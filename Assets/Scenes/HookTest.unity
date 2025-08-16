@@ -477,6 +477,7 @@ MonoBehaviour:
     m_Bits: 64
   maxWireLength: 30
   extendSpeed: 20
+  retractSpeed: 25
   curveSegments: 20
 --- !u!1 &961739749
 GameObject:
@@ -651,6 +652,7 @@ MonoBehaviour:
     m_Bits: 1
   maxWireLength: 30
   extendSpeed: 20
+  retractSpeed: 25
   curveSegments: 20
 --- !u!4 &1008262241
 Transform:
@@ -740,24 +742,6 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 0.06023958
-        value: 0.71917725
-        inSlope: 0
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 0.189759
         value: 1
         inSlope: 0
         outSlope: 0
