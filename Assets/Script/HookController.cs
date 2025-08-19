@@ -14,7 +14,7 @@ public class DualSenseWireController : MonoBehaviour
     [SerializeField] private float retractSpeed = 25f;
     [SerializeField] private int curveSegments = 20;
 
-    private bool wireMode = false;
+    private bool wireMode = true;
     private bool isExtending = false;
     private bool isRetracting = false;
 
@@ -91,6 +91,7 @@ public class DualSenseWireController : MonoBehaviour
         if (Physics.Raycast(origin, direction, out RaycastHit hit, maxWireLength, hitLayers))
         {
             targetPoint = hit.point;
+            Debug.Log("ÉèÉCÉÑÅ[Ç™ìñÇΩÇ¡ÇΩ");
         }
         else
         {
