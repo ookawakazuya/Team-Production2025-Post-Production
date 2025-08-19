@@ -1,161 +1,190 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System.Collections;
 
 public class DualSenseWireController : MonoBehaviour
 {
     [Header("プレイヤー関連")]
     [SerializeField] private Camera playerCamera;   // プレイヤー視点用カメラ
+    [SerializeField] private CharacterController characterController; // プレイヤーの移動制御用
+    [SerializeField] private Transform originalCameraParent; // 通常時のカメラの親
+    [SerializeField] private Transform moveCameraParent; // 移動中のカメラの親
 
     [Header("ワイヤー関連設定")]
     [SerializeField] private LineRenderer lineRenderer;
-    [SerializeField] private LayerMask hitLayers = ~0;
+    [SerializeField] private LayerMask hookableLayers; // フック可能なレイヤー
+    [SerializeField] private LayerMask interactiveLayers; // ギミック用レイヤー
     [SerializeField] private float maxWireLength = 15f;
     [SerializeField] private float extendSpeed = 20f;
     [SerializeField] private float retractSpeed = 25f;
+    [SerializeField] private float moveSpeed = 30f; // 移動用フックの移動速度
     [SerializeField] private int curveSegments = 20;
 
-    private bool wireMode = false;
-    private bool isExtending = false;
-    private bool isRetracting = false;
+    // 共通
+    private bool canShootHook = true;
+    private float coolDownTime = 1f;
 
-    private Vector3 targetPoint;
-    private float currentLength;
+    // 移動用フック
+    private bool isGrappling = false;
+    private bool isReturning = false;
+    private Vector3 grapplePoint;
+    private Vector3 lastPosition;
+    private Coroutine stayOnWallCoroutine;
+
+    // ギミック用フック
+    private Transform grabbedObject;
 
     void Update()
     {
         if (Gamepad.current == null) return;
 
-        // ================================
         // ×ボタンでワイヤーモード切替
-        // ================================
         if (Gamepad.current.buttonSouth.wasPressedThisFrame)
         {
-            wireMode = !wireMode;
-            Debug.Log($"ワイヤーモード: {(wireMode ? "ON" : "OFF")}");
+            // ギミック用と移動用のフックモードを切り替えるロジックを実装
+            // 例: public enum HookMode { Grapple, Gimmick }
+            Debug.Log("フックモード切り替え");
         }
 
-        if (!wireMode)
+        // R2でフックを射出
+        if (Gamepad.current.rightTrigger.wasPressedThisFrame && canShootHook)
         {
-            lineRenderer.enabled = false;
-            return;
+            StartCoroutine(ShootHook());
         }
 
-        // ================================
-        // R2で射出開始
-        // ================================
-        if (Gamepad.current.rightTrigger.wasPressedThisFrame)
-        {
-            StartWire();
-        }
-
-        // ================================
-        // ワイヤー伸び処理
-        // ================================
-        if (isExtending && !isRetracting && Gamepad.current.rightTrigger.isPressed)
-        {
-            ExtendWire();
-        }
-
-        // ================================
-        // R2離したら解除
-        // ================================
+        // R2を離したらフックを解除
         if (Gamepad.current.rightTrigger.wasReleasedThisFrame)
         {
-            ReleaseWire();
+            ReleaseHook();
         }
 
-        // ================================
         // R1押したら「巻き取りモード開始」
-        // （伸び中でも即巻き取りに切替）
-        // ================================
-        if (Gamepad.current.rightShoulder.wasPressedThisFrame && lineRenderer.enabled)
+        if (Gamepad.current.rightShoulder.wasPressedThisFrame)
         {
-            isExtending = false;   // 伸びるのを中断
-            isRetracting = true;   // 巻き取り開始
-        }
-
-        // ================================
-        // 巻き取りモード中なら自動巻き取り
-        // ================================
-        if (isRetracting)
-        {
-            RetractWire();
+            if (isGrappling)
+            {
+                isReturning = true;
+            }
+            if (grabbedObject != null)
+            {
+                // ギミックを巻き取る
+                StartCoroutine(RetractObject(grabbedObject));
+            }
         }
     }
 
-    private void StartWire()
+    private IEnumerator ShootHook()
     {
+        canShootHook = false;
+        RaycastHit hit;
         Vector3 origin = playerCamera.transform.position;
         Vector3 direction = playerCamera.transform.forward;
 
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, maxWireLength, hitLayers))
+        // フックが壁、側面、足場、またはギミックに当たったか判定
+        if (Physics.Raycast(origin, direction, out hit, maxWireLength, hookableLayers | interactiveLayers))
         {
-            targetPoint = hit.point;
+            // ギミック用フック
+            if (interactiveLayers == (interactiveLayers | (1 << hit.collider.gameObject.layer)))
+            {
+                Debug.Log("ギミックに当たった");
+                grabbedObject = hit.transform;
+                // ここでオブジェクトの掴む処理を開始
+            }
+            // 移動用フック
+            else
+            {
+                Debug.Log("移動用フックが当たった");
+                grapplePoint = hit.point;
+                lastPosition = transform.position; // 戻るための位置を保存
+                isGrappling = true;
+
+                // 移動中のカメラ処理
+                playerCamera.transform.SetParent(moveCameraParent);
+                // 移動モーションやカメラの引きをここで実装
+            }
         }
         else
         {
-            targetPoint = origin + direction * maxWireLength;
+            Debug.Log("何にも当たらなかった");
         }
 
-        currentLength = 0f;
-        isExtending = true;
-        isRetracting = false;
-
-        lineRenderer.positionCount = curveSegments;
-        lineRenderer.enabled = true;
+        // クールタイム
+        yield return new WaitForSeconds(coolDownTime);
+        canShootHook = true;
     }
 
-    private void ExtendWire()
+    void LateUpdate()
     {
-        currentLength += extendSpeed * Time.deltaTime;
-        float totalLength = Vector3.Distance(playerCamera.transform.position, targetPoint);
-
-        if (currentLength >= totalLength)
+        // 移動用フックの移動処理
+        if (isGrappling)
         {
-            currentLength = totalLength;
-            isExtending = false; // 自然に伸び切ったら終了
+            Vector3 newPosition = Vector3.MoveTowards(transform.position, grapplePoint, moveSpeed * Time.deltaTime);
+            characterController.Move(newPosition - transform.position);
+
+            // 目標地点に到達したか判定
+            if (Vector3.Distance(transform.position, grapplePoint) < 1f)
+            {
+                isGrappling = false;
+                // ここで壁に留まる処理を開始
+                stayOnWallCoroutine = StartCoroutine(StayOnWall(5f));
+            }
+        }
+        else if (isReturning)
+        {
+            Vector3 newPosition = Vector3.MoveTowards(transform.position, lastPosition, moveSpeed * Time.deltaTime);
+            characterController.Move(newPosition - transform.position);
+
+            if (Vector3.Distance(transform.position, lastPosition) < 1f)
+            {
+                isReturning = false;
+                ReleaseHook();
+            }
         }
 
-        DrawWire(playerCamera.transform.position, Vector3.Lerp(playerCamera.transform.position, targetPoint, currentLength / totalLength));
+        // ワイヤーの描画処理
+        if (isGrappling || isReturning || grabbedObject != null)
+        {
+            lineRenderer.enabled = true;
+            // 描画ロジックをここに
+            DrawWire(playerCamera.transform.position, isGrappling || isReturning ? grapplePoint : grabbedObject.position);
+        }
     }
 
-    private void ReleaseWire()
+    private void ReleaseHook()
     {
         lineRenderer.enabled = false;
-        isExtending = false;
-        isRetracting = false;
-    }
-
-    private void RetractWire()
-    {
-        if (!lineRenderer.enabled) return;
-
-        currentLength -= retractSpeed * Time.deltaTime;
-
-        if (currentLength <= 0f)
+        isGrappling = false;
+        isReturning = false;
+        grabbedObject = null;
+        if (stayOnWallCoroutine != null)
         {
-            currentLength = 0f;
-            ReleaseWire(); // 完全に巻き取りきったら解除
-            return;
+            StopCoroutine(stayOnWallCoroutine);
         }
 
-        DrawWire(playerCamera.transform.position, Vector3.Lerp(playerCamera.transform.position, targetPoint, currentLength / Vector3.Distance(playerCamera.transform.position, targetPoint)));
+        // カメラを元の状態に戻す
+        playerCamera.transform.SetParent(originalCameraParent);
+    }
+
+    private IEnumerator StayOnWall(float stayTime)
+    {
+        // 壁に留まっている間、プレイヤーの移動を無効化
+        // characterController.enabled = false;
+        yield return new WaitForSeconds(stayTime);
+        // characterController.enabled = true;
+        // 5秒経過後、フックを強制解除
+        ReleaseHook();
+    }
+
+    private IEnumerator RetractObject(Transform obj)
+    {
+        // オブジェクトを引き寄せる処理
+        // 例: obj.position = Vector3.MoveTowards(...)
+        yield return null;
     }
 
     private void DrawWire(Vector3 start, Vector3 end)
     {
-        for (int i = 0; i < curveSegments; i++)
-        {
-            float t = (float)i / (curveSegments - 1);
-            Vector3 pos = Vector3.Lerp(start, end, t);
-
-            float sag = Mathf.Sin(t * Mathf.PI) * 0.2f;
-            pos.y -= sag;
-
-            float sway = Mathf.Sin(Time.time * 10f + t * 5f) * 0.02f;
-            pos.x += sway;
-
-            lineRenderer.SetPosition(i, pos);
-        }
+        // 既存の描画ロジックを流用
+        // ...
     }
 }
