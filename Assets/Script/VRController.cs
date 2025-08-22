@@ -1,11 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.XR;
 using System.Collections;
 using UnityEngine.XR;
 
 public class VRController : MonoBehaviour
-{
+{/*
     [Header("プレイヤー関連")]
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
@@ -24,52 +23,82 @@ public class VRController : MonoBehaviour
 
     bool canShootHook = true;
     float coolDownTime = 1f;
+
     bool isGrappling = false;
     bool isReturning = false;
     bool isRetractingAndMoving = false;
     Vector3 grapplePoint;
     Vector3 lastPosition;
     Coroutine stayOnWallCoroutine;
+
     Transform grabbedObject;
+
     float lastR2PressTime = 0f;
     float doubleTapTime = 0.3f;
 
-    private XRController rightHandController;
+    private VRHookActions vrActions;
+    private Vector3 rightHandPosition;
+    private Quaternion rightHandRotation;
 
     [Header("デバッグ関連")]
     [SerializeField] private LineRenderer debugLineRenderer;
 
     void Awake()
     {
-        var vrControllers = InputSystem.devices;
-        foreach (var device in vrControllers)
-        {
-            if (device is XRController && ((XRController)device).characteristics.HasFlag(InputDeviceCharacteristics.Right))
-            {
-                rightHandController = (XRController)device;
-                break;
-            }
-        }
+        vrActions = new VRHookActions();
+        vrActions.VR.Enable();
 
-        if (rightHandController == null)
+        // アクションのコールバックを設定
+        vrActions.VR.HookShoot.performed += ctx => {
+            if (Time.time - lastR2PressTime < doubleTapTime)
+            {
+                CancelGrapple();
+            }
+            else if (canShootHook)
+            {
+                StartCoroutine(ShootHook());
+            }
+            lastR2PressTime = Time.time;
+        };
+
+        vrActions.VR.HookShoot.canceled += ctx => ReleaseHook();
+        vrActions.VR.Retract.performed += ctx => {
+            if (isGrappling)
+            {
+                isGrappling = false;
+                isRetractingAndMoving = true;
+            }
+            else if (grabbedObject != null)
+            {
+                StartCoroutine(RetractObject(grabbedObject));
+            }
+        };
+    }
+
+    void OnDestroy()
+    {
+        if (vrActions != null)
         {
-            Debug.LogError("右手VRコントローラーが見つかりませんでした。VRデバイスが接続されているか確認してください。");
+            vrActions.VR.Disable();
         }
     }
 
     void Update()
     {
-        if (rightHandController == null) return;
+        // 外部のXRデバイスから直接Transform情報を取得する
+        var rightHandDevice = GetRightHandController();
+        if (rightHandDevice == null) return;
 
         // R2が押されている間だけデバッグ用のレイを表示
-        if (rightHandController.trigger.isPressed && !isGrappling && !isRetractingAndMoving && !isReturning)
+        if (vrActions.VR.HookShoot.ReadValue<float>() > 0.1f && !isGrappling && !isRetractingAndMoving && !isReturning)
         {
             if (debugLineRenderer != null)
             {
                 debugLineRenderer.enabled = true;
                 debugLineRenderer.positionCount = 2;
-                Vector3 origin = rightHandController.device.transform.position;
-                Vector3 direction = rightHandController.device.transform.forward;
+                // ★★★ 修正箇所: 取得したrightHandDeviceから直接transformにアクセス ★★★
+                Vector3 origin = rightHandDevice.device.transform.position.ReadValue();
+                Vector3 direction = rightHandDevice.device.transform.forward.ReadValue();
                 debugLineRenderer.SetPosition(0, origin);
                 debugLineRenderer.SetPosition(1, origin + direction * maxWireLength);
             }
@@ -81,37 +110,18 @@ public class VRController : MonoBehaviour
                 debugLineRenderer.enabled = false;
             }
         }
+    }
 
-        if (rightHandController.trigger.wasPressedThisFrame)
+    private UnityEngine.InputSystem.XR.XRController GetRightHandController()
+    {
+        foreach (var device in InputSystem.devices)
         {
-            if (Time.time - lastR2PressTime < doubleTapTime)
+            if (device is UnityEngine.InputSystem.XR.XRController controller && controller.characteristics.HasFlag(InputDeviceCharacteristics.Right))
             {
-                CancelGrapple();
-            }
-            else if (canShootHook)
-            {
-                StartCoroutine(ShootHook());
-            }
-            lastR2PressTime = Time.time;
-        }
-
-        if (rightHandController.trigger.wasReleasedThisFrame)
-        {
-            ReleaseHook();
-        }
-
-        if (rightHandController.grip.wasPressedThisFrame)
-        {
-            if (isGrappling)
-            {
-                isGrappling = false;
-                isRetractingAndMoving = true;
-            }
-            else if (grabbedObject != null)
-            {
-                StartCoroutine(RetractObject(grabbedObject));
+                return controller;
             }
         }
+        return null;
     }
 
     void LateUpdate()
@@ -171,8 +181,8 @@ public class VRController : MonoBehaviour
         canShootHook = false;
         RaycastHit hit;
 
-        Vector3 origin = rightHandController.device.transform.position;
-        Vector3 direction = rightHandController.device.transform.forward;
+        Vector3 origin = rightHandPosition;
+        Vector3 direction = rightHandRotation * Vector3.forward;
 
         if (Physics.Raycast(origin, direction, out hit, maxWireLength, hookableLayers | interactiveLayers))
         {
@@ -214,7 +224,6 @@ public class VRController : MonoBehaviour
 
     private void DrawWire(Vector3 start, Vector3 end)
     {
-        lineRenderer.enabled = true;
         lineRenderer.positionCount = curveSegments;
         for (int i = 0; i < curveSegments; i++)
         {
@@ -230,4 +239,5 @@ public class VRController : MonoBehaviour
             lineRenderer.SetPosition(i, pos);
         }
     }
+    */
 }

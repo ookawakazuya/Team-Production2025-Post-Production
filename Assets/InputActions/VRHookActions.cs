@@ -132,7 +132,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""fcf1d13d-b836-497e-8439-4d6bbd9d7714"",
-                    ""path"": ""<XRController>{LeftHand}/{PrimaryAction}"",
+                    ""path"": ""<XRController>{LeftHand}/{Primary2DAxisTouch}"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
