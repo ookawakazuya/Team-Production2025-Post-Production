@@ -1,0 +1,94 @@
+{
+    "name": "VRHookActions",
+    "maps": [
+        {
+            "name": "VR",
+            "id": "be41a9b2-82c9-4a3a-9cef-6d39645334bd",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "Button",
+                    "id": "c63a53b5-8523-4a03-8c29-768ddfff70b6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "HookShoot",
+                    "type": "Button",
+                    "id": "a7a918d0-a6ec-4cb3-a611-473ed35dcb96",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Retract",
+                    "type": "Button",
+                    "id": "bf851218-9901-479e-a0d5-af17724086b4",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "532d10d3-72db-458a-9ef5-9344b824d5df",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "fcf1d13d-b836-497e-8439-4d6bbd9d7714",
+                    "path": "<XRController>{LeftHand}/{Primary2DAxisTouch}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a3a1d5c5-75b2-4ecb-8a05-c8f405e3ae50",
+                    "path": "<XRController>{RightHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "HookShoot",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0ef8c3ef-ae0c-482c-87cd-3c9b6dc4c5e4",
+                    "path": "<XRController>{RightHand}/{GripButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Retract",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cd414fb5-c27c-43df-a5be-bb590b2c2483",
+                    "path": "<XRController>{RightHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Cancel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

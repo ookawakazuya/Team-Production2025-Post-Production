@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
+using UnityEngine.XR;
 
-public class HookController : MonoBehaviour
-{
+public class VRController : MonoBehaviour
+{/*
     [Header("プレイヤー関連")]
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
@@ -20,105 +21,117 @@ public class HookController : MonoBehaviour
     [SerializeField] float moveSpeed = 30f;
     [SerializeField] int curveSegments = 20;
 
-    // 共通
     bool canShootHook = true;
     float coolDownTime = 1f;
 
-    // 移動用フック
     bool isGrappling = false;
     bool isReturning = false;
-    bool isRetractingAndMoving = false; // R1による巻き取り移動
+    bool isRetractingAndMoving = false;
     Vector3 grapplePoint;
     Vector3 lastPosition;
     Coroutine stayOnWallCoroutine;
 
-    // ギミック用フック
     Transform grabbedObject;
 
-    // ダブルタップ関連
     float lastR2PressTime = 0f;
-    float doubleTapTime = 0.3f; // ダブルタップと判定する時間
+    float doubleTapTime = 0.3f;
 
-    void Update()
+    private VRHookActions vrActions;
+    private Vector3 rightHandPosition;
+    private Quaternion rightHandRotation;
+
+    [Header("デバッグ関連")]
+    [SerializeField] private LineRenderer debugLineRenderer;
+
+    void Awake()
     {
-        if (Gamepad.current == null) return;
+        vrActions = new VRHookActions();
+        vrActions.VR.Enable();
 
-        if (Gamepad.current.rightTrigger.isPressed && !isGrappling && !isRetractingAndMoving && !isReturning)
-        {
-            if (lineRenderer != null)
-            {
-                lineRenderer.enabled = true;
-                lineRenderer.positionCount = 2;
-                Vector3 origin = mainCamera.transform.position;
-                Vector3 direction = mainCamera.transform.forward;
-                lineRenderer.SetPosition(0, origin);
-                lineRenderer.SetPosition(1, origin + direction * maxWireLength);
-            }
-        }
-        else
-        {
-            if (lineRenderer != null && lineRenderer.enabled)
-            {
-                lineRenderer.enabled = false;
-            }
-        }
-
-
-        // ×ボタンでワイヤーモード切替
-        if (Gamepad.current.buttonSouth.wasPressedThisFrame)
-        {
-            Debug.Log("フックモード切り替え");
-        }
-        // R2でフックを射出、またはダブルタップで取り消し
-        if (Gamepad.current.rightTrigger.wasPressedThisFrame)
-        {
-            // ダブルタップ判定
+        // アクションのコールバックを設定
+        vrActions.VR.HookShoot.performed += ctx => {
             if (Time.time - lastR2PressTime < doubleTapTime)
             {
-                // ダブルタップが検出されたら移動を取り消し
                 CancelGrapple();
             }
             else if (canShootHook)
             {
                 StartCoroutine(ShootHook());
             }
-
             lastR2PressTime = Time.time;
-        }
+        };
 
-        // R2を離したらフックを解除
-        if (Gamepad.current.rightTrigger.wasReleasedThisFrame)
-        {
-            ReleaseHook();
-        }
-
-        // R1押したら巻き取り（移動）を開始
-        if (Gamepad.current.rightShoulder.wasPressedThisFrame)
-        {
+        vrActions.VR.HookShoot.canceled += ctx => ReleaseHook();
+        vrActions.VR.Retract.performed += ctx => {
             if (isGrappling)
             {
-                // 既にフックが当たっている場合、巻き取り移動を開始
                 isGrappling = false;
                 isRetractingAndMoving = true;
             }
             else if (grabbedObject != null)
             {
-                // ギミックを巻き取る
                 StartCoroutine(RetractObject(grabbedObject));
+            }
+        };
+    }
+
+    void OnDestroy()
+    {
+        if (vrActions != null)
+        {
+            vrActions.VR.Disable();
+        }
+    }
+
+    void Update()
+    {
+        // 外部のXRデバイスから直接Transform情報を取得する
+        var rightHandDevice = GetRightHandController();
+        if (rightHandDevice == null) return;
+
+        // R2が押されている間だけデバッグ用のレイを表示
+        if (vrActions.VR.HookShoot.ReadValue<float>() > 0.1f && !isGrappling && !isRetractingAndMoving && !isReturning)
+        {
+            if (debugLineRenderer != null)
+            {
+                debugLineRenderer.enabled = true;
+                debugLineRenderer.positionCount = 2;
+                // ★★★ 修正箇所: 取得したrightHandDeviceから直接transformにアクセス ★★★
+                Vector3 origin = rightHandDevice.device.transform.position.ReadValue();
+                Vector3 direction = rightHandDevice.device.transform.forward.ReadValue();
+                debugLineRenderer.SetPosition(0, origin);
+                debugLineRenderer.SetPosition(1, origin + direction * maxWireLength);
+            }
+        }
+        else
+        {
+            if (debugLineRenderer != null && debugLineRenderer.enabled)
+            {
+                debugLineRenderer.enabled = false;
             }
         }
     }
 
+    private UnityEngine.InputSystem.XR.XRController GetRightHandController()
+    {
+        foreach (var device in InputSystem.devices)
+        {
+            if (device is UnityEngine.InputSystem.XR.XRController controller && controller.characteristics.HasFlag(InputDeviceCharacteristics.Right))
+            {
+                return controller;
+            }
+        }
+        return null;
+    }
+
     void LateUpdate()
     {
-        // 巻き取り移動の処理
         if (isRetractingAndMoving)
         {
             Vector3 direction = grapplePoint - transform.position;
             characterController.Move(direction.normalized * moveSpeed * Time.deltaTime);
             DrawWire(mainCamera.transform.position, grapplePoint);
 
-            // 目標地点に到達したか判定
             if (Vector3.Distance(transform.position, grapplePoint) < 1f)
             {
                 isRetractingAndMoving = false;
@@ -141,7 +154,6 @@ public class HookController : MonoBehaviour
 
     private void CancelGrapple()
     {
-        // フックが発射中、または移動中であれば強制的に解除
         if (isGrappling || isRetractingAndMoving || isReturning)
         {
             Debug.Log("フック移動を取り消しました");
@@ -168,8 +180,10 @@ public class HookController : MonoBehaviour
     {
         canShootHook = false;
         RaycastHit hit;
-        Vector3 origin = mainCamera.transform.position;
-        Vector3 direction = mainCamera.transform.forward;
+
+        Vector3 origin = rightHandPosition;
+        Vector3 direction = rightHandRotation * Vector3.forward;
+
         if (Physics.Raycast(origin, direction, out hit, maxWireLength, hookableLayers | interactiveLayers))
         {
             if (interactiveLayers == (interactiveLayers | (1 << hit.collider.gameObject.layer)))
@@ -225,4 +239,5 @@ public class HookController : MonoBehaviour
             lineRenderer.SetPosition(i, pos);
         }
     }
+    */
 }
