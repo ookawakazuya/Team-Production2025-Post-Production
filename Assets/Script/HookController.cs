@@ -14,7 +14,7 @@ public class HookController : MonoBehaviour
     [SerializeField] LineRenderer lineRenderer;
     [SerializeField] LayerMask hookableLayers;
     [SerializeField] LayerMask interactiveLayers;
-    [SerializeField] float maxWireLength = 15f;
+    [SerializeField] float maxWireLength = 15f; //ƒtƒbƒN‚Ì’·‚³
     [SerializeField] float extendSpeed = 20f;
     [SerializeField] float retractSpeed = 25f;
     [SerializeField] float moveSpeed = 30f;
@@ -28,6 +28,7 @@ public class HookController : MonoBehaviour
     bool isGrappling = false;
     bool isReturning = false;
     bool isRetractingAndMoving = false; // R1‚É‚æ‚éŠª‚«Žæ‚èˆÚ“®
+    public bool IsRetetractingAndMoving => isRetractingAndMoving;
     Vector3 grapplePoint;
     Vector3 lastPosition;
     Coroutine stayOnWallCoroutine;

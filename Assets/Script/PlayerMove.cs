@@ -6,10 +6,17 @@ public class PlayerMove : MonoBehaviour
     [Header("プレイヤーの設定")]
     [SerializeField] CharacterController controller;
     [SerializeField] float playerMoveSpeed = 5f;
+    [SerializeField] float gravity = -9.8f; //重力加速度
     [Header("カメラ設定")]
     [SerializeField] Camera mainCamera;
     [SerializeField] float cameraDistance = 3f;
-    [SerializeField] float cameraHeight  = 1.5f;
+    [SerializeField] float cameraHeight = 1.5f;
+
+    Vector3 moveDirection;
+    Vector3 velocity;
+
+    [SerializeField] HookController hookController;
+
     void Update()
     {
         if (Gamepad.current == null) return;
@@ -23,6 +30,22 @@ public class PlayerMove : MonoBehaviour
 
     private void HandleMovement()
     {
+        bool isGrounded = controller.isGrounded;
+
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
+        else if (!isGrounded)
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
+
+        if (hookController != null && hookController.IsRetetractingAndMoving)
+        {
+            return;
+        }
+
         // 左スティックの入力値を取得
         Vector2 leftStickInput = Gamepad.current.leftStick.ReadValue();
 
@@ -42,6 +65,12 @@ public class PlayerMove : MonoBehaviour
             // キャラクターコントローラーで移動を実行
             controller.Move(moveDirection * playerMoveSpeed * Time.deltaTime);
         }
+        else
+        {
+            moveDirection = Vector3.zero;
+        }
+
+        controller.Move(velocity * Time.deltaTime);
     }
 
     private void HandleCamera()
