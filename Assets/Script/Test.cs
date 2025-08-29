@@ -1,25 +1,40 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit.Inputs.Readers;
 
 public class Test : MonoBehaviour
 {
+    InputDevice leftHand;
+    InputDevice rightHand;
+
+    void Start()
+    {
+        leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+        rightHand = InputDevices.GetDeviceAtXRNode (XRNode.RightHand);
+    }
     void Update()
     {
-        if (Gamepad.current != null)
+        if(leftHand.TryGetFeatureValue(CommonUsages.primaryButton,out bool xButton))
         {
-            // L2（左トリガー）とR2（右トリガー）の押し込み（0.0～1.0）
-            float l2 = Gamepad.current.leftTrigger.ReadValue();
-            float r2 = Gamepad.current.rightTrigger.ReadValue();
+            if (xButton) Debug.Log("Xボタンの入力");
 
-            // L1（左バンパー）とR1（右バンパー）の押下状態（true/false）
-            bool l1Pressed = Gamepad.current.leftShoulder.isPressed;
-            bool r1Pressed = Gamepad.current.rightShoulder.isPressed;
-
-            Debug.Log($"L1: {l1Pressed}  L2: {l2:F2}  |  R1: {r1Pressed}  R2: {r2:F2}");
         }
-        else
+        if(leftHand.TryGetFeatureValue(CommonUsages.secondaryButton, out bool yButton))
         {
-            Debug.Log("PS5コントローラーが接続されていません");
+            if(yButton) Debug.Log("Yボタンの入力");
+        }
+        if(leftHand.TryGetFeatureValue(CommonUsages.triggerButton,out bool triggerValue))
+        {
+            Debug.Log($"左トリガーの押し込み:{ triggerValue}");
+        }
+        if(leftHand.TryGetFeatureValue(CommonUsages.gripButton,out bool gripButon))
+        {
+            Debug.Log($"左グリップの押し込み:{gripButon}");
+        }
+
+        if (leftHand.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 joystick))
+        {
+            Debug.Log($"スティックの入力: {joystick}");
         }
     }
 }
