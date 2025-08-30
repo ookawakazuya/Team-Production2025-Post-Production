@@ -4,6 +4,7 @@ using System.Collections;
 
 public class HookController : MonoBehaviour
 {
+
     [Header("プレイヤー関連")]
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
@@ -62,13 +63,6 @@ public class HookController : MonoBehaviour
             {
                 lineRenderer.enabled = false;
             }
-        }
-
-
-        // ×ボタンでワイヤーモード切替
-        if (Gamepad.current.buttonSouth.wasPressedThisFrame)
-        {
-            Debug.Log("フックモード切り替え");
         }
         // R2でフックを射出、またはダブルタップで取り消し
         if (Gamepad.current.rightTrigger.wasPressedThisFrame)
