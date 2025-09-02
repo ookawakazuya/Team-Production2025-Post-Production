@@ -7,20 +7,18 @@ public class FollowCameraUI : MonoBehaviour
     public float height = 1.5f;
     public float followSpeed = 5f;
 
-    private void Update()
+    void Update()
     {
         if (targetCamera == null) return;
 
-        // カメラの正面方向を基準に位置を計算
+        // 位置計算
         Vector3 targetPos = targetCamera.position + targetCamera.forward * distance;
         targetPos.y = targetCamera.position.y + height;
-
-        // スムーズに位置を補間
         transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followSpeed);
 
-        // 常にカメラの方向を向く
-        transform.LookAt(targetCamera);
-        transform.rotation = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
-        // 水平回転だけに制限（上下に首を振ってもUIが傾かない）
+        // 回転補正
+        Vector3 forward = targetCamera.forward;
+        forward.y = 0; // 水平のみ
+        transform.rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(0, 180, 0);
     }
 }
