@@ -41,10 +41,14 @@ public class PlayerMove : MonoBehaviour
             velocity.y += gravity * Time.deltaTime;
         }
 
-        if (hookController != null && hookController.IsRetetractingAndMoving)
+        if(hookController != null)
         {
-            return;
+            if (hookController != null && hookController.IsPlayerMove)
+            {
+                return;
+            }
         }
+
 
         // 左スティックの入力値を取得
         Vector2 leftStickInput = Gamepad.current.leftStick.ReadValue();
