@@ -4,7 +4,6 @@ using System.Collections;
 
 public class HookController : MonoBehaviour
 {
-
     [Header("プレイヤー関連")]
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
@@ -14,8 +13,7 @@ public class HookController : MonoBehaviour
     [Header("ワイヤー関連設定")]
     [SerializeField] LineRenderer lineRenderer;
     [SerializeField] LayerMask hookableLayers;
-    [SerializeField] LayerMask interactiveLayers;
-    [SerializeField] float maxWireLength = 15f; //フックの長さ
+    [SerializeField] float maxWireLength = 15f; // フックの長さ
     [SerializeField] float extendSpeed = 20f;
     [SerializeField] float retractSpeed = 25f;
     [SerializeField] float moveSpeed = 30f;
@@ -30,21 +28,17 @@ public class HookController : MonoBehaviour
     bool isReturning = false;
     bool isRetractingAndMoving = false; // R1による巻き取り移動
     public bool IsRetetractingAndMoving => isRetractingAndMoving;
+    public bool IsPlayerMove { get; private set; } = false;
+    
     Vector3 grapplePoint;
     Vector3 lastPosition;
     Coroutine stayOnWallCoroutine;
-
-    // ギミック用フック
-    Transform grabbedObject;
-
-    // ダブルタップ関連
-    float lastR2PressTime = 0f;
-    float doubleTapTime = 0.3f; // ダブルタップと判定する時間
 
     void Update()
     {
         if (Gamepad.current == null) return;
 
+        // R2押しっぱなしで照準ワイヤーを表示
         if (Gamepad.current.rightTrigger.isPressed && !isGrappling && !isRetractingAndMoving && !isReturning)
         {
             if (lineRenderer != null)
@@ -64,21 +58,11 @@ public class HookController : MonoBehaviour
                 lineRenderer.enabled = false;
             }
         }
-        // R2でフックを射出、またはダブルタップで取り消し
+
+        // R2でフックを射出
         if (Gamepad.current.rightTrigger.wasPressedThisFrame)
         {
-            // ダブルタップ判定
-            if (Time.time - lastR2PressTime < doubleTapTime)
-            {
-                // ダブルタップが検出されたら移動を取り消し
-                CancelGrapple();
-            }
-            else if (canShootHook)
-            {
-                StartCoroutine(ShootHook());
-            }
-
-            lastR2PressTime = Time.time;
+            StartCoroutine(ShootHook());
         }
 
         // R2を離したらフックを解除
@@ -95,11 +79,6 @@ public class HookController : MonoBehaviour
                 // 既にフックが当たっている場合、巻き取り移動を開始
                 isGrappling = false;
                 isRetractingAndMoving = true;
-            }
-            else if (grabbedObject != null)
-            {
-                // ギミックを巻き取る
-                StartCoroutine(RetractObject(grabbedObject));
             }
         }
     }
@@ -150,7 +129,7 @@ public class HookController : MonoBehaviour
         isGrappling = false;
         isReturning = false;
         isRetractingAndMoving = false;
-        grabbedObject = null;
+
         if (stayOnWallCoroutine != null)
         {
             StopCoroutine(stayOnWallCoroutine);
@@ -165,22 +144,14 @@ public class HookController : MonoBehaviour
         RaycastHit hit;
         Vector3 origin = mainCamera.transform.position;
         Vector3 direction = mainCamera.transform.forward;
-        if (Physics.Raycast(origin, direction, out hit, maxWireLength, hookableLayers | interactiveLayers))
+        if (Physics.Raycast(origin, direction, out hit, maxWireLength, hookableLayers))
         {
-            if (interactiveLayers == (interactiveLayers | (1 << hit.collider.gameObject.layer)))
-            {
-                Debug.Log("ギミックに当たった");
-                grabbedObject = hit.transform;
-            }
-            else
-            {
-                Debug.Log("移動用フックが当たった");
-                grapplePoint = hit.point;
-                lastPosition = transform.position;
-                isGrappling = true;
+            Debug.Log("移動用フックが当たった");
+            grapplePoint = hit.point;
+            lastPosition = transform.position;
+            isGrappling = true;
 
-                mainCamera.transform.SetParent(moveCameraParent);
-            }
+            mainCamera.transform.SetParent(moveCameraParent);
         }
         else
         {
@@ -194,13 +165,13 @@ public class HookController : MonoBehaviour
 
     private IEnumerator StayOnWall(float stayTime)
     {
-        yield return new WaitForSeconds(stayTime);
-        ReleaseHook();
-    }
+        Debug.Log("移動の停止");
+        IsPlayerMove = true;
 
-    private IEnumerator RetractObject(Transform obj)
-    {
-        yield return null;
+        yield return new WaitForSeconds(stayTime);
+
+        IsPlayerMove = false;
+        ReleaseHook();
     }
 
     private void DrawWire(Vector3 start, Vector3 end)
