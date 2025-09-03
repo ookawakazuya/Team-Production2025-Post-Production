@@ -1,0 +1,54 @@
+{
+    "name": "XRInputActions",
+    "maps": [
+        {
+            "name": "XRI_LeftHand",
+            "id": "fd807e9b-8ed4-4a30-b91b-743576292d07",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "2079ffec-f15b-4fb1-8053-b8fdf0e0029a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Menu",
+                    "type": "Button",
+                    "id": "d2adf9db-95af-4e61-8fc7-c5c7c0245522",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a9fe8cd6-0e6b-4cf5-9b37-d39c5e668f52",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0eacb447-c704-443c-982f-e3acc76ca98c",
+                    "path": "<OculusTouchController>{LeftHand}/menu",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
