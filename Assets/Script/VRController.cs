@@ -1,8 +1,6 @@
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit.Inputs.Readers;
 using System.Collections;
+using UnityEngine.InputSystem;
 
 public class VRController : MonoBehaviour
 {
@@ -20,36 +18,74 @@ public class VRController : MonoBehaviour
     bool isGrappling = false;
     Vector3 grapplePoiint;
 
+    public VRHookActions HookMap;
+
+     void Awake()
+    {
+        HookMap = new VRHookActions();
+
+        HookMap.VR.HookShoot.started += ctx =>
+        {
+            isGrappling = true;
+        };
+
+        HookMap.VR.HookShoot.canceled +=ctx =>
+        {
+            isGrappling = false;
+        };
+        HookMap.VR.Retract.started += ctx =>
+        {
+            if (isGrappling)
+            {
+                Debug.Log("グリップ処理");
+            }
+        };
+    }
+
+    void OnEnable()
+    {
+        HookMap.Enable();
+    }
+    void OnDisable()
+    {
+        HookMap.Disable();
+    }
+    private void HookShoot_canceled(InputAction.CallbackContext obj)
+    {
+        throw new System.NotImplementedException();
+    }
+
     private void Start()
     {
-        leftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-        rightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
     }
     private void Update()
     {
-        //if (rightController == null) return;
-        //if (leftController == null) return;
 
-        //if (rightController.activateAction.action.WasPressedThisFrame())
+
+        //if (rightHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool triggerValue))
         //{
         //    ShootHook();
+        //    Debug.Log($"左トリガーの押し込み:{triggerValue}");
         //}
-        //if (rightController.selectAction.action.WasPressedThisFrame())
+        //if (rightHand.TryGetFeatureValue(CommonUsages.gripButton, out bool gripButon))
         //{
         //    StartRetract();
+        //    Debug.Log($"左グリップの押し込み:{gripButon}");
         //}
 
+    }
 
-        if (rightHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool triggerValue))
+
+    public void OnRightTriggerButton(InputValue input)
+    {
+        if (input.isPressed)
         {
             ShootHook();
-            Debug.Log($"左トリガーの押し込み:{triggerValue}");
         }
-        if (rightHand.TryGetFeatureValue(CommonUsages.gripButton, out bool gripButon))
-        {
-            StartRetract();
-            Debug.Log($"左グリップの押し込み:{gripButon}");
-        }
+    }
+
+    public void OnRightGripButton()
+    {
 
     }
 

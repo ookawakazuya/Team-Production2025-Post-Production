@@ -93,12 +93,12 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
             ""actions"": [
                 {
                     ""name"": ""Move"",
-                    ""type"": ""Button"",
+                    ""type"": ""Value"",
                     ""id"": ""c63a53b5-8523-4a03-8c29-768ddfff70b6"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""HookShoot"",
@@ -132,7 +132,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""fcf1d13d-b836-497e-8439-4d6bbd9d7714"",
-                    ""path"": ""<XRController>{LeftHand}/{Primary2DAxisTouch}"",
+                    ""path"": ""<OculusTouchController>{LeftHand}/thumbstick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -143,7 +143,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a3a1d5c5-75b2-4ecb-8a05-c8f405e3ae50"",
-                    ""path"": ""<XRController>{RightHand}/{TriggerButton}"",
+                    ""path"": ""<OculusTouchController>{RightHand}/triggerPressed"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

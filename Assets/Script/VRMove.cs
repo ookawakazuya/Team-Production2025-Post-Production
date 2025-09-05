@@ -6,6 +6,7 @@ public class VRMove : MonoBehaviour
     [Header("プレイヤーの設定")]
     [SerializeField] CharacterController controller;
     [SerializeField] float playerMoveSpeed = 5f;
+    [SerializeField] Transform headTransform;
 
     [Header("カメラ設定")]
     [SerializeField] Camera mainCamera; // VRカメラ
