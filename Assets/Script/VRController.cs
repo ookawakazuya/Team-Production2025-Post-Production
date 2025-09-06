@@ -1,105 +1,107 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using static VRHookActions;
 
 public class VRController : MonoBehaviour
 {
     [Header("XR Controllers")]
     [SerializeField] GameObject rightController;
     [SerializeField] GameObject leftController;
-    InputDevice leftHand;
-    InputDevice rightHand;
 
     [Header("フック関連")]
     [SerializeField] Camera mainCamera;
-    //[SerializeField] LineRenderer lineRenderer;
-    [SerializeField] float maxWireLength = 15f;
+    [SerializeField] CharacterController characterController;
+
+    [SerializeField] float maxWireLength = 300f;//レイの長さ
+    [SerializeField] float maxMoveSpeed = 30f;//最大速度
+    [SerializeField] float acceleration = 20f;//加速度
+    [SerializeField] float stopDistance = 1f;//停止判定の距離
+
 
     bool isGrappling = false;
-    Vector3 grapplePoiint;
+    bool isRetracting = false;
+    Vector3 grapplePoint;
+
+
+    float currentSpeed = 0f;//現在の移動速度
 
     public VRHookActions HookMap;
 
-     void Awake()
+    void Awake()
     {
         HookMap = new VRHookActions();
+    }
+    private void OnEnable() => HookMap.Enable();
+    void OnDisable() => HookMap.Disable();
 
-        HookMap.VR.HookShoot.started += ctx =>
-        {
-            isGrappling = true;
-        };
-
-        HookMap.VR.HookShoot.canceled +=ctx =>
-        {
-            isGrappling = false;
-        };
-        HookMap.VR.Retract.started += ctx =>
-        {
-            if (isGrappling)
-            {
-                Debug.Log("グリップ処理");
-            }
-        };
-    }
-
-    void OnEnable()
-    {
-        HookMap.Enable();
-    }
-    void OnDisable()
-    {
-        HookMap.Disable();
-    }
-    private void HookShoot_canceled(InputAction.CallbackContext obj)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    private void Start()
-    {
-    }
     private void Update()
     {
+        // 右トリガー押しっぱなし → フック維持
+        bool triggerHeld = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
 
+        if (triggerHeld)
+        {
+            if (!isGrappling) // 初回だけレイキャスト
+            {
+                ShootHook();
+            }
+        }
+        else
+        {
+            if (isGrappling || isRetracting) // トリガーを離したら解除
+            {
+                ReleaseHook();
+            }
+        }
 
-        //if (rightHand.TryGetFeatureValue(CommonUsages.triggerButton, out bool triggerValue))
+        ////フックショット発射
+        //HookMap.VR.HookShoot.started += ctx =>
         //{
         //    ShootHook();
-        //    Debug.Log($"左トリガーの押し込み:{triggerValue}");
-        //}
-        //if (rightHand.TryGetFeatureValue(CommonUsages.gripButton, out bool gripButon))
+        //    Debug.Log("フック発射");
+        //};
+
+        ////フックショットの解除
+        //HookMap.VR.HookShoot.canceled += ctx =>
         //{
-        //    StartRetract();
-        //    Debug.Log($"左グリップの押し込み:{gripButon}");
-        //}
+        //    ReleaseHook();
+        //};
 
-    }
-
-
-    public void OnRightTriggerButton(InputValue input)
-    {
-        if (input.isPressed)
+        ////ワイヤーの巻取り
+        //HookMap.VR.Retract.started += ctx =>
+        //{
+        //    if (isGrappling)
+        //    {
+        //        StartRetract();
+        //        Debug.Log("グリップ処理");
+        //    }
+        //};
+        // 右グリップ押しっぱなし → 巻き取り開始
+        bool gripHeld = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
+        if (gripHeld && isGrappling && !isRetracting)
         {
-            ShootHook();
+            StartRetract();
         }
-    }
-
-    public void OnRightGripButton()
-    {
-
+        if (isRetracting)
+        {
+            AccelerateTowardsHook();
+        }
     }
 
     void ShootHook()
     {
         Debug.Log("フック射出");
-        Ray ray = new Ray(mainCamera.transform.position, mainCamera.transform.forward);
-        if(Physics.Raycast(ray,out RaycastHit hit, maxWireLength))
+        Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
-            grapplePoiint = hit.point;
+            grapplePoint = hit.point;
             isGrappling = true;
-            //lineRenderer.enabled = true;
-            //lineRenderer.SetPosition(0,mainCamera.transform.position);
-            //lineRenderer.SetPosition(1, grapplePoiint);
+            Debug.Log($"フックショット命中:{hit.collider.name}");
+        }
+        else
+        {
+            Debug.Log("フック未明中");
         }
     }
     void StartRetract()
@@ -107,7 +109,37 @@ public class VRController : MonoBehaviour
         if (isGrappling)
         {
             Debug.Log("巻き取り開始");
-            // 移動処理などをここに書く
+            isRetracting = true;
+            currentSpeed = 0f;
         }
+    }
+    void AccelerateTowardsHook()
+    {
+        Vector3 direction = grapplePoint - transform.position;
+        float distance = direction.magnitude;
+
+        if (distance > stopDistance)
+        {
+            //加速度でスピードアップ
+            currentSpeed += acceleration * Time.deltaTime;
+            //最大速度制限
+            currentSpeed = Mathf.Min(currentSpeed, maxMoveSpeed);
+
+            characterController.Move(direction.normalized * currentSpeed * Time.deltaTime);
+        }
+        else
+        {
+            Debug.Log("フック地点に到達");
+            isRetracting = false;
+            ReleaseHook();
+        }
+    }
+
+    void ReleaseHook()
+    {
+        Debug.Log("フックの解除");
+        isGrappling = false;
+        isRetracting = false;
+        currentSpeed = 0f;
     }
 }
