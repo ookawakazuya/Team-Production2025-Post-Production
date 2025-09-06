@@ -1,13 +1,20 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Shotgun : MonoBehaviour
 {
     [SerializeField] Transform target;
+    [SerializeField] Image image;
     [SerializeField] float rayDistance = 10f;
 
-    [SerializeField] Camera camera;
-    private float cameraSpeed = 0.125f;
+    [Header("Bullet Settings")]
+    [SerializeField] GameObject bulletPrefab; // ç‰ã®ãƒ—ãƒ¬ãƒãƒ–
+    // public Transform firePoint; // ç™ºå°„ä½ç½®ï¼ˆç©ºã®GameObjectãªã©ï¼‰
+    [SerializeField] float bulletSpeed = 50.0f; // é£›ã¶é€Ÿã•
+    [SerializeField] float bulletLifeTime = 0.2f; // ç‰ã®å¯¿å‘½ï¼ˆç§’ï¼‰
+    private GameObject currentBullet;
+    private bool Bullet = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -17,32 +24,38 @@ public class Shotgun : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //‚¨‚µ
-        // ƒ}ƒEƒX‚ÌˆÊ’u‚ğƒXƒNƒŠ[ƒ“À•W‚Åæ“¾
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
+        Vector3 rayOrigin = transform.position; // è‡ªåˆ†ã®ä½ç½®
+        Vector3 rayDirection = transform.forward; // ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã¸ã®æ–¹å‘ï¼ˆæ­£è¦åŒ–ï¼‰
 
-        // ƒXƒNƒŠ[ƒ“À•W‚ğƒ[ƒ‹ƒhÀ•W‚É•ÏŠ·
-        Vector3 worldMousePosition = camera.ScreenToWorldPoint(new Vector3(mousePosition.x, mousePosition.y, camera.nearClipPlane));
-
-        // ƒJƒƒ‰‚ÌˆÊ’u‚Æƒ}ƒEƒX‚ÌˆÊ’u‚©‚ç•ûŒü‚ğŒvZ
-        Vector3 direction = worldMousePosition - transform.position;
-
-        // •ûŒü‚©‚ç‰ñ“]Šp“x‚ğŒvZiƒ}ƒEƒX‚ª‚¢‚é•ûŒüj
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-
-        // ‰ñ“]‚ğŠŠ‚ç‚©‚É•âŠÔ
-        float smoothAngle = Mathf.LerpAngle(transform.eulerAngles.z, angle, cameraSpeed * Time.deltaTime);
-
-        // Z²‰ñ“]‚Ì‚İ
-        transform.rotation = Quaternion.Euler(new Vector3(0, 0, smoothAngle));
-
-        Vector3 rayOrigin = transform.position;
-        Vector3 rayDirection = target.position - rayOrigin;
+        Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayã‚’å¯è¦–åŒ–
 
         RaycastHit hit;
         if (Physics.Raycast(rayOrigin, rayDirection.normalized, out hit, rayDistance))
         {
             Debug.Log("Ray hit:");
+            image.color = Color.green;
+
+            if (currentBullet == null && !Bullet) { Shoot(); Bullet = true; }
         }
+        else { image.color = Color.red; }
+    }
+
+    void Shoot()
+    {
+        GameObject bullet = Instantiate(bulletPrefab, transform.position, transform.rotation); // ç‰ã‚’ç”Ÿæˆï¼ˆå‘ãã‚‚firePointã®å‘ãã«åˆã‚ã›ã‚‹ï¼‰
+
+        Rigidbody rb = bullet.GetComponent<Rigidbody>(); // RigidbodyãŒä»˜ã„ã¦ã„ã‚‹ã“ã¨ã‚’ç¢ºèªã—ã¦é€Ÿåº¦ã‚’è¨­å®š
+
+        if (rb != null) { rb.linearVelocity = transform.forward * bulletSpeed; }
+
+        Destroy(bullet, bulletLifeTime); // ä¸€å®šæ™‚é–“å¾Œã«ç‰ã‚’è‡ªå‹•ã§æ¶ˆã™
+
+        Invoke(nameof(ClearBulletReference), bulletLifeTime);
+    }
+
+    void ClearBulletReference()
+    {
+        currentBullet = null;
+        Bullet = false;
     }
 }
