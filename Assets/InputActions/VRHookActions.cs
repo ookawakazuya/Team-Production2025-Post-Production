@@ -95,7 +95,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                     ""name"": ""Move"",
                     ""type"": ""Value"",
                     ""id"": ""c63a53b5-8523-4a03-8c29-768ddfff70b6"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -143,7 +143,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a3a1d5c5-75b2-4ecb-8a05-c8f405e3ae50"",
-                    ""path"": ""<OculusTouchController>{RightHand}/triggerPressed"",
+                    ""path"": ""<XRController>{RightHand}/triggerProximity"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -154,7 +154,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""0ef8c3ef-ae0c-482c-87cd-3c9b6dc4c5e4"",
-                    ""path"": ""<XRController>{RightHand}/{GripButton}"",
+                    ""path"": ""<XRController>{RightHand}/gripButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

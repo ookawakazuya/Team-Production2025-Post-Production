@@ -42,6 +42,7 @@ public class VRMove : MonoBehaviour
 
         if (leftStickInput != Vector2.zero)
         {
+            Debug.Log("ˆÚ“®’†");
             Vector3 forward = mainCamera.transform.forward;
             Vector3 right = mainCamera.transform.right;
             forward.y = 0;
