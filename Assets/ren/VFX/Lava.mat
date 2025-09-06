@@ -46,19 +46,28 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BottomPower: 1
-    - _FresnelPower: 1
+    - _BottomPower: -0.29
+    - _FresnelPower: 0.5
     - _Metallic: 0
     - _QueueControl: 0
     - _QueueOffset: 0
+    - _SimpleNoiseAmount: 0
+    - _SimpleNoisePower: 2
+    - _SimpleNoiseScale: 30
     - _Smoothness: 0
+    - _VoronoiAmount: 0.2
+    - _VoronoiAngleOffset: 0.2
+    - _VoronoiScale: 3
     m_Colors:
-    - _BottomRemap: {r: 0, g: 1.25, b: 0, a: 0}
-    - _FresnelColor: {r: 1, g: 1, b: 1, a: 0}
-    - _LavaColor: {r: 11.984314, g: 1.4285816, b: 0, a: 0}
-    - _LavaNormalSpeed: {r: 0, g: 0.03, b: 0, a: 0}
-    - _LavaScale: {r: 3, g: 3, b: 0, a: 0}
-    - _LavaSpeed: {r: 0, g: 0.02, b: 0, a: 0}
+    - _BottomRemap: {r: 0, g: 0.3, b: 0, a: 0}
+    - _FresnelColor: {r: 9.51876, g: 1.103058, b: 0, a: 0}
+    - _LavaColor: {r: 38.075047, g: 7.2397995, b: 0, a: 0}
+    - _LavaNormalSpeed: {r: 0, g: -0.01, b: 0, a: 0}
+    - _LavaRemap: {r: -0.05, g: 1, b: 0, a: 0}
+    - _LavaScale: {r: 5, g: 5, b: 0, a: 0}
+    - _LavaSpeed: {r: 0, g: -0.02, b: 0, a: 0}
+    - _SimpleNoiseSpeed: {r: 0, g: 0.05, b: 0, a: 0}
+    - _VoronoiSpeed: {r: 0, g: 0.01, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &3272852489778300402
