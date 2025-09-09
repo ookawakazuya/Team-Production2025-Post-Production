@@ -21,6 +21,7 @@ public class VRController : MonoBehaviour
 
     bool isGrappling = false;
     bool isRetracting = false;
+    bool wasgripPressed = false;//前フレームの状態
     Vector3 grapplePoint;
 
 
@@ -37,84 +38,34 @@ public class VRController : MonoBehaviour
 
     private void Update()
     {
-        float triggerValue = HookMap.VR.HookShoot.ReadValue<float>();
-        // 右トリガー押しっぱなし → フック維持
-        bool triggerHeld = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
-        bool gripHeld = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-        Debug.Log($"Trigger Value: {triggerValue}, Grip Held: {gripHeld}");
+        //トリガーとグリップの状態
+        bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
+        bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
 
-        if (triggerValue > 0.5f)
+        //フック発射処理
+        if (triggerPressed)
         {
-            if (!isGrappling)
-            {
-                ShootHook();
-            }
+            if(!isGrappling && !isRetracting)
+            ShootHook();
         }
-        else
+        else if (!triggerPressed && (isGrappling || isRetracting))
         {
-            if (isGrappling || isRetracting)
-            {
-                ReleaseHook();
-            }
+            ReleaseHook();
         }
-
-        if (gripHeld && isGrappling && !isRetracting)
+        //ワイヤー移動開始
+        if (isGrappling && triggerPressed&&gripPressed&&!wasgripPressed&&!isRetracting)
         {
             StartRetract();
         }
-
+        //実際の移動処理
         if (isRetracting)
         {
             AccelerateTowardsHook();
         }
-        //if (triggerHeld)
-        //{
-        //    if (!isGrappling) // 初回だけレイキャスト
-        //    {
-        //        ShootHook();
-        //    }
-        //}
-        //else
-        //{
-        //    if (isGrappling || isRetracting) // トリガーを離したら解除
-        //    {
-        //        ReleaseHook();
-        //    }
-        //}
-
-        //////フックショット発射
-        ////HookMap.VR.HookShoot.started += ctx =>
-        ////{
-        ////    ShootHook();
-        ////    Debug.Log("フック発射");
-        ////};
-
-        //////フックショットの解除
-        ////HookMap.VR.HookShoot.canceled += ctx =>
-        ////{
-        ////    ReleaseHook();
-        ////};
-
-        //////ワイヤーの巻取り
-        ////HookMap.VR.Retract.started += ctx =>
-        ////{
-        ////    if (isGrappling)
-        ////    {
-        ////        StartRetract();
-        ////        Debug.Log("グリップ処理");
-        ////    }
-        ////};
-        //// 右グリップ押しっぱなし → 巻き取り開始
-        //bool gripHeld = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-        //if (gripHeld && isGrappling && !isRetracting)
-        //{
-        //    StartRetract();
-        //}
-        //if (isRetracting)
-        //{
-        //    AccelerateTowardsHook();
-        //}
+        wasgripPressed = gripPressed;
     }
+
+        
 
     void ShootHook()
     {
