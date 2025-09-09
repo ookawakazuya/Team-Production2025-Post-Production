@@ -939,7 +939,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 764344510}
   playerMoveSpeed: 10
-  headTransform: {fileID: 0}
+  headTransform: {fileID: 879927378}
   mainCamera: {fileID: 660910727}
   cameraDistance: 3
   cameraHeight: 1.5
@@ -960,8 +960,8 @@ MonoBehaviour:
   mainCamera: {fileID: 660910727}
   characterController: {fileID: 764344510}
   maxWireLength: 100
-  maxMoveSpeed: 30
-  acceleration: 20
+  maxMoveSpeed: 1000
+  acceleration: 500
   stopDistance: 1
 --- !u!143 &764344510
 CharacterController:
