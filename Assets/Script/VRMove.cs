@@ -8,11 +8,6 @@ public class VRMove : MonoBehaviour
     [SerializeField] float playerMoveSpeed = 5f;
     [SerializeField] Transform headTransform;
 
-    [Header("ÉJÉÅÉâê›íË")]
-    [SerializeField] Camera mainCamera; // VRÉJÉÅÉâ
-    [SerializeField] float cameraDistance = 3f;
-    [SerializeField] float cameraHeight = 1.5f;
-
     // êVÇµÇ¢ Input Action Asset
     private VRHookActions vrActions;
 
@@ -33,7 +28,6 @@ public class VRMove : MonoBehaviour
     void Update()
     {
         HandleMovement();
-        HandleCamera();
     }
 
     private void HandleMovement()
@@ -43,8 +37,8 @@ public class VRMove : MonoBehaviour
         if (leftStickInput != Vector2.zero)
         {
             Debug.Log("à⁄ìÆíÜ");
-            Vector3 forward = mainCamera.transform.forward;
-            Vector3 right = mainCamera.transform.right;
+            Vector3 forward = headTransform.forward;
+            Vector3 right = headTransform.right;
             forward.y = 0;
             right.y = 0;
             forward.Normalize();
@@ -53,12 +47,5 @@ public class VRMove : MonoBehaviour
             Vector3 moveDirection = (forward * leftStickInput.y + right * leftStickInput.x).normalized;
             controller.Move(moveDirection * playerMoveSpeed * Time.deltaTime);
         }
-    }
-
-    private void HandleCamera()
-    {
-        Vector3 targetPosition = transform.position - mainCamera.transform.forward * cameraDistance;
-        targetPosition.y += cameraHeight;
-        mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, targetPosition, Time.deltaTime * 5f);
     }
 }
