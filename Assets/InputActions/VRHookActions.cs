@@ -143,7 +143,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""a3a1d5c5-75b2-4ecb-8a05-c8f405e3ae50"",
-                    ""path"": ""<XRController>{RightHand}/triggerProximity"",
+                    ""path"": ""<XRController>{RightHand}/{TriggerButton}"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
