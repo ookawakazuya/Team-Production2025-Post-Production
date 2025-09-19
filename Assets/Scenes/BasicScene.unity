@@ -1641,7 +1641,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &2515090895076851432
 GameObject:
   m_ObjectHideFlags: 0
@@ -1686,6 +1686,10 @@ PrefabInstance:
     - target: {fileID: 4690125843882935571, guid: c2b477dc06a0ecb4f913924f9727c98b, type: 3}
       propertyPath: m_Name
       value: needle2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4690125843882935571, guid: c2b477dc06a0ecb4f913924f9727c98b, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5358575709825916841, guid: c2b477dc06a0ecb4f913924f9727c98b, type: 3}
       propertyPath: m_LocalPosition.x
