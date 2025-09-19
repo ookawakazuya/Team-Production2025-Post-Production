@@ -19,11 +19,20 @@ public class VRController : MonoBehaviour
     [SerializeField] float stopDistance = 1f;//停止判定の距離
 
 
+    [Header("LineRendererの設定")]
+    [SerializeField] LineRenderer hookLine;//ワイヤーレイ
+    [SerializeField] LineRenderer aimLine;//照準用
+
     bool isGrappling = false;
     bool isRetracting = false;
     bool wasgripPressed = false;//前フレームの状態
     Vector3 grapplePoint;
 
+
+    [Header("マーカ設定")]
+    [SerializeField] GameObject markerPrefab;//カーソルプレハブ
+    private GameObject aimMarkerInstance;//照準用
+    private GameObject hookMarkerInstance;//フック用
 
     float currentSpeed = 0f;//現在の移動速度
 
@@ -32,6 +41,51 @@ public class VRController : MonoBehaviour
     void Awake()
     {
         HookMap = new VRHookActions();
+        // LineRendererの初期設定（インスペクタでセットしていない場合、自動追加）
+        if (hookLine == null)
+        {
+            hookLine = gameObject.AddComponent<LineRenderer>();
+            hookLine.startWidth = 0.02f;
+            hookLine.endWidth = 0.02f;
+            hookLine.material = new Material(Shader.Find("Sprites/Default"));
+            hookLine.startColor = Color.white;
+            hookLine.endColor = Color.white;
+        }
+        hookLine.enabled = false; // 初期は非表示
+        if (aimLine == null)
+        {
+            GameObject aimObj = new GameObject("AimLine");
+            aimObj.transform.SetParent(transform);
+            aimLine = aimObj.AddComponent<LineRenderer>();
+            aimLine.startWidth = 0.01f;
+            aimLine.endWidth = 0.01f;
+            aimLine.material = new Material(Shader.Find("Sprites/Default"));
+            aimLine.startColor = Color.green;
+            aimLine.endColor = Color.green;
+        }
+        aimLine.enabled = true; // 初期は非表示
+
+        // マーカー生成（プレハブ未指定なら自動生成）
+        if (markerPrefab == null)
+        {
+            markerPrefab = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            markerPrefab.transform.localScale = Vector3.one * 0.1f;
+            Destroy(markerPrefab.GetComponent<Collider>());
+            var renderer = markerPrefab.GetComponent<Renderer>();
+            renderer.material = new Material(Shader.Find("Unlit/Color"));
+            renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
+        }
+
+        // Aim 用マーカー
+        aimMarkerInstance = Instantiate(markerPrefab);
+        aimMarkerInstance.name = "AimMarker";
+        aimMarkerInstance.SetActive(true);
+
+        // Hook 用マーカー
+        hookMarkerInstance = Instantiate(markerPrefab);
+        hookMarkerInstance.name = "HookMarker";
+        hookMarkerInstance.SetActive(false);
+
     }
     private void OnEnable() => HookMap.Enable();
     void OnDisable() => HookMap.Disable();
@@ -62,6 +116,17 @@ public class VRController : MonoBehaviour
         {
             AccelerateTowardsHook();
         }
+
+        if (isGrappling)
+        {
+            UpdateHookLine();//フック用
+        }
+        else
+        {
+            UpdateAimLine();//照準用
+        }
+
+            
         wasgripPressed = gripPressed;
     }
 
@@ -75,11 +140,56 @@ public class VRController : MonoBehaviour
         {
             grapplePoint = hit.point;
             isGrappling = true;
+            // ライン開始
+            aimLine.enabled = false;
+            hookLine.enabled = true;
+            aimMarkerInstance.SetActive(false);
+            hookMarkerInstance.SetActive(true);
             Debug.Log($"フックショット命中:{hit.collider.name}");
         }
         else
         {
             Debug.Log("フック未明中");
+        }
+    }
+
+    void UpdateHookLine()
+    {
+        if (hookLine.enabled)
+        {
+            hookLine.SetPosition(0, rightController.transform.position);
+            hookLine.SetPosition(1, grapplePoint);
+
+            if(hookMarkerInstance != null)
+            {
+                hookMarkerInstance.SetActive(true);
+                hookMarkerInstance.transform.position = grapplePoint;
+                hookMarkerInstance.transform.rotation =
+                    Quaternion.LookRotation((transform.position - grapplePoint).normalized);
+            }
+
+        }
+    }
+    void UpdateAimLine() 
+    {
+        Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
+        Vector3 endPoint = ray.origin + ray.direction * maxWireLength;
+        Vector3 normal = -ray.direction;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        {
+            endPoint = hit.point; // ヒットしたらそこまで
+            normal = hit.normal;
+        }
+        //レイの描画
+        aimLine.SetPosition(0, rightController.transform.position);
+        aimLine.SetPosition(1, endPoint);
+
+        if (aimMarkerInstance != null)
+        {
+            aimMarkerInstance.SetActive(true);
+            aimMarkerInstance.transform.transform.position = endPoint;
+            aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
         }
     }
     void StartRetract()
@@ -91,6 +201,7 @@ public class VRController : MonoBehaviour
             currentSpeed = 0f;
         }
     }
+
     void AccelerateTowardsHook()
     {
         Vector3 direction = grapplePoint - transform.position;
@@ -119,5 +230,11 @@ public class VRController : MonoBehaviour
         isGrappling = false;
         isRetracting = false;
         currentSpeed = 0f;
+
+        hookLine.enabled = false;
+        aimLine.enabled = true;
+
+        hookMarkerInstance.SetActive(false);
+        aimMarkerInstance.SetActive(true);
     }
 }
