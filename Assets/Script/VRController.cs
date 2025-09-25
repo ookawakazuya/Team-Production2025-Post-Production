@@ -34,9 +34,20 @@ public class VRController : MonoBehaviour
     private GameObject aimMarkerInstance;//照準用
     private GameObject hookMarkerInstance;//フック用
 
+    [Header("壁張り付き設定")]
+    [SerializeField] float clingDuration = 5f;  //壁に留まれる時間
+
+    bool isClinging = false;    //到達したか
+    float clingTimer = 0f;      //落下タイマー
+    GameObject grappledObject;  //命中したオブジェクト
+
+
+
     float currentSpeed = 0f;//現在の移動速度
 
     public VRHookActions HookMap;
+
+    [SerializeField] string wallTag;
 
     void Awake()
     {
@@ -99,7 +110,7 @@ public class VRController : MonoBehaviour
         //フック発射処理
         if (triggerPressed)
         {
-            if(!isGrappling && !isRetracting)
+            if(!isGrappling && !isRetracting&&!isClinging)
             ShootHook();
         }
         else if (!triggerPressed && (isGrappling || isRetracting))
@@ -107,38 +118,53 @@ public class VRController : MonoBehaviour
             ReleaseHook();
         }
         //ワイヤー移動開始
-        if (isGrappling && triggerPressed&&gripPressed&&!wasgripPressed&&!isRetracting)
+        if (isGrappling && triggerPressed&&gripPressed&&!wasgripPressed&&!isRetracting &&!isClinging)
         {
             StartRetract();
         }
-        //実際の移動処理
-        if (isRetracting)
-        {
-            AccelerateTowardsHook();
-        }
 
-        if (isGrappling)
+        //wasgripPressed = gripPressed;
+
+        //張り付き処理
+        if (isClinging)
         {
-            UpdateHookLine();//フック用
+            clingTimer -= Time.deltaTime;
+            if(clingTimer <= 0)
+            {
+                Debug.Log("張り付き解除→落下開始");
+                isClinging = false;
+                ReleaseHook();
+            }
         }
         else
         {
-            UpdateAimLine();//照準用
+            //実際の移動処理
+            if (isRetracting)
+            {
+                AccelerateTowardsHook();
+            }
         }
-
-            
+        if(isGrappling) UpdateHookLine();
+        else UpdateAimLine();
         wasgripPressed = gripPressed;
     }
 
-        
+
 
     void ShootHook()
     {
+        if (isClinging)
+        {
+            isClinging = false;
+            clingTimer = 0f;
+        }
+
         Debug.Log("フック射出");
         Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             grapplePoint = hit.point;
+            grappledObject = hit.collider.gameObject;//命中したオブジェクトの保存
             isGrappling = true;
             // ライン開始
             aimLine.enabled = false;
@@ -204,6 +230,7 @@ public class VRController : MonoBehaviour
 
     void AccelerateTowardsHook()
     {
+        if (isClinging) return;
         Vector3 direction = grapplePoint - transform.position;
         float distance = direction.magnitude;
 
@@ -219,8 +246,17 @@ public class VRController : MonoBehaviour
         else
         {
             Debug.Log("フック地点に到達");
-            isRetracting = false;
-            ReleaseHook();
+            //到達時に特定のタグが付いている場合
+            if(grappledObject != null && grappledObject.CompareTag(wallTag))
+            {
+                StartCling();
+            }
+            else
+            {   //それ以外
+                isRetracting = false;
+                ReleaseHook();
+            }
+
         }
     }
 
@@ -229,12 +265,21 @@ public class VRController : MonoBehaviour
         Debug.Log("フックの解除");
         isGrappling = false;
         isRetracting = false;
+        isClinging = false;
         currentSpeed = 0f;
+        grappledObject = null;
 
         hookLine.enabled = false;
         aimLine.enabled = true;
 
         hookMarkerInstance.SetActive(false);
         aimMarkerInstance.SetActive(true);
+    }
+    void StartCling()
+    {
+        Debug.Log("壁に張り付いた");
+        isRetracting = false;
+        isClinging = true;
+        clingTimer = clingDuration;
     }
 }
