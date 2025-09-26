@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using static VRHookActions;
 
 public class VRController : MonoBehaviour
@@ -23,6 +25,7 @@ public class VRController : MonoBehaviour
     [SerializeField] LineRenderer hookLine;//ワイヤーレイ
     [SerializeField] LineRenderer aimLine;//照準用
 
+
     bool isGrappling = false;
     bool isRetracting = false;
     bool wasgripPressed = false;//前フレームの状態
@@ -30,6 +33,8 @@ public class VRController : MonoBehaviour
 
 
     [Header("マーカ設定")]
+    [SerializeField] XRRayInteractor rayInteractor;
+    [SerializeField] XRInteractorLineVisual lineVisual;
     [SerializeField] GameObject markerPrefab;//カーソルプレハブ
     private GameObject aimMarkerInstance;//照準用
     private GameObject hookMarkerInstance;//フック用
@@ -75,6 +80,15 @@ public class VRController : MonoBehaviour
             aimLine.endColor = Color.green;
         }
         aimLine.enabled = true; // 初期は非表示
+
+        if (lineVisual != null && markerPrefab != null)
+        {
+            lineVisual.reticle = markerPrefab; // 終端にマーカーを出す
+        }
+
+        if (rayInteractor != null) rayInteractor.enabled = true;
+        if (lineVisual != null) lineVisual.enabled = true;
+
 
         // マーカー生成（プレハブ未指定なら自動生成）
         if (markerPrefab == null)
@@ -196,7 +210,7 @@ public class VRController : MonoBehaviour
 
         }
     }
-    void UpdateAimLine() 
+    void UpdateAimLine()
     {
         Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
         Vector3 endPoint = ray.origin + ray.direction * maxWireLength;
@@ -207,14 +221,16 @@ public class VRController : MonoBehaviour
             endPoint = hit.point; // ヒットしたらそこまで
             normal = hit.normal;
         }
-        //レイの描画
+
+        // レイの描画（もしXRInteractorLineVisualを使うなら不要）
         aimLine.SetPosition(0, rightController.transform.position);
         aimLine.SetPosition(1, endPoint);
 
+        // マーカー更新
         if (aimMarkerInstance != null)
         {
             aimMarkerInstance.SetActive(true);
-            aimMarkerInstance.transform.transform.position = endPoint;
+            aimMarkerInstance.transform.position = endPoint; // ←修正
             aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
         }
     }
