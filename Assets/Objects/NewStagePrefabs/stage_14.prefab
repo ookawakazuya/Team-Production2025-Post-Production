@@ -40,6 +40,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4192067109281421608}
     m_Modifications:
+    - target: {fileID: 680508454160533679, guid: a58ef13497ab9c14ab8252a3893603ca, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: c9744ce1d37bbd64e96a595a14b120a1, type: 2}
     - target: {fileID: 4251650002324646765, guid: a58ef13497ab9c14ab8252a3893603ca, type: 3}
       propertyPath: m_Name
       value: stage_14
