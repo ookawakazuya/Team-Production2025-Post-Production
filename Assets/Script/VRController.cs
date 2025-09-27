@@ -47,7 +47,14 @@ public class VRController : MonoBehaviour
 
     [Header("重力設定")]
     [SerializeField] float gravity = -9.81f;
+    [SerializeField] float maxFallSpeed = -50.0f;
     [SerializeField] float fallSpeed = 0f;
+
+    [Header("視点移動設定")]
+    [SerializeField] float rotationSpeed = 45f; //回転速度
+    [SerializeField] Transform playerRoot;      //プレイヤーの角度
+    Vector2 rightStickInput;
+    bool stickPressed;
 
 
 
@@ -120,54 +127,175 @@ public class VRController : MonoBehaviour
 
     private void Update()
     {
+        /*
         //トリガーとグリップの状態
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-
-        //フック発射処理
-        if (triggerPressed)
-        {
-            if(!isGrappling && !isRetracting&&!isClinging)
-            ShootHook();
-        }
-        //ワイヤー移動開始
-        if (isGrappling && triggerPressed&&gripPressed&&!wasgripPressed&&!isRetracting &&!isClinging)
-        {
-            StartRetract();
-        }
-
-        //wasgripPressed = gripPressed;
 
         //張り付き処理
         if (isClinging)
         {
             clingTimer -= Time.deltaTime;
-            if(clingTimer <= 0f)
+            if (clingTimer <= 0f)
             {
                 Debug.Log("張り付き解除→落下開始");
                 isClinging = false;
                 ReleaseHook();
             }
+
+            if (triggerPressed)
+            {
+                isClinging = false;
+                ReleaseHook();
+                ShootHook();
+            }
+            UpdateAimLine();
+            return;
+        }
+        //フック発射処理
+        if (triggerPressed)
+        {
+            if (!isGrappling && !isRetracting)
+                ShootHook();
+
+            if (isGrappling && gripPressed && !isRetracting)
+                StartRetract();
         }
         else
         {
-            //実際の移動処理
-            if (isRetracting)
-            {
-                AccelerateTowardsHook();
-            }
-            else
-            {
-                ApplGravity();
-            }
+            if ((isGrappling || isRetracting)||!isClinging)
+                ReleaseHook();
+        }
+        if (isGrappling && gripPressed && !isRetracting && !isClinging)
+            StartRetract();
+
+
+        //実際の移動処理
+        if (isRetracting)
+        {
+            AccelerateTowardsHook();
+        }
+        else
+        {
+            ApplyGravity();
         }
         if(isGrappling) UpdateHookLine();
         else UpdateAimLine();
-        wasgripPressed = gripPressed;
+        wasgripPressed = gripPressed;*/
+        bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
+        bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
+        rightStickInput = HookMap.VR.RightStick.ReadValue<Vector2>();
+        stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
+
+
+        // --- 張り付き中の特別処理 ---
+        if (isClinging)
+        {
+            // 張り付き時間カウント
+            clingTimer -= Time.deltaTime;
+            if (clingTimer <= 0f)
+            {
+                Debug.Log("張り付き解除→落下開始");
+                isClinging = false;
+                ReleaseHook();
+            }
+
+            // トリガーで新しいフックを狙う
+            if (triggerPressed)
+            {
+                // 張り付き解除して新しいフックを撃つ
+                if (!isGrappling && !isRetracting)
+                {
+                    isClinging = false;
+                    ReleaseHook();
+                    ShootHook();
+                }
+
+                // フック中にグリップを押したら移動開始
+                if (isGrappling && gripPressed && !isRetracting)
+                    StartRetract();
+            }
+            else
+            {
+                // トリガーを放したらフックレイ解除（張り付きは維持）
+                if (isGrappling || isRetracting)
+                {
+                    isGrappling = false;
+                    isRetracting = false;
+                    hookLine.enabled = false;
+                    hookMarkerInstance.SetActive(false);
+
+                    aimLine.enabled = true;
+                    aimMarkerInstance.SetActive(true);
+                }
+            }
+
+
+            // 横方向に倒していたらカメラ回転
+            if (Mathf.Abs(rightStickInput.x) > 0.2f)
+            {
+                float rotateAmount = rightStickInput.x * rotationSpeed * Time.deltaTime;
+
+                // 回転前の位置保存
+                Vector3 beforePos = mainCamera.transform.position;
+                Quaternion beforeRot = mainCamera.transform.rotation;
+
+                // プレイヤーを中心に回転
+                mainCamera.transform.RotateAround(playerRoot.position, Vector3.up, rotateAmount);
+
+                // 障害物チェック（プレイヤーからカメラまでRaycast）
+                Vector3 dir = mainCamera.transform.position - playerRoot.position;
+                float dist = dir.magnitude;
+                if (Physics.Raycast(playerRoot.position, dir.normalized, out RaycastHit hit, dist))
+                {
+                    // 障害物にぶつかるなら元に戻す
+                    mainCamera.transform.position = beforePos;
+                    mainCamera.transform.rotation = beforeRot;
+                }
+            }
+
+            // スティック押し込み → Y軸リセット
+            if (stickPressed)
+            {
+                Vector3 camEuler = mainCamera.transform.eulerAngles;
+                mainCamera.transform.eulerAngles = new Vector3(camEuler.x, 0f, camEuler.z);
+            }
+
+            // 張り付き中は照準レイを更新
+            UpdateAimLine();
+            return; // 重力・移動は止める
+        }
+
+        // --- 通常のフック処理 ---
+        if (triggerPressed)
+        {
+            if (!isGrappling && !isRetracting)
+                ShootHook();
+
+            if (isGrappling && gripPressed && !isRetracting)
+                StartRetract();
+        }
+        else
+        {
+            if ((isGrappling || isRetracting) && !isClinging) // ← cling中は解除しない
+                ReleaseHook();
+        }
+
+        // --- 通常の移動や落下 ---
+        if (isRetracting)
+            AccelerateTowardsHook();
+        else
+            ApplyGravity();
+
+        // --- レイ描画 ---
+        if (isGrappling) UpdateHookLine();
+        else UpdateAimLine();
+
+
     }
 
 
-    void ApplGravity()
+void ApplyGravity()
     {
         if (characterController.isGrounded)
         {
@@ -176,6 +304,7 @@ public class VRController : MonoBehaviour
         else
         {
             fallSpeed += gravity * Time.deltaTime;//自由落下加速
+            fallSpeed = Mathf.Max(fallSpeed, maxFallSpeed);//最大落下速度制限
             characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
         }
     }
@@ -289,7 +418,7 @@ public class VRController : MonoBehaviour
                 isRetracting = false;
                 ReleaseHook();
             }
-
+            return;
         }
     }
 

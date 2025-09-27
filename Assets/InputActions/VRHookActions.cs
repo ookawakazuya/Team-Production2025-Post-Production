@@ -126,6 +126,24 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RightStick"",
+                    ""type"": ""Value"",
+                    ""id"": ""45e0a8fb-9861-4901-9eb6-653f7346579a"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RightStickPress"",
+                    ""type"": ""Button"",
+                    ""id"": ""f5b12219-ecfc-4b2b-a9c8-9d24185aa295"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -172,6 +190,28 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                     ""action"": ""Cancel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""74f42f02-2d56-453b-b70e-bd0a64b222e2"",
+                    ""path"": ""<OculusTouchController>{RightHand}/thumbstick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightStick"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""85d92ff7-1c4e-4d8d-b5c2-fdc7fb70090a"",
+                    ""path"": ""<OculusTouchController>{RightHand}/thumbstick/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RightStickPress"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -184,6 +224,8 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
         m_VR_HookShoot = m_VR.FindAction("HookShoot", throwIfNotFound: true);
         m_VR_Retract = m_VR.FindAction("Retract", throwIfNotFound: true);
         m_VR_Cancel = m_VR.FindAction("Cancel", throwIfNotFound: true);
+        m_VR_RightStick = m_VR.FindAction("RightStick", throwIfNotFound: true);
+        m_VR_RightStickPress = m_VR.FindAction("RightStickPress", throwIfNotFound: true);
     }
 
     ~@VRHookActions()
@@ -268,6 +310,8 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_VR_HookShoot;
     private readonly InputAction m_VR_Retract;
     private readonly InputAction m_VR_Cancel;
+    private readonly InputAction m_VR_RightStick;
+    private readonly InputAction m_VR_RightStickPress;
     /// <summary>
     /// Provides access to input actions defined in input action map "VR".
     /// </summary>
@@ -295,6 +339,14 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "VR/Cancel".
         /// </summary>
         public InputAction @Cancel => m_Wrapper.m_VR_Cancel;
+        /// <summary>
+        /// Provides access to the underlying input action "VR/RightStick".
+        /// </summary>
+        public InputAction @RightStick => m_Wrapper.m_VR_RightStick;
+        /// <summary>
+        /// Provides access to the underlying input action "VR/RightStickPress".
+        /// </summary>
+        public InputAction @RightStickPress => m_Wrapper.m_VR_RightStickPress;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -333,6 +385,12 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
             @Cancel.started += instance.OnCancel;
             @Cancel.performed += instance.OnCancel;
             @Cancel.canceled += instance.OnCancel;
+            @RightStick.started += instance.OnRightStick;
+            @RightStick.performed += instance.OnRightStick;
+            @RightStick.canceled += instance.OnRightStick;
+            @RightStickPress.started += instance.OnRightStickPress;
+            @RightStickPress.performed += instance.OnRightStickPress;
+            @RightStickPress.canceled += instance.OnRightStickPress;
         }
 
         /// <summary>
@@ -356,6 +414,12 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
             @Cancel.started -= instance.OnCancel;
             @Cancel.performed -= instance.OnCancel;
             @Cancel.canceled -= instance.OnCancel;
+            @RightStick.started -= instance.OnRightStick;
+            @RightStick.performed -= instance.OnRightStick;
+            @RightStick.canceled -= instance.OnRightStick;
+            @RightStickPress.started -= instance.OnRightStickPress;
+            @RightStickPress.performed -= instance.OnRightStickPress;
+            @RightStickPress.canceled -= instance.OnRightStickPress;
         }
 
         /// <summary>
@@ -424,5 +488,19 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCancel(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RightStick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRightStick(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RightStickPress" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRightStickPress(InputAction.CallbackContext context);
     }
 }
