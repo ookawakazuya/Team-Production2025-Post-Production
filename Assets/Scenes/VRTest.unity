@@ -1386,7 +1386,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 517779130}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 333ec37ab1ef17b46a20f747305d370a, type: 3}
   m_Name: 
@@ -1659,7 +1659,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &727663779
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1742,13 +1742,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 727663778}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.36, y: 15.5, z: 99.4}
+  m_LocalRotation: {x: -0, y: 0.51161796, z: -0, w: 0.8592131}
+  m_LocalPosition: {x: 26.7, y: 14.4, z: 6.1}
   m_LocalScale: {x: 30, y: 30, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 61.543, z: 0}
 --- !u!1001 &760690384
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1901,7 +1901,13 @@ MonoBehaviour:
   stopDistance: 1
   hookLine: {fileID: 0}
   aimLine: {fileID: 0}
+  rayInteractor: {fileID: 879927384}
+  lineVisual: {fileID: 879927382}
   markerPrefab: {fileID: 0}
+  clingDuration: 5
+  gravity: -9.81
+  fallSpeed: 0
+  wallTag: Wall
 --- !u!143 &764344510
 CharacterController:
   m_ObjectHideFlags: 0
@@ -3253,6 +3259,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ActionAssets:
+  - {fileID: -944628639613478452, guid: 201ab15ce40ebc543ba94f4e50930aef, type: 3}
   - {fileID: -944628639613478452, guid: 8bf4c22dff828434f9e13e3a3eb5ec8e, type: 3}
 --- !u!114 &1425030186
 MonoBehaviour:
@@ -3564,7 +3571,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &1663585466
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -41,10 +41,13 @@ public class VRController : MonoBehaviour
 
     [Header("壁張り付き設定")]
     [SerializeField] float clingDuration = 5f;  //壁に留まれる時間
-
     bool isClinging = false;    //到達したか
     float clingTimer = 0f;      //落下タイマー
     GameObject grappledObject;  //命中したオブジェクト
+
+    [Header("重力設定")]
+    [SerializeField] float gravity = -9.81f;
+    [SerializeField] float fallSpeed = 0f;
 
 
 
@@ -127,10 +130,6 @@ public class VRController : MonoBehaviour
             if(!isGrappling && !isRetracting&&!isClinging)
             ShootHook();
         }
-        else if (!triggerPressed && (isGrappling || isRetracting))
-        {
-            ReleaseHook();
-        }
         //ワイヤー移動開始
         if (isGrappling && triggerPressed&&gripPressed&&!wasgripPressed&&!isRetracting &&!isClinging)
         {
@@ -143,7 +142,7 @@ public class VRController : MonoBehaviour
         if (isClinging)
         {
             clingTimer -= Time.deltaTime;
-            if(clingTimer <= 0)
+            if(clingTimer <= 0f)
             {
                 Debug.Log("張り付き解除→落下開始");
                 isClinging = false;
@@ -157,10 +156,28 @@ public class VRController : MonoBehaviour
             {
                 AccelerateTowardsHook();
             }
+            else
+            {
+                ApplGravity();
+            }
         }
         if(isGrappling) UpdateHookLine();
         else UpdateAimLine();
         wasgripPressed = gripPressed;
+    }
+
+
+    void ApplGravity()
+    {
+        if (characterController.isGrounded)
+        {
+            fallSpeed = 0f;
+        }
+        else
+        {
+            fallSpeed += gravity * Time.deltaTime;//自由落下加速
+            characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
+        }
     }
 
 
@@ -297,5 +314,13 @@ public class VRController : MonoBehaviour
         isRetracting = false;
         isClinging = true;
         clingTimer = clingDuration;
+
+        //  レイ切り替え 
+        hookLine.enabled = false;          // フックレイ非表示
+        aimLine.enabled = true;            // 照準レイ再表示
+
+        // マーカー切り替え
+        hookMarkerInstance.SetActive(false);
+        aimMarkerInstance.SetActive(true);
     }
 }
