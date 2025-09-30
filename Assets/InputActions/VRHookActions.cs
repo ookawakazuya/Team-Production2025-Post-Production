@@ -205,7 +205,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""85d92ff7-1c4e-4d8d-b5c2-fdc7fb70090a"",
-                    ""path"": ""<OculusTouchController>{RightHand}/thumbstick/down"",
+                    ""path"": ""<OculusTouchController>{RightHand}/thumbstickClicked "",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
