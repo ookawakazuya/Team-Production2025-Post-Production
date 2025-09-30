@@ -53,7 +53,6 @@ public class VRController : MonoBehaviour
     [Header("視点移動設定")]
     [SerializeField] float rotationSpeed = 45f; //回転速度
     [SerializeField] Transform playerRoot;      //プレイヤーの角度
-    Vector2 rightStickInput;
     bool stickPressed;
 
 
@@ -184,7 +183,7 @@ public class VRController : MonoBehaviour
         wasgripPressed = gripPressed;*/
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-        rightStickInput = HookMap.VR.RightStick.ReadValue<Vector2>();
+        CameraRotation();
         stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
 
 
@@ -231,35 +230,48 @@ public class VRController : MonoBehaviour
             }
 
 
-            // 横方向に倒していたらカメラ回転
-            if (Mathf.Abs(rightStickInput.x) > 0.2f)
-            {
-                float rotateAmount = rightStickInput.x * rotationSpeed * Time.deltaTime;
+            //// 横方向に倒していたらカメラ回転
+            //if (Mathf.Abs(rightStickInput.x) > 0.2f)
+            //{
+            //    float rotateAmount = rightStickInput.x * rotationSpeed * Time.deltaTime;
 
-                // 回転前の位置保存
-                Vector3 beforePos = mainCamera.transform.position;
-                Quaternion beforeRot = mainCamera.transform.rotation;
+            //    // 回転前の位置保存
+            //    Vector3 beforePos = mainCamera.transform.position;
+            //    Quaternion beforeRot = mainCamera.transform.rotation;
 
-                // プレイヤーを中心に回転
-                mainCamera.transform.RotateAround(playerRoot.position, Vector3.up, rotateAmount);
+            //    // プレイヤーを中心に回転
+            //    mainCamera.transform.RotateAround(playerRoot.position, Vector3.up, rotateAmount);
 
-                // 障害物チェック（プレイヤーからカメラまでRaycast）
-                Vector3 dir = mainCamera.transform.position - playerRoot.position;
-                float dist = dir.magnitude;
-                if (Physics.Raycast(playerRoot.position, dir.normalized, out RaycastHit hit, dist))
-                {
-                    // 障害物にぶつかるなら元に戻す
-                    mainCamera.transform.position = beforePos;
-                    mainCamera.transform.rotation = beforeRot;
-                }
-            }
+            //    // 障害物チェック（プレイヤーからカメラまでRaycast）
+            //    Vector3 dir = mainCamera.transform.position - playerRoot.position;
+            //    float dist = dir.magnitude;
+            //    if (Physics.Raycast(playerRoot.position, dir.normalized, out RaycastHit hit, dist))
+            //    {
+            //        // 障害物にぶつかるなら元に戻す
+            //        mainCamera.transform.position = beforePos;
+            //        mainCamera.transform.rotation = beforeRot;
+            //    }
+            //}
 
-            // スティック押し込み → Y軸リセット
-            if (stickPressed)
-            {
-                Vector3 camEuler = mainCamera.transform.eulerAngles;
-                mainCamera.transform.eulerAngles = new Vector3(camEuler.x, 0f, camEuler.z);
-            }
+
+            //// スティック押し込み → Y軸リセット
+            //if (stickPressed)
+            //{
+            //    Vector3 camEuler = mainCamera.transform.eulerAngles;
+            //    mainCamera.transform.eulerAngles = new Vector3(camEuler.x, 0f, camEuler.z);
+            //}
+
+            //float stickPressValue = HookMap.VR.RightStickPress.ReadValue<float>();
+            //Debug.Log($"RightStickPress Raw Value: {stickPressValue}");
+
+            //stickPressed = stickPressValue > 0.5f;
+
+            //if (stickPressed)
+            //{
+            //    Debug.Log("RightStick Pressed!");
+            //}
+
+
 
             // 張り付き中は照準レイを更新
             UpdateAimLine();
@@ -294,8 +306,47 @@ public class VRController : MonoBehaviour
 
     }
 
+    void CameraRotation()
+    {
+        Vector2 rightStickInput = HookMap.VR.RightStick.ReadValue<Vector2>();
 
-void ApplyGravity()
+        // 横方向に倒していたらカメラ回転
+        if (Mathf.Abs(rightStickInput.x) > 0.2f)
+        {
+            float rotateAmount = rightStickInput.x * rotationSpeed * Time.deltaTime;
+
+            // 回転前の位置保存
+            Vector3 beforePos = mainCamera.transform.position;
+            Quaternion beforeRot = mainCamera.transform.rotation;
+
+            // プレイヤーを中心に回転
+            mainCamera.transform.RotateAround(playerRoot.position, Vector3.up, rotateAmount);
+
+            // 障害物チェック（プレイヤーからカメラまでRaycast）
+            Vector3 dir = mainCamera.transform.position - playerRoot.position;
+            float dist = dir.magnitude;
+            if (Physics.Raycast(playerRoot.position, dir.normalized, out RaycastHit hit, dist))
+            {
+                // 障害物にぶつかるなら元に戻す
+                mainCamera.transform.position = beforePos;
+                mainCamera.transform.rotation = beforeRot;
+            }
+        }
+
+        bool stickPressed = HookMap.VR.RightStickPress.ReadValue<bool>();
+        if (stickPressed)
+        {
+            Debug.Log("Y軸をリセット！");
+            Vector3 euler = playerRoot.eulerAngles;
+            euler.y = 0f; // Y軸だけを0に戻す
+            playerRoot.eulerAngles = euler;
+
+            Debug.Log($"Stick Pressed: {stickPressed}");
+        }
+    }
+
+
+    void ApplyGravity()
     {
         if (characterController.isGrounded)
         {
