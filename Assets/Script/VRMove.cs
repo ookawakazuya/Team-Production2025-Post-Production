@@ -8,6 +8,8 @@ public class VRMove : MonoBehaviour
     [SerializeField] float playerMoveSpeed = 5f;
     [SerializeField] Transform headTransform;
 
+
+    [SerializeField] VRController vrController;
     // êVÇµÇ¢ Input Action Asset
     private VRHookActions vrActions;
 
@@ -27,6 +29,8 @@ public class VRMove : MonoBehaviour
 
     void Update()
     {
+        if (!vrController.isMoving)
+            return;
         HandleMovement();
     }
 

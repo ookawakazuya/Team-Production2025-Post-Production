@@ -30,6 +30,7 @@ public class VRController : MonoBehaviour
     bool isRetracting = false;
     bool wasgripPressed = false;//前フレームの状態
     Vector3 grapplePoint;
+    public bool isMoving {  get; private set; }
 
 
     [Header("マーカ設定")]
@@ -44,6 +45,7 @@ public class VRController : MonoBehaviour
     bool isClinging = false;    //到達したか
     float clingTimer = 0f;      //落下タイマー
     GameObject grappledObject;  //命中したオブジェクト
+    
 
     [Header("重力設定")]
     [SerializeField] float gravity = -9.81f;
@@ -51,7 +53,7 @@ public class VRController : MonoBehaviour
     [SerializeField] float fallSpeed = 0f;
 
     [Header("視点移動設定")]
-    [SerializeField] float rotationSpeed = 45f; //回転速度
+    [SerializeField] float rotationSpeed = 90f; //回転速度
     [SerializeField] Transform playerRoot;      //プレイヤーの角度
     bool stickPressed;
 
@@ -126,61 +128,6 @@ public class VRController : MonoBehaviour
 
     private void Update()
     {
-        /*
-        //トリガーとグリップの状態
-        bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
-        bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-
-        //張り付き処理
-        if (isClinging)
-        {
-            clingTimer -= Time.deltaTime;
-            if (clingTimer <= 0f)
-            {
-                Debug.Log("張り付き解除→落下開始");
-                isClinging = false;
-                ReleaseHook();
-            }
-
-            if (triggerPressed)
-            {
-                isClinging = false;
-                ReleaseHook();
-                ShootHook();
-            }
-            UpdateAimLine();
-            return;
-        }
-        //フック発射処理
-        if (triggerPressed)
-        {
-            if (!isGrappling && !isRetracting)
-                ShootHook();
-
-            if (isGrappling && gripPressed && !isRetracting)
-                StartRetract();
-        }
-        else
-        {
-            if ((isGrappling || isRetracting)||!isClinging)
-                ReleaseHook();
-        }
-        if (isGrappling && gripPressed && !isRetracting && !isClinging)
-            StartRetract();
-
-
-        //実際の移動処理
-        if (isRetracting)
-        {
-            AccelerateTowardsHook();
-        }
-        else
-        {
-            ApplyGravity();
-        }
-        if(isGrappling) UpdateHookLine();
-        else UpdateAimLine();
-        wasgripPressed = gripPressed;*/
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
         CameraRotation();
@@ -196,6 +143,7 @@ public class VRController : MonoBehaviour
             {
                 Debug.Log("張り付き解除→落下開始");
                 isClinging = false;
+                isMoving = true;
                 ReleaseHook();
             }
 
@@ -219,67 +167,21 @@ public class VRController : MonoBehaviour
                 // トリガーを放したらフックレイ解除（張り付きは維持）
                 if (isGrappling || isRetracting)
                 {
-                    isGrappling = false;
-                    isRetracting = false;
-                    hookLine.enabled = false;
-                    hookMarkerInstance.SetActive(false);
-
-                    aimLine.enabled = true;
-                    aimMarkerInstance.SetActive(true);
+                    if (isClinging)
+                        return;
+                    ReleaseHook();
                 }
             }
-
-
-            //// 横方向に倒していたらカメラ回転
-            //if (Mathf.Abs(rightStickInput.x) > 0.2f)
-            //{
-            //    float rotateAmount = rightStickInput.x * rotationSpeed * Time.deltaTime;
-
-            //    // 回転前の位置保存
-            //    Vector3 beforePos = mainCamera.transform.position;
-            //    Quaternion beforeRot = mainCamera.transform.rotation;
-
-            //    // プレイヤーを中心に回転
-            //    mainCamera.transform.RotateAround(playerRoot.position, Vector3.up, rotateAmount);
-
-            //    // 障害物チェック（プレイヤーからカメラまでRaycast）
-            //    Vector3 dir = mainCamera.transform.position - playerRoot.position;
-            //    float dist = dir.magnitude;
-            //    if (Physics.Raycast(playerRoot.position, dir.normalized, out RaycastHit hit, dist))
-            //    {
-            //        // 障害物にぶつかるなら元に戻す
-            //        mainCamera.transform.position = beforePos;
-            //        mainCamera.transform.rotation = beforeRot;
-            //    }
-            //}
-
-
-            //// スティック押し込み → Y軸リセット
-            //if (stickPressed)
-            //{
-            //    Vector3 camEuler = mainCamera.transform.eulerAngles;
-            //    mainCamera.transform.eulerAngles = new Vector3(camEuler.x, 0f, camEuler.z);
-            //}
-
-            //float stickPressValue = HookMap.VR.RightStickPress.ReadValue<float>();
-            //Debug.Log($"RightStickPress Raw Value: {stickPressValue}");
-
-            //stickPressed = stickPressValue > 0.5f;
-
-            //if (stickPressed)
-            //{
-            //    Debug.Log("RightStick Pressed!");
-            //}
-
-
-
             // 張り付き中は照準レイを更新
             UpdateAimLine();
             return; // 重力・移動は止める
         }
 
+        bool blockTriggerByGrip = gripPressed;
+
+
         // --- 通常のフック処理 ---
-        if (triggerPressed)
+        if (triggerPressed&&!blockTriggerByGrip)
         {
             if (!isGrappling && !isRetracting)
                 ShootHook();
@@ -287,7 +189,7 @@ public class VRController : MonoBehaviour
             if (isGrappling && gripPressed && !isRetracting)
                 StartRetract();
         }
-        else
+        else if(!blockTriggerByGrip)
         {
             if ((isGrappling || isRetracting) && !isClinging) // ← cling中は解除しない
                 ReleaseHook();
@@ -313,33 +215,18 @@ public class VRController : MonoBehaviour
         // 横方向に倒していたらカメラ回転
         if (Mathf.Abs(rightStickInput.x) > 0.2f)
         {
-            float rotateAmount = rightStickInput.x * rotationSpeed * Time.deltaTime;
+            Debug.Log($"横方向の入力:{rightStickInput}");
+            playerRoot.Rotate(Vector3.up * rightStickInput.x * rotationSpeed * Time.deltaTime);
 
-            // 回転前の位置保存
-            Vector3 beforePos = mainCamera.transform.position;
-            Quaternion beforeRot = mainCamera.transform.rotation;
-
-            // プレイヤーを中心に回転
-            mainCamera.transform.RotateAround(playerRoot.position, Vector3.up, rotateAmount);
-
-            // 障害物チェック（プレイヤーからカメラまでRaycast）
-            Vector3 dir = mainCamera.transform.position - playerRoot.position;
-            float dist = dir.magnitude;
-            if (Physics.Raycast(playerRoot.position, dir.normalized, out RaycastHit hit, dist))
-            {
-                // 障害物にぶつかるなら元に戻す
-                mainCamera.transform.position = beforePos;
-                mainCamera.transform.rotation = beforeRot;
-            }
         }
 
         bool stickPressed = HookMap.VR.RightStickPress.ReadValue<bool>();
         if (stickPressed)
         {
             Debug.Log("Y軸をリセット！");
-            Vector3 euler = playerRoot.eulerAngles;
-            euler.y = 0f; // Y軸だけを0に戻す
-            playerRoot.eulerAngles = euler;
+            Vector3 forward = mainCamera.transform.forward;
+            forward.y = 0f; // カメラの向きに合わせてY軸を修正
+            playerRoot.eulerAngles = forward;
 
             Debug.Log($"Stick Pressed: {stickPressed}");
         }
@@ -427,7 +314,7 @@ public class VRController : MonoBehaviour
         if (aimMarkerInstance != null)
         {
             aimMarkerInstance.SetActive(true);
-            aimMarkerInstance.transform.position = endPoint; // ←修正
+            aimMarkerInstance.transform.position = endPoint; 
             aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
         }
     }
@@ -437,6 +324,7 @@ public class VRController : MonoBehaviour
         {
             Debug.Log("巻き取り開始");
             isRetracting = true;
+            isMoving = false;
             currentSpeed = 0f;
         }
     }
@@ -469,7 +357,6 @@ public class VRController : MonoBehaviour
                 isRetracting = false;
                 ReleaseHook();
             }
-            return;
         }
     }
 
