@@ -2852,6 +2852,7 @@ MonoBehaviour:
   controller: {fileID: 764344510}
   playerMoveSpeed: 10
   headTransform: {fileID: 764344511}
+  vrController: {fileID: 764344509}
 --- !u!114 &764344509
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2868,22 +2869,22 @@ MonoBehaviour:
   leftController: {fileID: 517779130}
   mainCamera: {fileID: 660910727}
   characterController: {fileID: 764344510}
-  maxWireLength: 10000
+  maxWireLength: 1000
   maxMoveSpeed: 500
   acceleration: 50
   stopDistance: 1
   hookLine: {fileID: 0}
   aimLine: {fileID: 0}
-  rayInteractor: {fileID: 0}
-  lineVisual: {fileID: 0}
+  rayInteractor: {fileID: 879927384}
+  lineVisual: {fileID: 879927385}
   markerPrefab: {fileID: 0}
   clingDuration: 5
   gravity: -9.81
   maxFallSpeed: -50
   fallSpeed: 0
-  rotationSpeed: 45
-  playerRoot: {fileID: 0}
-  wallTag: 
+  rotationSpeed: 90
+  playerRoot: {fileID: 1425030187}
+  wallTag: Wall
 --- !u!143 &764344510
 CharacterController:
   m_ObjectHideFlags: 0
@@ -3600,7 +3601,7 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 879927377}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
