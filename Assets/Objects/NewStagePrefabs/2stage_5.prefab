@@ -40,14 +40,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6895440896968326179}
     m_Modifications:
+    - target: {fileID: 825632782249184948, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
     - target: {fileID: 1044634344134054067, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: c9744ce1d37bbd64e96a595a14b120a1, type: 2}
+    - target: {fileID: 2793768450889085328, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
     - target: {fileID: 3299669968107012835, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: c9744ce1d37bbd64e96a595a14b120a1, type: 2}
+    - target: {fileID: 4062437907242259760, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
     - target: {fileID: 4414774659443298334, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
       propertyPath: m_Name
       value: 2stage_5
@@ -91,6 +103,10 @@ PrefabInstance:
     - target: {fileID: 5636539396139138304, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835656843708722525, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
+      propertyPath: m_TagString
+      value: Wall
       objectReference: {fileID: 0}
     - target: {fileID: 9142401431581459226, guid: 15fa2ce527fd1eb45b245bed301fcdb6, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'

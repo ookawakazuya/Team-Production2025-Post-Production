@@ -40,6 +40,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 5063350919569035966}
     m_Modifications:
+    - target: {fileID: 1560177436647286051, guid: ac95ccd9a7790994394916c0891124fe, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
     - target: {fileID: 2662997021240781980, guid: ac95ccd9a7790994394916c0891124fe, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -87,6 +91,10 @@ PrefabInstance:
     - target: {fileID: 6858507402073258485, guid: ac95ccd9a7790994394916c0891124fe, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7814991583197229187, guid: ac95ccd9a7790994394916c0891124fe, type: 3}
+      propertyPath: m_TagString
+      value: Wall
       objectReference: {fileID: 0}
     - target: {fileID: 8872197944985483435, guid: ac95ccd9a7790994394916c0891124fe, type: 3}
       propertyPath: m_Name

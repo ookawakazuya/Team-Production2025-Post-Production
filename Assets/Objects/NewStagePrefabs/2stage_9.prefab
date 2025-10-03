@@ -40,9 +40,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7168506569014693814}
     m_Modifications:
+    - target: {fileID: 4946394548438987938, guid: ddb02053ef665ba4ca4d48dc21313c3d, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
     - target: {fileID: 4979463917247609438, guid: ddb02053ef665ba4ca4d48dc21313c3d, type: 3}
       propertyPath: m_Name
       value: 2stage_9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6470187119406962033, guid: ddb02053ef665ba4ca4d48dc21313c3d, type: 3}
+      propertyPath: m_TagString
+      value: Wall
+      objectReference: {fileID: 0}
+    - target: {fileID: 7786392849375022933, guid: ddb02053ef665ba4ca4d48dc21313c3d, type: 3}
+      propertyPath: m_TagString
+      value: Wall
       objectReference: {fileID: 0}
     - target: {fileID: 7892516577693533179, guid: ddb02053ef665ba4ca4d48dc21313c3d, type: 3}
       propertyPath: m_LocalPosition.x
