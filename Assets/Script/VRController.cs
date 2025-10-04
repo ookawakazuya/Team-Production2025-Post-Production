@@ -26,7 +26,7 @@ public class VRController : MonoBehaviour
     [SerializeField] LineRenderer aimLine;//照準用
 
 
-    bool isGrappling = false;
+    bool isGrappling = false;//グリップを押したか
     bool isRetracting = false;
     bool wasgripPressed = false;//前フレームの状態
     Vector3 grapplePoint;
@@ -94,13 +94,13 @@ public class VRController : MonoBehaviour
         }
         aimLine.enabled = true; // 初期は非表示
 
-        if (lineVisual != null && markerPrefab != null)
-        {
-            lineVisual.reticle = markerPrefab; // 終端にマーカーを出す
-        }
+        //if (lineVisual != null && markerPrefab != null)
+        //{
+        //    lineVisual.reticle = markerPrefab; // 終端にマーカーを出す
+        //}
 
-        if (rayInteractor != null) rayInteractor.enabled = true;
-        if (lineVisual != null) lineVisual.enabled = true;
+        //if (rayInteractor != null) rayInteractor.enabled = true;
+        //if (lineVisual != null) lineVisual.enabled = true;
 
 
         // マーカー生成（プレハブ未指定なら自動生成）
@@ -137,22 +137,22 @@ public class VRController : MonoBehaviour
         // グリップ先行中のブロック
         bool blockTriggerByGrip = gripPressed && !isGrappling && !isRetracting;
 
-        // ---------------- 張り付き中の処理 ----------------
+        // 張り付き中の処理 
         if (isClinging)
         {
             clingTimer -= Time.deltaTime;
+            Debug.Log(clingTimer);
             if (clingTimer <= 0f)
             {
                 Debug.Log("張り付き解除→落下開始");
                 isClinging = false;
-                isMoving = true;
                 ReleaseHook();
             }
 
             // 張り付き中も照準レイ常時更新
             UpdateAimLine();
 
-            // ★ 張り付き中でもフック射出を許可（グリップ先行時は無効）
+            //  張り付き中でもフック射出を許可（グリップ先行時は無効）
             if (triggerPressed && !blockTriggerByGrip)
             {
                 // 新しいフックを撃つ
@@ -166,10 +166,21 @@ public class VRController : MonoBehaviour
             else if (!triggerPressed && (isGrappling || isRetracting))
             {
                 // トリガーを放したら解除
+                isGrappling = false;
+                isRetracting = false;
+                isClinging = false;
+                currentSpeed = 0f;
+                grappledObject = null;
+
+                hookLine.enabled = false;
+                aimLine.enabled = true;
+
+                hookMarkerInstance.SetActive(false);
+                aimMarkerInstance.SetActive(true);
                 ReleaseHook();
             }
 
-            // ★ 張り付き中でも巻き取り中は移動処理を継続
+            // 張り付き中でも巻き取り中は移動処理を継続
             if (isRetracting)
             {
                 AccelerateTowardsHook();
@@ -178,8 +189,8 @@ public class VRController : MonoBehaviour
             return; // 張り付き中は重力落下だけ止める
         }
 
-        // ---------------- 通常時の処理 ----------------
-        if (triggerPressed && !blockTriggerByGrip)
+        //  通常時の処理 
+        if (triggerPressed)
         {
             if (!isGrappling && !isRetracting)
                 ShootHook();
