@@ -52,6 +52,8 @@ public class VRController : MonoBehaviour
     [SerializeField] float maxFallSpeed = -50.0f;
     [SerializeField] float fallSpeed = 0f;
 
+    bool useGravity = true;
+
     [Header("視点移動設定")]
     [SerializeField] float rotationSpeed = 90f; //回転速度
     [SerializeField] Transform playerRoot;      //プレイヤーの角度
@@ -143,6 +145,7 @@ public class VRController : MonoBehaviour
             {
                 Debug.Log("張り付き解除→落下開始");
                 isClinging = false;
+                isMoving = true;
                 ReleaseHook();
             }
 
@@ -219,15 +222,19 @@ public class VRController : MonoBehaviour
             Debug.Log("Y軸をリセット！");
             Vector3 forward = mainCamera.transform.forward;
             forward.y = 0f; // カメラの向きに合わせてY軸を修正
-            playerRoot.eulerAngles = forward;
-
-            Debug.Log($"Stick Pressed: {stickPressed}");
+            if (forward.sqrMagnitude > 0.01f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(forward);
+                playerRoot.rotation = targetRotation; // カメラの向きに合わせて回転
+            }
         }
     }
 
 
     void ApplyGravity()
     {
+        if (!useGravity) return;
+
         if (characterController.isGrounded)
         {
             fallSpeed = 0f;
@@ -318,6 +325,7 @@ public class VRController : MonoBehaviour
             Debug.Log("巻き取り開始");
             isRetracting = true;
             isMoving = false;
+            useGravity = true;
             currentSpeed = 0f;
         }
     }
@@ -359,6 +367,7 @@ public class VRController : MonoBehaviour
         isGrappling = false;
         isRetracting = false;
         isClinging = false;
+        useGravity = true;
         currentSpeed = 0f;
         grappledObject = null;
 
@@ -374,6 +383,7 @@ public class VRController : MonoBehaviour
         isRetracting = false;
         isClinging = true;
         clingTimer = clingDuration;
+        useGravity = false;//重力の無効化
 
         //  レイ切り替え 
         hookLine.enabled = false;          // フックレイ非表示
