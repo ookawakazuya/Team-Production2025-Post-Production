@@ -132,56 +132,51 @@ public class VRController : MonoBehaviour
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
         CameraRotation();
         stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
+        // グリップ先行中のブロック
+        bool blockTriggerByGrip = gripPressed && !isGrappling && !isRetracting;
 
-
-        // --- 張り付き中の特別処理 ---
+        // ---------------- 張り付き中の処理 ----------------
         if (isClinging)
         {
-            // 張り付き時間カウント
             clingTimer -= Time.deltaTime;
             if (clingTimer <= 0f)
             {
                 Debug.Log("張り付き解除→落下開始");
                 isClinging = false;
-                isMoving = true;
                 ReleaseHook();
             }
 
-            // トリガーで新しいフックを狙う
-            if (triggerPressed)
-            {
-                // 張り付き解除して新しいフックを撃つ
-                if (!isGrappling && !isRetracting)
-                {
-                    isClinging = false;
-                    ReleaseHook();
-                    ShootHook();
-                }
+            // 張り付き中も照準レイ常時更新
+            UpdateAimLine();
 
-                // フック中にグリップを押したら移動開始
+            // ★ 張り付き中でもフック射出を許可（グリップ先行時は無効）
+            if (triggerPressed && !blockTriggerByGrip)
+            {
+                // 新しいフックを撃つ
+                if (!isGrappling && !isRetracting)
+                    ShootHook();
+
+                // フック中にグリップ押下で巻き取り開始
                 if (isGrappling && gripPressed && !isRetracting)
                     StartRetract();
             }
-            else
+            else if (!triggerPressed && (isGrappling || isRetracting))
             {
-                // トリガーを放したらフックレイ解除（張り付きは維持）
-                if (isGrappling || isRetracting)
-                {
-                    if (isClinging)
-                        return;
-                    ReleaseHook();
-                }
+                // トリガーを放したら解除
+                ReleaseHook();
             }
-            // 張り付き中は照準レイを更新
-            UpdateAimLine();
-            return; // 重力・移動は止める
+
+            // ★ 張り付き中でも巻き取り中は移動処理を継続
+            if (isRetracting)
+            {
+                AccelerateTowardsHook();
+            }
+
+            return; // 張り付き中は重力落下だけ止める
         }
 
-        bool blockTriggerByGrip = gripPressed;
-
-
-        // --- 通常のフック処理 ---
-        if (triggerPressed&&!blockTriggerByGrip)
+        // ---------------- 通常時の処理 ----------------
+        if (triggerPressed && !blockTriggerByGrip)
         {
             if (!isGrappling && !isRetracting)
                 ShootHook();
@@ -189,23 +184,21 @@ public class VRController : MonoBehaviour
             if (isGrappling && gripPressed && !isRetracting)
                 StartRetract();
         }
-        else if(!blockTriggerByGrip)
+        else if (!triggerPressed)
         {
-            if ((isGrappling || isRetracting) && !isClinging) // ← cling中は解除しない
+            if ((isGrappling || isRetracting) && !isClinging)
                 ReleaseHook();
         }
 
-        // --- 通常の移動や落下 ---
+        // 通常移動／落下処理
         if (isRetracting)
             AccelerateTowardsHook();
         else
             ApplyGravity();
 
-        // --- レイ描画 ---
+        // レイ描画
         if (isGrappling) UpdateHookLine();
         else UpdateAimLine();
-
-
     }
 
     void CameraRotation()
