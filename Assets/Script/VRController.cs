@@ -135,7 +135,7 @@ public class VRController : MonoBehaviour
         CameraRotation();
         stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
         // グリップ先行中のブロック
-        bool blockTriggerByGrip = gripPressed && !isGrappling && !isRetracting;
+        bool gripHeld = gripPressed && !triggerPressed;
 
         // 張り付き中の処理 
         if (isClinging)
@@ -153,55 +153,31 @@ public class VRController : MonoBehaviour
             UpdateAimLine();
 
             //  張り付き中でもフック射出を許可（グリップ先行時は無効）
-            if (triggerPressed && !blockTriggerByGrip)
+            if (triggerPressed && !gripHeld)
             {
-                // 新しいフックを撃つ
-                if (!isGrappling && !isRetracting)
-                    ShootHook();
-
-                // フック中にグリップ押下で巻き取り開始
-                if (isGrappling && gripPressed && !isRetracting)
-                    StartRetract();
-            }
-            else if (!triggerPressed && (isGrappling || isRetracting))
-            {
-                // トリガーを放したら解除
-                isGrappling = false;
-                isRetracting = false;
                 isClinging = false;
-                currentSpeed = 0f;
-                grappledObject = null;
-
-                hookLine.enabled = false;
-                aimLine.enabled = true;
-
-                hookMarkerInstance.SetActive(false);
-                aimMarkerInstance.SetActive(true);
                 ReleaseHook();
+                ShootHook();
             }
-
-            // 張り付き中でも巻き取り中は移動処理を継続
-            if (isRetracting)
+            if (isGrappling && gripPressed&&!isRetracting)
             {
-                AccelerateTowardsHook();
+                StartRetract();
             }
-
             return; // 張り付き中は重力落下だけ止める
         }
 
         //  通常時の処理 
-        if (triggerPressed)
+        if (!gripHeld)
         {
-            if (!isGrappling && !isRetracting)
-                ShootHook();
-
-            if (isGrappling && gripPressed && !isRetracting)
-                StartRetract();
-        }
-        else if (!triggerPressed)
-        {
-            if ((isGrappling || isRetracting) && !isClinging)
-                ReleaseHook();
+            if (triggerPressed)
+            {
+                if (!isGrappling && !isRetracting)
+                    ShootHook();
+                if(isGrappling&& gripPressed && !isRetracting)
+                {
+                    StartRetract();
+                }
+            }
         }
 
         // 通常移動／落下処理
