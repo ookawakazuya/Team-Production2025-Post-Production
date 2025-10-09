@@ -183,7 +183,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""cd414fb5-c27c-43df-a5be-bb590b2c2483"",
-                    ""path"": ""<XRController>{RightHand}/{TriggerButton}"",
+                    ""path"": ""<OculusTouchController>{RightHand}/buttonB）"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",

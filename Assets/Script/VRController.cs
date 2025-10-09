@@ -15,10 +15,12 @@ public class VRController : MonoBehaviour
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
 
-    [SerializeField] float maxWireLength = 300f;//レイの長さ
-    [SerializeField] float maxMoveSpeed = 30f;//最大速度
-    [SerializeField] float acceleration = 20f;//加速度
-    [SerializeField] float stopDistance = 1f;//停止判定の距離
+    [SerializeField] float maxWireLength = 300f;        //レイの長さ
+    [SerializeField] float maxMoveSpeed = 30f;          //最大速度
+    [SerializeField] float acceleration = 20f;          //加速度
+    [SerializeField] float stopDistance = 1f;           //停止判定の距離
+    [SerializeField] float cancelAvailableTime = 3.0f;  //キャンセル可能時間
+    float retractTimer = 0.0f;                          //巻取り経過時間
 
 
     [Header("LineRendererの設定")]
@@ -30,7 +32,6 @@ public class VRController : MonoBehaviour
     bool isRetracting = false;
     bool wasgripPressed = false;//前フレームの状態
     Vector3 grapplePoint;
-    public bool isMoving {  get; private set; }
 
 
     [Header("マーカ設定")]
@@ -39,19 +40,21 @@ public class VRController : MonoBehaviour
     [SerializeField] GameObject markerPrefab;//カーソルプレハブ
     private GameObject aimMarkerInstance;//照準用
     private GameObject hookMarkerInstance;//フック用
+    [Header("グリップクールタイム設定")]
+    [SerializeField] float gripCooldownTime = 1.0f; //クールタイムの長さ
+    float gripCoolddownTimer = 0.0f;                //クールタイム
 
     [Header("壁張り付き設定")]
     [SerializeField] float clingDuration = 5f;  //壁に留まれる時間
     bool isClinging = false;    //到達したか
     float clingTimer = 0f;      //落下タイマー
     GameObject grappledObject;  //命中したオブジェクト
-    
+
 
     [Header("重力設定")]
     [SerializeField] float gravity = -9.81f;
     [SerializeField] float maxFallSpeed = -50.0f;
     [SerializeField] float fallSpeed = 0f;
-
     bool useGravity = true;
 
     [Header("視点移動設定")]
@@ -94,15 +97,6 @@ public class VRController : MonoBehaviour
         }
         aimLine.enabled = true; // 初期は非表示
 
-        //if (lineVisual != null && markerPrefab != null)
-        //{
-        //    lineVisual.reticle = markerPrefab; // 終端にマーカーを出す
-        //}
-
-        //if (rayInteractor != null) rayInteractor.enabled = true;
-        //if (lineVisual != null) lineVisual.enabled = true;
-
-
         // マーカー生成（プレハブ未指定なら自動生成）
         if (markerPrefab == null)
         {
@@ -130,12 +124,36 @@ public class VRController : MonoBehaviour
 
     private void Update()
     {
+
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-        CameraRotation();
-        stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
         // グリップ先行中のブロック
         bool gripHeld = gripPressed && !triggerPressed;
+        bool canselPressed = HookMap.VR.Cancel.ReadValue<bool>();
+
+        CameraRotation();
+        stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
+
+        if(gripCoolddownTimer > 0.0f)
+        {
+            gripCoolddownTimer -= Time.deltaTime;
+        }
+
+        if (isRetracting)
+        {
+            retractTimer += Time.deltaTime;
+            if(canselPressed && retractTimer >= cancelAvailableTime)
+            {
+                Debug.Log("ワイヤー移動の無効化");
+                ReleaseHook();
+                return;
+            }
+        }
+        else
+        {//移動していないときのタイマーの無効化
+            retractTimer = 0.0f;
+        }
+
 
         // 張り付き中の処理 
         if (isClinging)
@@ -159,9 +177,10 @@ public class VRController : MonoBehaviour
                 ReleaseHook();
                 ShootHook();
             }
-            if (isGrappling && gripPressed&&!isRetracting)
+            if (isGrappling && gripPressed && !isRetracting && gripCoolddownTimer <= 0.0f)
             {
                 StartRetract();
+                gripCoolddownTimer = gripCooldownTime;
             }
             return; // 張り付き中は重力落下だけ止める
         }
@@ -173,9 +192,16 @@ public class VRController : MonoBehaviour
             {
                 if (!isGrappling && !isRetracting)
                     ShootHook();
-                if(isGrappling&& gripPressed && !isRetracting)
+                if (isGrappling && gripPressed && !isRetracting)
                 {
                     StartRetract();
+                }
+            }
+            else
+            {
+                if ((isGrappling || isRetracting) && isClinging)
+                {
+                    ReleaseHook();
                 }
             }
         }
@@ -271,7 +297,7 @@ public class VRController : MonoBehaviour
             hookLine.SetPosition(0, rightController.transform.position);
             hookLine.SetPosition(1, grapplePoint);
 
-            if(hookMarkerInstance != null)
+            if (hookMarkerInstance != null)
             {
                 hookMarkerInstance.SetActive(true);
                 hookMarkerInstance.transform.position = grapplePoint;
@@ -301,7 +327,7 @@ public class VRController : MonoBehaviour
         if (aimMarkerInstance != null)
         {
             aimMarkerInstance.SetActive(true);
-            aimMarkerInstance.transform.position = endPoint; 
+            aimMarkerInstance.transform.position = endPoint;
             aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
         }
     }
@@ -311,7 +337,6 @@ public class VRController : MonoBehaviour
         {
             Debug.Log("巻き取り開始");
             isRetracting = true;
-            isMoving = false;
             useGravity = true;
             currentSpeed = 0f;
         }
@@ -336,7 +361,7 @@ public class VRController : MonoBehaviour
         {
             Debug.Log("フック地点に到達");
             //到達時に特定のタグが付いている場合
-            if(grappledObject != null && grappledObject.CompareTag(wallTag))
+            if (grappledObject != null && grappledObject.CompareTag(wallTag))
             {
                 StartCling();
             }
@@ -353,10 +378,10 @@ public class VRController : MonoBehaviour
         Debug.Log("フックの解除");
         isGrappling = false;
         isRetracting = false;
-        isClinging = false;
-        useGravity = true;
+        retractTimer = 0.0f;
         currentSpeed = 0f;
         grappledObject = null;
+        useGravity = true;
 
         hookLine.enabled = false;
         aimLine.enabled = true;
@@ -379,5 +404,11 @@ public class VRController : MonoBehaviour
         // マーカー切り替え
         hookMarkerInstance.SetActive(false);
         aimMarkerInstance.SetActive(true);
+    }
+
+    public bool IsWireMoving()
+    {
+        //巻取り中の移動を無効化
+        return isRetracting;
     }
 }

@@ -29,8 +29,8 @@ public class VRMove : MonoBehaviour
 
     void Update()
     {
-        //if (!vrController.isMoving)
-        //    return;
+        if (vrController != null && vrController.IsWireMoving())
+            return;
         HandleMovement();
     }
 
