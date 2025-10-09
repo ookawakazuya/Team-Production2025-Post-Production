@@ -24,6 +24,8 @@ public class VRController : MonoBehaviour
 
 
     [Header("LineRendererの設定")]
+    [SerializeField] WireRenderer wireRenderer;
+    GameObject wireEndPoint;
     [SerializeField] LineRenderer hookLine;//ワイヤーレイ
     [SerializeField] LineRenderer aimLine;//照準用
 
@@ -63,10 +65,9 @@ public class VRController : MonoBehaviour
     bool stickPressed;
 
 
-
     float currentSpeed = 0f;//現在の移動速度
 
-    public VRHookActions HookMap;
+    VRHookActions HookMap;
 
     [SerializeField] string wallTag;
 
@@ -282,6 +283,18 @@ public class VRController : MonoBehaviour
             hookLine.enabled = true;
             aimMarkerInstance.SetActive(false);
             hookMarkerInstance.SetActive(true);
+
+            if(wireEndPoint == null)
+            {
+                wireEndPoint = new GameObject("WireEndPoint");
+            }
+            wireEndPoint.transform.position = grapplePoint;
+
+            if (wireRenderer != null) 
+            {
+                wireRenderer.SetPoints(rightController.transform, wireEndPoint.transform);
+            }
+
             Debug.Log($"フックショット命中:{hit.collider.name}");
         }
         else
@@ -304,7 +317,6 @@ public class VRController : MonoBehaviour
                 hookMarkerInstance.transform.rotation =
                     Quaternion.LookRotation((transform.position - grapplePoint).normalized);
             }
-
         }
     }
     void UpdateAimLine()
@@ -378,16 +390,23 @@ public class VRController : MonoBehaviour
         Debug.Log("フックの解除");
         isGrappling = false;
         isRetracting = false;
+        isClinging = false;
         retractTimer = 0.0f;
         currentSpeed = 0f;
         grappledObject = null;
-        useGravity = true;
 
         hookLine.enabled = false;
         aimLine.enabled = true;
 
         hookMarkerInstance.SetActive(false);
         aimMarkerInstance.SetActive(true);
+
+        if (wireRenderer != null)
+            wireRenderer.Clear();
+
+        if(wireEndPoint != null)
+            Destroy(wireEndPoint);
+        
     }
     void StartCling()
     {
