@@ -2873,11 +2873,13 @@ MonoBehaviour:
   maxMoveSpeed: 500
   acceleration: 50
   stopDistance: 1
+  cancelAvailableTime: 3
   hookLine: {fileID: 0}
   aimLine: {fileID: 0}
   rayInteractor: {fileID: 879927384}
   lineVisual: {fileID: 879927385}
   markerPrefab: {fileID: 0}
+  gripCooldownTime: 1
   clingDuration: 5
   gravity: -9.81
   maxFallSpeed: -50
