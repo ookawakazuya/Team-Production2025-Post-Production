@@ -11,7 +11,7 @@ public class VRMove : MonoBehaviour
 
     [SerializeField] VRController vrController;
     // êVÇµÇ¢ Input Action Asset
-    private VRHookActions vrActions;
+    VRHookActions vrActions;
 
     void Awake()
     {
