@@ -60,7 +60,7 @@ public class VRController : MonoBehaviour
     bool useGravity = true;
 
     [Header("視点移動設定")]
-    [SerializeField] float rotationSpeed = 90f; //回転速度
+    [SerializeField] public float rotationSpeed = 90f; //回転速度
     [SerializeField] Transform playerRoot;      //プレイヤーの角度
     bool stickPressed;
 
