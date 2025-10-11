@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
@@ -11,70 +11,70 @@ public class VRController : MonoBehaviour
     [SerializeField] GameObject rightController;
     [SerializeField] GameObject leftController;
 
-    [Header("ƒtƒbƒNŠÖ˜A")]
+    [Header("ãƒ•ãƒƒã‚¯é–¢é€£")]
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
 
-    [SerializeField] float maxWireLength = 300f;        //ƒŒƒC‚Ì’·‚³
-    [SerializeField] float maxMoveSpeed = 30f;          //Å‘å‘¬“x
-    [SerializeField] float acceleration = 20f;          //‰Á‘¬“x
-    [SerializeField] float stopDistance = 1f;           //’â~”»’è‚Ì‹——£
-    [SerializeField] float cancelAvailableTime = 3.0f;  //ƒLƒƒƒ“ƒZƒ‹‰Â”\ŠÔ
-    float retractTimer = 0.0f;                          //Šªæ‚èŒo‰ßŠÔ
+    [SerializeField] float maxWireLength = 300f; // ãƒ¬ã‚¤ã®æœ€å¤§è·é›¢
+    [SerializeField] float maxMoveSpeed = 30f;   // æœ€å¤§å·»ãå–ã‚Šé€Ÿåº¦
+    [SerializeField] float acceleration = 20f;   // åŠ é€Ÿåº¦
+    [SerializeField] float stopDistance = 1f;    // åœæ­¢åˆ¤å®šè·é›¢
 
+    [Header("LineRendererè¨­å®š")]
+    [SerializeField] LineRenderer hookLine; // ãƒ¯ã‚¤ãƒ¤ãƒ¼ãƒ¬ã‚¤
+    [SerializeField] LineRenderer aimLine;  // ç…§æº–ãƒ¬ã‚¤
 
-    [Header("LineRenderer‚Ìİ’è")]
-    [SerializeField] WireRenderer wireRenderer;
-    GameObject wireEndPoint;
-    [SerializeField] LineRenderer hookLine;//ƒƒCƒ„[ƒŒƒC
-    [SerializeField] LineRenderer aimLine;//Æ€—p
+    // ========================
+    // å†…éƒ¨çŠ¶æ…‹å¤‰æ•°
+    // ========================
+    bool isGrappling = false;   // ãƒ•ãƒƒã‚¯ç™ºå°„ä¸­
+    bool isRetracting = false;  // å·»ãå–ã‚Šä¸­
+    bool isClinging = false;    // å£å¼µã‚Šä»˜ãä¸­
+    Vector3 grapplePoint;       // å‘½ä¸­åœ°ç‚¹
 
+    bool inputLocked = false;    // ãƒ¯ã‚¤ãƒ¤ãƒ¼ç§»å‹•ä¸­ã®æ“ä½œãƒ­ãƒƒã‚¯
+    bool allowCameraOnly = false; // ã‚«ãƒ¡ãƒ©æ“ä½œã®ã¿è¨±å¯ãƒ•ãƒ©ã‚°
 
-    bool isGrappling = false;//ƒOƒŠƒbƒv‚ğ‰Ÿ‚µ‚½‚©
-    bool isRetracting = false;
-    bool wasgripPressed = false;//‘OƒtƒŒ[ƒ€‚Ìó‘Ô
-    Vector3 grapplePoint;
-
-
-    [Header("ƒ}[ƒJİ’è")]
+    [Header("ãƒãƒ¼ã‚«ãƒ¼è¨­å®š")]
     [SerializeField] XRRayInteractor rayInteractor;
     [SerializeField] XRInteractorLineVisual lineVisual;
-    [SerializeField] GameObject markerPrefab;//ƒJ[ƒ\ƒ‹ƒvƒŒƒnƒu
-    private GameObject aimMarkerInstance;//Æ€—p
-    private GameObject hookMarkerInstance;//ƒtƒbƒN—p
-    [Header("ƒOƒŠƒbƒvƒN[ƒ‹ƒ^ƒCƒ€İ’è")]
-    [SerializeField] float gripCooldownTime = 1.0f; //ƒN[ƒ‹ƒ^ƒCƒ€‚Ì’·‚³
-    float gripCoolddownTimer = 0.0f;                //ƒN[ƒ‹ƒ^ƒCƒ€
+    [SerializeField] GameObject markerPrefab;
+    private GameObject aimMarkerInstance;
+    private GameObject hookMarkerInstance;
 
-    [Header("•Ç’£‚è•t‚«İ’è")]
-    [SerializeField] float clingDuration = 5f;  //•Ç‚É—¯‚Ü‚ê‚éŠÔ
-    bool isClinging = false;    //“’B‚µ‚½‚©
-    float clingTimer = 0f;      //—‰ºƒ^ƒCƒ}[
-    GameObject grappledObject;  //–½’†‚µ‚½ƒIƒuƒWƒFƒNƒg
+    [Header("å£å¼µã‚Šä»˜ãè¨­å®š")]
+    [SerializeField] float clingDuration = 5f; // å£ã«ã¨ã©ã¾ã‚Œã‚‹æ™‚é–“
+    float clingTimer = 0f;
+    GameObject grappledObject;
 
-
-    [Header("d—Íİ’è")]
+    [Header("é‡åŠ›è¨­å®š")]
     [SerializeField] float gravity = -9.81f;
     [SerializeField] float maxFallSpeed = -50.0f;
     [SerializeField] float fallSpeed = 0f;
-    bool useGravity = true;
+    bool useGravity = true; // â† å¼µã‚Šä»˜ãä¸­ãªã©ã§ç„¡åŠ¹åŒ–ã™ã‚‹ç”¨
 
-    [Header("‹“_ˆÚ“®İ’è")]
-    [SerializeField] public float rotationSpeed = 90f; //‰ñ“]‘¬“x
-    [SerializeField] Transform playerRoot;      //ƒvƒŒƒCƒ„[‚ÌŠp“x
-    bool stickPressed;
+    [Header("è¦–ç‚¹ç§»å‹•è¨­å®š")]
+    [SerializeField] float rotationSpeed = 45f; // å›è»¢é€Ÿåº¦
+    [SerializeField] Transform playerRoot;      // ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®è§’åº¦æ“ä½œå¯¾è±¡
 
+    [Header("ã‚¿ã‚°è¨­å®š")]
+    [SerializeField] string wallTag = "Wall"; // å£ã‚¿ã‚°è¨­å®š
 
-    float currentSpeed = 0f;//Œ»İ‚ÌˆÚ“®‘¬“x
+    float currentSpeed = 0f; // ç¾åœ¨ã®å·»ãå–ã‚Šé€Ÿåº¦
 
-    VRHookActions HookMap;
+    public bool IsRetracting => isRetracting;
+    public bool IsClinging => isClinging;
 
-    [SerializeField] string wallTag;
+    public VRHookActions HookMap;
 
+    // ==============================
+    // åˆæœŸåŒ–
+    // ==============================
     void Awake()
     {
         HookMap = new VRHookActions();
-        // LineRenderer‚Ì‰Šúİ’èiƒCƒ“ƒXƒyƒNƒ^‚ÅƒZƒbƒg‚µ‚Ä‚¢‚È‚¢ê‡A©“®’Ç‰Áj
+
+        // LineRendererã®è‡ªå‹•è¨­å®š
         if (hookLine == null)
         {
             hookLine = gameObject.AddComponent<LineRenderer>();
@@ -84,7 +84,8 @@ public class VRController : MonoBehaviour
             hookLine.startColor = Color.white;
             hookLine.endColor = Color.white;
         }
-        hookLine.enabled = false; // ‰Šú‚Í”ñ•\¦
+        hookLine.enabled = false;
+
         if (aimLine == null)
         {
             GameObject aimObj = new GameObject("AimLine");
@@ -96,9 +97,9 @@ public class VRController : MonoBehaviour
             aimLine.startColor = Color.green;
             aimLine.endColor = Color.green;
         }
-        aimLine.enabled = true; // ‰Šú‚Í”ñ•\¦
+        aimLine.enabled = true;
 
-        // ƒ}[ƒJ[¶¬iƒvƒŒƒnƒu–¢w’è‚È‚ç©“®¶¬j
+        // ãƒãƒ¼ã‚«ãƒ¼ç”Ÿæˆ
         if (markerPrefab == null)
         {
             markerPrefab = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -108,326 +109,266 @@ public class VRController : MonoBehaviour
             renderer.material = new Material(Shader.Find("Unlit/Color"));
             renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
         }
-
-        // Aim —pƒ}[ƒJ[
         aimMarkerInstance = Instantiate(markerPrefab);
         aimMarkerInstance.name = "AimMarker";
         aimMarkerInstance.SetActive(true);
 
-        // Hook —pƒ}[ƒJ[
         hookMarkerInstance = Instantiate(markerPrefab);
         hookMarkerInstance.name = "HookMarker";
         hookMarkerInstance.SetActive(false);
-
     }
+
     private void OnEnable() => HookMap.Enable();
-    void OnDisable() => HookMap.Disable();
+    private void OnDisable() => HookMap.Disable();
 
-    private void Update()
+    // ==============================
+    // æ›´æ–°å‡¦ç†
+    // ==============================
+    void Update()
     {
+        // ğŸ¥ å¸¸æ™‚è¦–ç‚¹æ“ä½œã¯æœ‰åŠ¹
+        CameraRotation();
 
+        // ğŸ® å…¥åŠ›å–å¾—
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-        // ƒOƒŠƒbƒvæs’†‚ÌƒuƒƒbƒN
-        bool gripHeld = gripPressed && !triggerPressed;
-        bool canselPressed = HookMap.VR.Cancel.ReadValue<bool>();
+        bool cancelPressed = HookMap.VR.Cancel.ReadValue<float>() > 0.5f;
 
-        CameraRotation();
-        stickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
-
-        if(gripCoolddownTimer > 0.0f)
+        // ===================================================
+        // ğŸš« å…¥åŠ›ãƒ­ãƒƒã‚¯ï¼šãƒ¯ã‚¤ãƒ¤ãƒ¼ç§»å‹•ä¸­ã¯ä»–ã®æ“ä½œã‚’ãƒ–ãƒ­ãƒƒã‚¯
+        // ===================================================
+        if (inputLocked)
         {
-            gripCoolddownTimer -= Time.deltaTime;
-        }
-
-        if (isRetracting)
-        {
-            retractTimer += Time.deltaTime;
-            if(canselPressed && retractTimer >= cancelAvailableTime)
+            if (isRetracting)
             {
-                Debug.Log("ƒƒCƒ„[ˆÚ“®‚Ì–³Œø‰»");
-                ReleaseHook();
-                return;
-            }
-        }
-        else
-        {//ˆÚ“®‚µ‚Ä‚¢‚È‚¢‚Æ‚«‚Ìƒ^ƒCƒ}[‚Ì–³Œø‰»
-            retractTimer = 0.0f;
-        }
-
-
-        // ’£‚è•t‚«’†‚Ìˆ— 
-        if (isClinging)
-        {
-            clingTimer -= Time.deltaTime;
-            Debug.Log(clingTimer);
-            if (clingTimer <= 0f)
-            {
-                Debug.Log("’£‚è•t‚«‰ğœ¨—‰ºŠJn");
-                isClinging = false;
-                ReleaseHook();
-            }
-
-            // ’£‚è•t‚«’†‚àÆ€ƒŒƒCíXV
-            UpdateAimLine();
-
-            //  ’£‚è•t‚«’†‚Å‚àƒtƒbƒNËo‚ğ‹–‰ÂiƒOƒŠƒbƒvæs‚Í–³Œøj
-            if (triggerPressed && !gripHeld)
-            {
-                isClinging = false;
-                ReleaseHook();
-                ShootHook();
-            }
-            if (isGrappling && gripPressed && !isRetracting && gripCoolddownTimer <= 0.0f)
-            {
-                StartRetract();
-                gripCoolddownTimer = gripCooldownTime;
-            }
-            return; // ’£‚è•t‚«’†‚Íd—Í—‰º‚¾‚¯~‚ß‚é
-        }
-
-        //  ’Êí‚Ìˆ— 
-        if (!gripHeld)
-        {
-            if (triggerPressed)
-            {
-                if (!isGrappling && !isRetracting)
-                    ShootHook();
-                if (isGrappling && gripPressed && !isRetracting)
-                {
-                    StartRetract();
-                }
+                AccelerateTowardsHook(); // â† ãƒˆãƒªã‚¬ãƒ¼æ”¾ã—ã¦ã‚‚å·»ãå–ã‚Šç¶™ç¶š
+                UpdateHookLine();
             }
             else
             {
-                if ((isGrappling || isRetracting) && isClinging)
-                {
-                    ReleaseHook();
-                }
+                UpdateAimLine();
             }
+            return; // ä»–ã®å…¥åŠ›ã¯ä¸€åˆ‡å‡¦ç†ã—ãªã„
         }
 
-        // ’ÊíˆÚ“®^—‰ºˆ—
+        // ===================================================
+        // ğŸ§± å£å¼µã‚Šä»˜ãå‡¦ç†
+        // ===================================================
+        if (isClinging)
+        {
+            clingTimer -= Time.deltaTime;
+            if (clingTimer <= 0f)
+            {
+                Debug.Log("å¼µã‚Šä»˜ãè§£é™¤ â†’ è½ä¸‹é–‹å§‹");
+                isClinging = false;
+                useGravity = true;
+                ReleaseHook();
+            }
+
+            // å£å¼µã‚Šä»˜ãä¸­ã§ã‚‚ã€Œãƒˆãƒªã‚¬ãƒ¼â†’ã‚°ãƒªãƒƒãƒ—ã€ã§å†ç§»å‹•å¯èƒ½
+            if (triggerPressed && gripPressed && !isRetracting)
+            {
+                StartRetract();
+            }
+
+            UpdateAimLine();
+            return;
+        }
+
+        // ===================================================
+        // ğŸª é€šå¸¸ã®ãƒ•ãƒƒã‚¯å‡¦ç†
+        // ===================================================
+        if (triggerPressed)
+        {
+            if (!isGrappling && !isRetracting)
+                ShootHook();
+
+            if (isGrappling && gripPressed && !isRetracting)
+                StartRetract(); // ãƒˆãƒªã‚¬ãƒ¼â†’ã‚°ãƒªãƒƒãƒ—ã§ç§»å‹•é–‹å§‹
+        }
+        else
+        {
+            // ãƒˆãƒªã‚¬ãƒ¼è§£é™¤ã§ãƒ•ãƒƒã‚¯ã‚’è§£é™¤ï¼ˆå¼µã‚Šä»˜ãæ™‚ä»¥å¤–ï¼‰
+            if ((isGrappling || isRetracting) && !isClinging)
+                ReleaseHook();
+        }
+
+        // ===================================================
+        // ğŸ§â€â™‚ï¸ é€šå¸¸ç§»å‹•ãƒ»é‡åŠ›
+        // ===================================================
         if (isRetracting)
             AccelerateTowardsHook();
         else
             ApplyGravity();
 
-        // ƒŒƒC•`‰æ
-        if (isGrappling) UpdateHookLine();
-        else UpdateAimLine();
+        // ===================================================
+        // ğŸ¯ ãƒ¬ã‚¤æç”»æ›´æ–°
+        // ===================================================
+        if (isGrappling)
+            UpdateHookLine();
+        else
+            UpdateAimLine();
     }
 
+    // ==============================
+    // ğŸ§­ è¦–ç‚¹å›è»¢
+    // ==============================
     void CameraRotation()
     {
-        Vector2 rightStickInput = HookMap.VR.RightStick.ReadValue<Vector2>();
-
-        // ‰¡•ûŒü‚É“|‚µ‚Ä‚¢‚½‚çƒJƒƒ‰‰ñ“]
-        if (Mathf.Abs(rightStickInput.x) > 0.2f)
-        {
-            Debug.Log($"‰¡•ûŒü‚Ì“ü—Í:{rightStickInput}");
-            playerRoot.Rotate(Vector3.up * rightStickInput.x * rotationSpeed * Time.deltaTime);
-
-        }
-
+        Vector2 stick = HookMap.VR.RightStick.ReadValue<Vector2>();
         bool stickPressed = HookMap.VR.RightStickPress.ReadValue<bool>();
+
+        if (Mathf.Abs(stick.x) > 0.2f)
+            playerRoot.Rotate(Vector3.up * stick.x * rotationSpeed * Time.deltaTime);
+
         if (stickPressed)
         {
-            Debug.Log("Y²‚ğƒŠƒZƒbƒgI");
-            Vector3 forward = mainCamera.transform.forward;
-            forward.y = 0f; // ƒJƒƒ‰‚ÌŒü‚«‚É‡‚í‚¹‚ÄY²‚ğC³
-            if (forward.sqrMagnitude > 0.01f)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(forward);
-                playerRoot.rotation = targetRotation; // ƒJƒƒ‰‚ÌŒü‚«‚É‡‚í‚¹‚Ä‰ñ“]
-            }
+            Vector3 euler = playerRoot.eulerAngles;
+            euler.y = 0f;
+            playerRoot.eulerAngles = euler;
         }
     }
 
-
-    void ApplyGravity()
+    // ==============================
+    // ğŸ§² å·»ãå–ã‚Šé–‹å§‹
+    // ==============================
+    void StartRetract()
     {
-        if (!useGravity) return;
+        Debug.Log("å·»ãå–ã‚Šé–‹å§‹");
+        isRetracting = true;
+        isGrappling = true;
+        useGravity = false;
+        currentSpeed = 0f;
 
-        if (characterController.isGrounded)
-        {
-            fallSpeed = 0f;
-        }
-        else
-        {
-            fallSpeed += gravity * Time.deltaTime;//©—R—‰º‰Á‘¬
-            fallSpeed = Mathf.Max(fallSpeed, maxFallSpeed);//Å‘å—‰º‘¬“x§ŒÀ
-            characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
-        }
+        inputLocked = true; // â† â˜…ç§»å‹•ä¸­ã¯æ“ä½œãƒ­ãƒƒã‚¯ï¼ˆè¦–ç‚¹ã®ã¿è¨±å¯ï¼‰
+        allowCameraOnly = true;
     }
 
-
-
+    // ==============================
+    // ğŸª ãƒ•ãƒƒã‚¯å°„å‡º
+    // ==============================
     void ShootHook()
     {
-        if (isClinging)
-        {
-            isClinging = false;
-            clingTimer = 0f;
-        }
-
-        Debug.Log("ƒtƒbƒNËo");
+        Debug.Log("ãƒ•ãƒƒã‚¯å°„å‡º");
         Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             grapplePoint = hit.point;
-            grappledObject = hit.collider.gameObject;//–½’†‚µ‚½ƒIƒuƒWƒFƒNƒg‚Ì•Û‘¶
+            grappledObject = hit.collider.gameObject;
             isGrappling = true;
-            // ƒ‰ƒCƒ“ŠJn
+
             aimLine.enabled = false;
             hookLine.enabled = true;
             aimMarkerInstance.SetActive(false);
             hookMarkerInstance.SetActive(true);
-
-            if(wireEndPoint == null)
-            {
-                wireEndPoint = new GameObject("WireEndPoint");
-            }
-            wireEndPoint.transform.position = grapplePoint;
-
-            if (wireRenderer != null) 
-            {
-                wireRenderer.SetPoints(rightController.transform, wireEndPoint.transform);
-            }
-
-            Debug.Log($"ƒtƒbƒNƒVƒ‡ƒbƒg–½’†:{hit.collider.name}");
+            Debug.Log($"å‘½ä¸­: {hit.collider.name}");
         }
         else
         {
-            Debug.Log("ƒtƒbƒN–¢–¾’†");
+            Debug.Log("æœªå‘½ä¸­");
         }
     }
 
-    void UpdateHookLine()
-    {
-        if (hookLine.enabled)
-        {
-            hookLine.SetPosition(0, rightController.transform.position);
-            hookLine.SetPosition(1, grapplePoint);
-
-            if (hookMarkerInstance != null)
-            {
-                hookMarkerInstance.SetActive(true);
-                hookMarkerInstance.transform.position = grapplePoint;
-                hookMarkerInstance.transform.rotation =
-                    Quaternion.LookRotation((transform.position - grapplePoint).normalized);
-            }
-        }
-    }
-    void UpdateAimLine()
-    {
-        Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
-        Vector3 endPoint = ray.origin + ray.direction * maxWireLength;
-        Vector3 normal = -ray.direction;
-
-        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
-        {
-            endPoint = hit.point; // ƒqƒbƒg‚µ‚½‚ç‚»‚±‚Ü‚Å
-            normal = hit.normal;
-        }
-
-        // ƒŒƒC‚Ì•`‰æi‚à‚µXRInteractorLineVisual‚ğg‚¤‚È‚ç•s—vj
-        aimLine.SetPosition(0, rightController.transform.position);
-        aimLine.SetPosition(1, endPoint);
-
-        // ƒ}[ƒJ[XV
-        if (aimMarkerInstance != null)
-        {
-            aimMarkerInstance.SetActive(true);
-            aimMarkerInstance.transform.position = endPoint;
-            aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
-        }
-    }
-    void StartRetract()
-    {
-        if (isGrappling)
-        {
-            Debug.Log("Šª‚«æ‚èŠJn");
-            isRetracting = true;
-            useGravity = true;
-            currentSpeed = 0f;
-        }
-    }
-
+    // ==============================
+    // ğŸš€ å·»ãå–ã‚Šå‡¦ç†
+    // ==============================
     void AccelerateTowardsHook()
     {
-        if (isClinging) return;
         Vector3 direction = grapplePoint - transform.position;
         float distance = direction.magnitude;
 
         if (distance > stopDistance)
         {
-            //‰Á‘¬“x‚ÅƒXƒs[ƒhƒAƒbƒv
             currentSpeed += acceleration * Time.deltaTime;
-            //Å‘å‘¬“x§ŒÀ
             currentSpeed = Mathf.Min(currentSpeed, maxMoveSpeed);
-
             characterController.Move(direction.normalized * currentSpeed * Time.deltaTime);
         }
         else
         {
-            Debug.Log("ƒtƒbƒN’n“_‚É“’B");
-            //“’B‚É“Á’è‚Ìƒ^ƒO‚ª•t‚¢‚Ä‚¢‚éê‡
             if (grappledObject != null && grappledObject.CompareTag(wallTag))
-            {
                 StartCling();
-            }
             else
-            {   //‚»‚êˆÈŠO
-                isRetracting = false;
                 ReleaseHook();
-            }
         }
     }
 
+    // ==============================
+    // ğŸ§â€â™‚ï¸ é‡åŠ›å‡¦ç†
+    // ==============================
+    void ApplyGravity()
+    {
+        if (!useGravity) return; // â† â˜…å¼µã‚Šä»˜ãä¸­ã¯ç„¡åŠ¹åŒ–
+        if (characterController.isGrounded)
+            fallSpeed = 0f;
+        else
+        {
+            fallSpeed += gravity * Time.deltaTime;
+            fallSpeed = Mathf.Max(fallSpeed, maxFallSpeed);
+            characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
+        }
+    }
+
+    // ==============================
+    // ğŸ¯ ãƒ¬ã‚¤æ›´æ–°ç³»
+    // ==============================
+    void UpdateHookLine()
+    {
+        hookLine.SetPosition(0, rightController.transform.position);
+        hookLine.SetPosition(1, grapplePoint);
+        hookMarkerInstance.transform.position = grapplePoint;
+    }
+
+    void UpdateAimLine()
+    {
+        Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
+        Vector3 endPoint = ray.origin + ray.direction * maxWireLength;
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+            endPoint = hit.point;
+
+        aimLine.SetPosition(0, ray.origin);
+        aimLine.SetPosition(1, endPoint);
+        aimMarkerInstance.transform.position = endPoint;
+    }
+
+    // ==============================
+    // ğŸ§± å£å¼µã‚Šä»˜ã
+    // ==============================
+    void StartCling()
+    {
+        Debug.Log("å£ã«å¼µã‚Šä»˜ã„ãŸ");
+        isRetracting = false;
+        isGrappling = false;
+        isClinging = true;
+        useGravity = false;
+        clingTimer = clingDuration;
+
+        // ãƒ¬ã‚¤åˆ‡æ›¿
+        hookLine.enabled = false;
+        aimLine.enabled = true;
+        hookMarkerInstance.SetActive(false);
+        aimMarkerInstance.SetActive(true);
+
+        // æ“ä½œãƒ­ãƒƒã‚¯è§£é™¤
+        inputLocked = false;
+        allowCameraOnly = false;
+    }
+
+    // ==============================
+    // ğŸ§¹ ãƒ•ãƒƒã‚¯è§£é™¤
+    // ==============================
     void ReleaseHook()
     {
-        Debug.Log("ƒtƒbƒN‚Ì‰ğœ");
+        Debug.Log("ãƒ•ãƒƒã‚¯è§£é™¤");
         isGrappling = false;
         isRetracting = false;
-        isClinging = false;
-        retractTimer = 0.0f;
-        currentSpeed = 0f;
-        grappledObject = null;
+        useGravity = true;
+
+        inputLocked = false;
+        allowCameraOnly = false;
 
         hookLine.enabled = false;
         aimLine.enabled = true;
-
         hookMarkerInstance.SetActive(false);
         aimMarkerInstance.SetActive(true);
-
-        if (wireRenderer != null)
-            wireRenderer.Clear();
-
-        if(wireEndPoint != null)
-            Destroy(wireEndPoint);
-        
-    }
-    void StartCling()
-    {
-        Debug.Log("•Ç‚É’£‚è•t‚¢‚½");
-        isRetracting = false;
-        isClinging = true;
-        clingTimer = clingDuration;
-        useGravity = false;//d—Í‚Ì–³Œø‰»
-
-        //  ƒŒƒCØ‚è‘Ö‚¦ 
-        hookLine.enabled = false;          // ƒtƒbƒNƒŒƒC”ñ•\¦
-        aimLine.enabled = true;            // Æ€ƒŒƒCÄ•\¦
-
-        // ƒ}[ƒJ[Ø‚è‘Ö‚¦
-        hookMarkerInstance.SetActive(false);
-        aimMarkerInstance.SetActive(true);
-    }
-
-    public bool IsWireMoving()
-    {
-        //Šªæ‚è’†‚ÌˆÚ“®‚ğ–³Œø‰»
-        return isRetracting;
     }
 }

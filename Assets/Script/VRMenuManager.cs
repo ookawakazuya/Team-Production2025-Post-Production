@@ -61,10 +61,10 @@ public class VRMenuManager : MonoBehaviour
         if (rightHandRay != null)
             rightHandRay.enabled = isMenuOpen;
 
-        if (isMenuOpen)
-        {
-            rotationSpeedSlider.value = vrController.rotationSpeed;
-        }
+        //if (isMenuOpen)
+        //{
+        //    rotationSpeedSlider.value = vrController.rotationSpeed;
+        //}
     }
 
     public void OnMasterVolumeChanged(float value)
@@ -86,13 +86,13 @@ public class VRMenuManager : MonoBehaviour
     {
         if (voiceSource) voiceSource.volume = value / 100.0f;
     }
-    public void OnRotationSpeedChanged(float value)
-    {
-        if(vrController != null)
-        {
-            vrController.rotationSpeed = value;
-        }
-    }
+    //public void OnRotationSpeedChanged(float value)
+    //{
+    //    if(vrController != null)
+    //    {
+    //        vrController.rotationSpeed = value;
+    //    }
+    //}
     public void OnInstructionToggle()
     {
         instructionImage.gameObject.SetActive(!instructionImage.gameObject.activeSelf);

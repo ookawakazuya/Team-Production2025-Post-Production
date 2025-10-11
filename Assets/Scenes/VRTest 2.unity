@@ -2870,16 +2870,14 @@ MonoBehaviour:
   mainCamera: {fileID: 660910727}
   characterController: {fileID: 764344510}
   maxWireLength: 50
-  maxMoveSpeed: 500
-  acceleration: 50
+  maxMoveSpeed: 40
+  acceleration: 5
   stopDistance: 1
-  cancelAvailableTime: 3
   hookLine: {fileID: 0}
   aimLine: {fileID: 0}
-  rayInteractor: {fileID: 879927384}
-  lineVisual: {fileID: 879927385}
+  rayInteractor: {fileID: 0}
+  lineVisual: {fileID: 0}
   markerPrefab: {fileID: 0}
-  gripCooldownTime: 1
   clingDuration: 5
   gravity: -9.81
   maxFallSpeed: -50
