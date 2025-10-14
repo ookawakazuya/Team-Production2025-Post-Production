@@ -23,10 +23,8 @@ public class VRController : MonoBehaviour
     [Header("LineRenderer設定")]
     [SerializeField] LineRenderer hookLine; // ワイヤーレイ
     [SerializeField] LineRenderer aimLine;  // 照準レイ
-
-    // ========================
     // 内部状態変数
-    // ========================
+
     bool isGrappling = false;   // フック発射中
     bool isRetracting = false;  // 巻き取り中
     bool isClinging = false;    // 壁張り付き中
@@ -67,9 +65,7 @@ public class VRController : MonoBehaviour
 
     public VRHookActions HookMap;
 
-    // ==============================
     // 初期化
-    // ==============================
     void Awake()
     {
         HookMap = new VRHookActions();
@@ -121,22 +117,18 @@ public class VRController : MonoBehaviour
     private void OnEnable() => HookMap.Enable();
     private void OnDisable() => HookMap.Disable();
 
-    // ==============================
     // 更新処理
-    // ==============================
     void Update()
     {
-        // 🎥 常時視点操作は有効
+        //  常時視点操作は有効
         CameraRotation();
 
-        // 🎮 入力取得
+        //  入力取得
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
         bool cancelPressed = HookMap.VR.Cancel.ReadValue<float>() > 0.5f;
 
-        // ===================================================
-        // 🚫 入力ロック：ワイヤー移動中は他の操作をブロック
-        // ===================================================
+        //  入力ロック：ワイヤー移動中は他の操作をブロック
         if (inputLocked)
         {
             if (isRetracting)
@@ -151,11 +143,26 @@ public class VRController : MonoBehaviour
             return; // 他の入力は一切処理しない
         }
 
-        // ===================================================
-        // 🧱 壁張り付き処理
-        // ===================================================
+        // 壁張り付き処理
         if (isClinging)
         {
+            
+            if (isGrappling && gripPressed && !isRetracting)
+            {
+                Debug.Log("張り付き：移動開始");
+                isClinging = false;
+                isGrappling = false;
+                useGravity = true;
+                StartRetract();
+                return;
+            }
+            if (triggerPressed && !isRetracting && isGrappling)
+            {
+                Debug.Log("張り付き　フック解除");
+                isClinging = false;                   
+                ShootHook();
+                return;
+            }
             clingTimer -= Time.deltaTime;
             if (clingTimer <= 0f)
             {
@@ -163,21 +170,16 @@ public class VRController : MonoBehaviour
                 isClinging = false;
                 useGravity = true;
                 ReleaseHook();
-            }
-
-            // 壁張り付き中でも「トリガー→グリップ」で再移動可能
-            if (triggerPressed && gripPressed && !isRetracting)
-            {
-                StartRetract();
+                return;
             }
 
             UpdateAimLine();
+
             return;
         }
 
-        // ===================================================
-        // 🪝 通常のフック処理
-        // ===================================================
+        //  通常のフック処理
+
         if (triggerPressed)
         {
             if (!isGrappling && !isRetracting)
@@ -193,26 +195,21 @@ public class VRController : MonoBehaviour
                 ReleaseHook();
         }
 
-        // ===================================================
-        // 🧍‍♂️ 通常移動・重力
-        // ===================================================
+        //  通常移動・重力
         if (isRetracting)
             AccelerateTowardsHook();
         else
             ApplyGravity();
 
-        // ===================================================
-        // 🎯 レイ描画更新
-        // ===================================================
+        //  レイ描画更新
+
         if (isGrappling)
             UpdateHookLine();
         else
             UpdateAimLine();
     }
 
-    // ==============================
-    // 🧭 視点回転
-    // ==============================
+    //  視点回転
     void CameraRotation()
     {
         Vector2 stick = HookMap.VR.RightStick.ReadValue<Vector2>();
@@ -229,9 +226,8 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // ==============================
-    // 🧲 巻き取り開始
-    // ==============================
+
+    //  巻き取り開始
     void StartRetract()
     {
         Debug.Log("巻き取り開始");
@@ -240,13 +236,11 @@ public class VRController : MonoBehaviour
         useGravity = false;
         currentSpeed = 0f;
 
-        inputLocked = true; // ← ★移動中は操作ロック（視点のみ許可）
+        inputLocked = true; // ← 移動中は操作ロック（視点のみ許可）
         allowCameraOnly = true;
     }
 
-    // ==============================
-    // 🪝 フック射出
-    // ==============================
+    //  フック射出
     void ShootHook()
     {
         Debug.Log("フック射出");
@@ -269,9 +263,7 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // ==============================
-    // 🚀 巻き取り処理
-    // ==============================
+    //  巻き取り処理
     void AccelerateTowardsHook()
     {
         Vector3 direction = grapplePoint - transform.position;
@@ -292,9 +284,7 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // ==============================
-    // 🧍‍♂️ 重力処理
-    // ==============================
+    //  重力処理
     void ApplyGravity()
     {
         if (!useGravity) return; // ← ★張り付き中は無効化
@@ -308,9 +298,7 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // ==============================
-    // 🎯 レイ更新系
-    // ==============================
+    //  レイ更新系
     void UpdateHookLine()
     {
         hookLine.SetPosition(0, rightController.transform.position);
@@ -330,14 +318,12 @@ public class VRController : MonoBehaviour
         aimMarkerInstance.transform.position = endPoint;
     }
 
-    // ==============================
-    // 🧱 壁張り付き
-    // ==============================
+    //  壁張り付き
     void StartCling()
     {
         Debug.Log("壁に張り付いた");
         isRetracting = false;
-        isGrappling = false;
+        isGrappling = true;
         isClinging = true;
         useGravity = false;
         clingTimer = clingDuration;
@@ -353,9 +339,7 @@ public class VRController : MonoBehaviour
         allowCameraOnly = false;
     }
 
-    // ==============================
-    // 🧹 フック解除
-    // ==============================
+    //  フック解除
     void ReleaseHook()
     {
         Debug.Log("フック解除");
