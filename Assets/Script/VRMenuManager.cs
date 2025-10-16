@@ -6,6 +6,11 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class VRMenuManager : MonoBehaviour
 {
+    [Header("UI Panels")]
+    public GameObject mainMenuPanel;
+    public GameObject optionPanel;
+    public GameObject controlGuidePanel;
+
     [Header("UI Elements")]
     [SerializeField] CanvasGroup menuCanvas;
     [SerializeField] XRRayInteractor rightHandRay;
@@ -13,7 +18,7 @@ public class VRMenuManager : MonoBehaviour
     [SerializeField] Slider bgmSlider;          //BGM
     [SerializeField] Slider sfxsSlider;         //効果音
     [SerializeField] Slider voiceSlider;        //音声
-    [SerializeField] Slider rotationSpeedSlider;
+    [SerializeField] Slider rotationSpeedSlider;//視点回転速度
     [SerializeField] Button instructionButton;
     [SerializeField] Button restartButton;
     [SerializeField] Button titleButton;
@@ -34,18 +39,32 @@ public class VRMenuManager : MonoBehaviour
     private void Awake()
     {
         inputActions = new VRHookActions();
+        // 初期非表示設定
         menuCanvas.alpha = 0f;
         menuCanvas.interactable = false;
         menuCanvas.blocksRaycasts = false;
         instructionImage.gameObject.SetActive(false);
+
+        //スライダー設定
+        if (masterSlider) masterSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+        if (bgmSlider) bgmSlider.onValueChanged.AddListener(OnBGMChanged);
+        if (sfxsSlider) sfxsSlider.onValueChanged.AddListener(OnSFXChanged);
+        if (voiceSlider) voiceSlider.onValueChanged.AddListener(OnVoiceChanged);
+        if (rotationSpeedSlider) rotationSpeedSlider.onValueChanged.AddListener(OnRotationSpeedChanged);
+
+        // ボタンイベント登録
+        if (instructionButton) instructionButton.onClick.AddListener(OnInstructionToggle);
+        if (restartButton) restartButton.onClick.AddListener(OnRestartStage);
+        if (titleButton) titleButton.onClick.AddListener(OnGoToTitle);
+
     }
 
-     void OnEnable() => inputActions.Enable();
+    void OnEnable() => inputActions.Enable();
      void OnDisable() => inputActions.Disable();
 
     void Update()
     {
-        if (inputActions.VR.Move.triggered)
+        if (inputActions.Menu.menuButton.triggered)
         {
             ToggleMenu();
         }
@@ -61,10 +80,14 @@ public class VRMenuManager : MonoBehaviour
         if (rightHandRay != null)
             rightHandRay.enabled = isMenuOpen;
 
-        //if (isMenuOpen)
-        //{
-        //    rotationSpeedSlider.value = vrController.rotationSpeed;
-        //}
+        // メニューを開いた時に現在値をUIに反映
+        if (isMenuOpen && vrController != null && rotationSpeedSlider != null)
+        {
+            rotationSpeedSlider.value = vrController.rotationSpeed;
+        }
+
+        // ゲームの一時停止
+        Time.timeScale = isMenuOpen ? 0f : 1f;
     }
 
     public void OnMasterVolumeChanged(float value)
@@ -86,13 +109,14 @@ public class VRMenuManager : MonoBehaviour
     {
         if (voiceSource) voiceSource.volume = value / 100.0f;
     }
-    //public void OnRotationSpeedChanged(float value)
-    //{
-    //    if(vrController != null)
-    //    {
-    //        vrController.rotationSpeed = value;
-    //    }
-    //}
+    public void OnRotationSpeedChanged(float value)
+    {
+        if (vrController != null)
+        {
+            vrController.rotationSpeed = value;
+        }
+    }
+
     public void OnInstructionToggle()
     {
         instructionImage.gameObject.SetActive(!instructionImage.gameObject.activeSelf);

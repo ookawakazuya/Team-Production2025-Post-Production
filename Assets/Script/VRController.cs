@@ -52,7 +52,7 @@ public class VRController : MonoBehaviour
     bool useGravity = true; // ← 張り付き中などで無効化する用
 
     [Header("視点移動設定")]
-    [SerializeField] float rotationSpeed = 45f; // 回転速度
+    [SerializeField] public float  rotationSpeed = 45f; // 回転速度
     [SerializeField] Transform playerRoot;      // プレイヤーの角度操作対象
 
     [Header("タグ設定")]
