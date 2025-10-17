@@ -7,9 +7,9 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 public class VRMenuManager : MonoBehaviour
 {
     [Header("UI Panels")]
-    public GameObject mainMenuPanel;
-    public GameObject optionPanel;
-    public GameObject controlGuidePanel;
+    public GameObject mainMenuPanel;            //メインメニューオブジェクト
+    public GameObject optionPanel;              //オプションパネルオブジェクト
+    public GameObject controlGuidePanel;        //コントロールパネルオブジェクト
 
     [Header("UI Elements")]
     [SerializeField] CanvasGroup menuCanvas;
@@ -33,6 +33,11 @@ public class VRMenuManager : MonoBehaviour
     [Header("VR Input")]
     [SerializeField] VRController vrController;
     public VRHookActions inputActions;
+
+
+    [Header("Menu Position")]
+    [SerializeField] Transform playerCamera;    //カメラの指定
+    [SerializeField] float menuDistance = 2.0f; //表示距離
 
     bool isMenuOpen = false;
 
@@ -59,17 +64,15 @@ public class VRMenuManager : MonoBehaviour
 
     }
 
-    void OnEnable() => inputActions.Enable();
-     void OnDisable() => inputActions.Disable();
-
-    void Update()
-    {
-        if (inputActions.Menu.menuButton.triggered)
-        {
-            ToggleMenu();
-        }
+    void OnEnable() { 
+        inputActions.Enable();
+        inputActions.Menu.menuButton.performed += ctx => ToggleMenu();
     }
-
+    void OnDisable()
+    {
+        inputActions.Disable();
+        inputActions.Menu.menuButton.performed -= ctx => ToggleMenu();
+    }
     void ToggleMenu()
     {
         isMenuOpen = !isMenuOpen;
@@ -81,19 +84,24 @@ public class VRMenuManager : MonoBehaviour
             rightHandRay.enabled = isMenuOpen;
 
         // メニューを開いた時に現在値をUIに反映
-        if (isMenuOpen && vrController != null && rotationSpeedSlider != null)
+        if (isMenuOpen && playerCamera != null)
         {
-            rotationSpeedSlider.value = vrController.rotationSpeed;
+            Vector3 fowardPos = playerCamera.position + playerCamera.forward * menuDistance;
+            menuCanvas.transform.position = fowardPos;
+            menuCanvas.transform.rotation = Quaternion.LookRotation(
+                menuCanvas.transform.position - playerCamera.position);
         }
+
+        if (isMenuOpen && vrController != null && rotationSpeedSlider != null)
+            rotationSpeedSlider.value = vrController.rotationSpeed;
 
         // ゲームの一時停止
         Time.timeScale = isMenuOpen ? 0f : 1f;
+        Debug.Log(isMenuOpen ? "メニューオープン" : "メニュークローズ");
     }
 
     public void OnMasterVolumeChanged(float value)
-    {
-        AudioListener.volume = value / 100.0f;
-    }
+        =>AudioListener.volume = value / 100.0f;
 
     public void OnBGMChanged(float value)
     {
