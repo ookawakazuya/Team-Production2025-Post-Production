@@ -7,6 +7,8 @@ using static VRHookActions;
 
 public class VRController : MonoBehaviour
 {
+    [SerializeField] private VRMenuManager menuManager;
+
     [Header("XR Controllers")]
     [SerializeField] GameObject rightController;
     [SerializeField] GameObject leftController;
@@ -64,11 +66,17 @@ public class VRController : MonoBehaviour
     public bool IsClinging => isClinging;
 
     public VRHookActions HookMap;
+    public VRHookActions UIMap;
+
+    bool isMenuOpen = false;
+
+
 
     // 初期化
     void Awake()
     {
         HookMap = new VRHookActions();
+        UIMap = new VRHookActions();
 
         // LineRendererの自動設定
         if (hookLine == null)
@@ -115,15 +123,26 @@ public class VRController : MonoBehaviour
     }
 
     private void OnEnable() => HookMap.Enable();
-    private void OnDisable() => HookMap.Disable();
+    private void OnDisable()
+    {
+        HookMap.Disable();
+        UIMap.Disable();
+    }
+
+    public void SetMenuState(bool state)
+    {
+        isMenuOpen = state;
+    }
 
     // 更新処理
     void Update()
     {
-        //  常時視点操作は有効
-        CameraRotation();
-
-        //  入力取得
+        if (isMenuOpen)
+        {
+            //  常時視点操作は有効
+            CameraRotation();
+            return;
+        }        //  入力取得
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
         bool cancelPressed = HookMap.VR.Cancel.ReadValue<float>() > 0.5f;
