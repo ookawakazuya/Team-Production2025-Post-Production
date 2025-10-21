@@ -201,9 +201,9 @@ public class VRMenuManager : MonoBehaviour
         if (menuCanvas != null)
             menuCanvas.SetActive(isMenuOpen);
 
-        // 右手のポインターを有効化 / 無効化
-        if (rightHandRay != null)
-            rightHandRay.enabled = isMenuOpen;
+        //// 右手のポインターを有効化 / 無効化
+        //if (rightHandRay != null)
+        //    rightHandRay.enabled = isMenuOpen;
 
         // VRControllerには通知のみ（操作の有効/無効は行わない）
         if (vrController != null)
