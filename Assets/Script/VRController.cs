@@ -30,7 +30,9 @@ public class VRController : MonoBehaviour
     bool isGrappling = false;   // フック発射中
     bool isRetracting = false;  // 巻き取り中
     bool isClinging = false;    // 壁張り付き中
+    bool isGripCooldown = false;
     Vector3 grapplePoint;       // 命中地点
+    GameObject grappledObject;
 
     bool inputLocked = false;    // ワイヤー移動中の操作ロック
     bool allowCameraOnly = false; // カメラ操作のみ許可フラグ
@@ -45,7 +47,7 @@ public class VRController : MonoBehaviour
     [Header("壁張り付き設定")]
     [SerializeField] float clingDuration = 5f; // 壁にとどまれる時間
     float clingTimer = 0f;
-    GameObject grappledObject;
+
 
     [Header("重力設定")]
     [SerializeField] float gravity = -9.81f;
@@ -76,7 +78,7 @@ public class VRController : MonoBehaviour
     void Awake()
     {
         HookMap = new VRHookActions();
-        UIMap = new VRHookActions();
+        //UIMap = new VRHookActions();
 
         // LineRendererの自動設定
         if (hookLine == null)
@@ -87,8 +89,9 @@ public class VRController : MonoBehaviour
             hookLine.material = new Material(Shader.Find("Sprites/Default"));
             hookLine.startColor = Color.white;
             hookLine.endColor = Color.white;
+            hookLine.enabled = false;
         }
-        hookLine.enabled = false;
+
 
         if (aimLine == null)
         {
@@ -100,8 +103,9 @@ public class VRController : MonoBehaviour
             aimLine.material = new Material(Shader.Find("Sprites/Default"));
             aimLine.startColor = Color.green;
             aimLine.endColor = Color.green;
+            aimLine.enabled = true;
         }
-        aimLine.enabled = true;
+
 
         // マーカー生成
         if (markerPrefab == null)
@@ -126,7 +130,6 @@ public class VRController : MonoBehaviour
     private void OnDisable()
     {
         HookMap.Disable();
-        UIMap.Disable();
     }
 
     public void SetMenuState(bool state)
@@ -137,12 +140,9 @@ public class VRController : MonoBehaviour
     // 更新処理
     void Update()
     {
-        if (isMenuOpen)
-        {
             //  常時視点操作は有効
             CameraRotation();
-            return;
-        }        //  入力取得
+                //  入力取得
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
         bool cancelPressed = HookMap.VR.Cancel.ReadValue<float>() > 0.5f;
@@ -166,23 +166,22 @@ public class VRController : MonoBehaviour
         if (isClinging)
         {
             
-            if (isGrappling && gripPressed && !isRetracting)
+            if (gripPressed)
             {
                 Debug.Log("張り付き：移動開始");
                 isClinging = false;
-                isGrappling = false;
                 useGravity = true;
-                StartRetract();
+                UpdateAimLine();
                 return;
             }
             if (triggerPressed && !isRetracting && isGrappling)
             {
-                Debug.Log("張り付き　フック解除");
-                isClinging = false;                   
+                Debug.Log("張り付き　フック解除");                 
                 ShootHook();
                 return;
             }
             clingTimer -= Time.deltaTime;
+  
             if (clingTimer <= 0f)
             {
                 Debug.Log("張り付き解除 → 落下開始");
@@ -249,6 +248,7 @@ public class VRController : MonoBehaviour
     //  巻き取り開始
     void StartRetract()
     {
+        if(isRetracting)
         Debug.Log("巻き取り開始");
         isRetracting = true;
         isGrappling = true;
