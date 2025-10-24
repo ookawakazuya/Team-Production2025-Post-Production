@@ -7,7 +7,7 @@ using static VRHookActions;
 
 public class VRController : MonoBehaviour
 {
-    [SerializeField] private VRMenuManager menuManager;
+    [SerializeField]  VRMenuManager menuManager;
 
     [Header("XR Controllers")]
     [SerializeField] GameObject rightController;
@@ -140,6 +140,7 @@ public class VRController : MonoBehaviour
     // 更新処理
     void Update()
     {
+        if (isMenuOpen) return;
             //  常時視点操作は有効
             CameraRotation();
                 //  入力取得
