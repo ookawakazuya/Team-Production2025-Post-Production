@@ -847,6 +847,7 @@ GameObject:
   - component: {fileID: 244329575}
   - component: {fileID: 244329574}
   - component: {fileID: 244329573}
+  - component: {fileID: 244329576}
   m_Layer: 5
   m_Name: BackButton
   m_TagString: Untagged
@@ -872,7 +873,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -74}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &244329573
@@ -957,6 +958,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 244329571}
   m_CullTransparentMesh: 1
+--- !u!114 &244329576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 244329571}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d124261cf21c3f74ca92b6a3f2b24884, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testButton: {fileID: 244329573}
 --- !u!1 &281086930
 GameObject:
   m_ObjectHideFlags: 0
@@ -3125,9 +3139,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4283425761326543017, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 879927380}
-    - targetCorrespondingSourceObject: {fileID: 4283425761326543017, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 879927381}
     - targetCorrespondingSourceObject: {fileID: 4283425761326543017, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
       insertIndex: -1
@@ -3186,7 +3197,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d30d264bfea303b41a59a666535b764c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuManager: {fileID: 0}
+  menuManager: {fileID: 1696602876}
   rightController: {fileID: 879927377}
   leftController: {fileID: 517779130}
   mainCamera: {fileID: 660910727}
@@ -3205,7 +3216,7 @@ MonoBehaviour:
   maxFallSpeed: -50
   fallSpeed: 0
   rotationSpeed: 90
-  playerRoot: {fileID: 1425030187}
+  playerRoot: {fileID: 764344511}
   wallTag: Wall
 --- !u!143 &764344510
 CharacterController:
@@ -3505,23 +3516,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3475118261464492563, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
   m_PrefabInstance: {fileID: 760690384}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &879927380
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 879927377}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c136b463d91eb74c90d06fca5e650b1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_PlayOnStart: 0
-  m_Recording: {fileID: 0}
-  m_InteractorObject: {fileID: 0}
-  m_VisitEachFrame: 0
-  m_XRController: {fileID: 0}
 --- !u!114 &879927381
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6066,6 +6060,7 @@ GameObject:
   - component: {fileID: 1495211349}
   - component: {fileID: 1495211355}
   - component: {fileID: 1495211356}
+  - component: {fileID: 1495211357}
   m_Layer: 5
   m_Name: VRMenuCanvas
   m_TagString: Untagged
@@ -6190,6 +6185,20 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &1495211357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1495211348}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1441ab3ec7ce3dc4392a5186c37aef34, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  closebutton: {fileID: 244329573}
+  menuPanel: {fileID: 415876932}
 --- !u!1 &1501231628
 GameObject:
   m_ObjectHideFlags: 0
@@ -6576,26 +6585,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1696602873}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9828f9cc7d6362a4ab41dd1c65279801, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuCanvas: {fileID: 1495211355}
-  rightHandRay: {fileID: 879927384}
-  menuButton:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Menu Button
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 43ead235-cd70-4bfb-b520-b025b4f73095
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  vrController: {fileID: 764344509}
+  menuCanvas: {fileID: 1495211348}
+  rightController: {fileID: 879927377}
+  vrControllerScripts: {fileID: 764344509}
+  vrController: {fileID: 0}
 --- !u!1 &1708644622
 GameObject:
   m_ObjectHideFlags: 0

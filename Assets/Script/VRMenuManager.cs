@@ -1,188 +1,46 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 
 public class VRMenuManager : MonoBehaviour
 {
-    /*
-    [SerializeField] private VRController VRController;
-
-    [Header("UI 設定")]
-    public GameObject mainMenuPanel;            //メインメニューオブジェクト
-    public GameObject optionPanel;              //オプションパネルオブジェクト
-    public GameObject controlGuidePanel;        //コントロールパネルオブジェクト
-
-    [Header("UI Elements")]
-    [SerializeField] CanvasGroup menuCanvas;
-    [SerializeField] XRRayInteractor rightHandRay;
-    [SerializeField] Slider masterSlider;       //音量
-    [SerializeField] Slider bgmSlider;          //BGM
-    [SerializeField] Slider sfxsSlider;         //効果音
-    [SerializeField] Slider voiceSlider;        //音声
-    [SerializeField] Slider rotationSpeedSlider;//視点回転速度
-    [SerializeField] Button instructionButton;
-    [SerializeField] Button restartButton;
-    [SerializeField] Button titleButton;
-    [SerializeField] Image instructionImage;
-
-
-    [Header("Audio Mixers (任意)")]
-    [SerializeField] AudioSource bgmSource;
-    [SerializeField] AudioSource sfxSource;
-    [SerializeField] AudioSource voiceSource;
-
-    [Header("VR Input")]
-    [SerializeField] VRController vrController;
-    public VRHookActions inputActions;
-
-
-    [Header("Menu Position")]
-    [SerializeField] Transform playerCamera;    //カメラの指定
-    [SerializeField] float menuDistance = 2.0f; //表示距離
-
-    [Header("UI設定")]
-    [SerializeField] XRRayInteractor rigtHandRay;       //
-
-
-    bool isMenuOpen = false;
-
-    public bool IsMenuOpen => isMenuOpen;       //他のスクリプトから参照可能に
-
-    private void Awake()
-    {
-        inputActions = new VRHookActions();
-        // 初期非表示設定
-        menuCanvas.alpha = 0f;
-        menuCanvas.interactable = false;
-        menuCanvas.blocksRaycasts = false;
-        instructionImage.gameObject.SetActive(false);
-
-        //スライダー設定
-        if (masterSlider) masterSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
-        if (bgmSlider) bgmSlider.onValueChanged.AddListener(OnBGMChanged);
-        if (sfxsSlider) sfxsSlider.onValueChanged.AddListener(OnSFXChanged);
-        if (voiceSlider) voiceSlider.onValueChanged.AddListener(OnVoiceChanged);
-        if (rotationSpeedSlider) rotationSpeedSlider.onValueChanged.AddListener(OnRotationSpeedChanged);
-
-        // ボタンイベント登録
-        if (instructionButton) instructionButton.onClick.AddListener(OnInstructionToggle);
-        if (restartButton) restartButton.onClick.AddListener(OnRestartStage);
-        if (titleButton) titleButton.onClick.AddListener(OnGoToTitle);
-
-    }
-
-    void OnEnable() { 
-        inputActions.Enable();
-        inputActions.Menu.menuButton.performed += ctx => ToggleMenu();
-    }
-    void OnDisable()
-    {
-        inputActions.Disable();
-        inputActions.Menu.menuButton.performed -= ctx => ToggleMenu();
-    }
-    void ToggleMenu()
-    {
-        isMenuOpen = !isMenuOpen;
-
-        if (isMenuOpen) 
-        {
-            vrController.HookMap.Dispose();     //通常操作の無効化
-            vrController.UIMap.Enable();        //UI操作を有効化
-            Debug.Log("Uiモードに切り替え");
-        }
-        else
-        {
-            vrController.UIMap.Disable();
-            vrController.HookMap.Enable();
-            Debug.Log("通常モード");
-        }
-
-            menuCanvas.alpha = isMenuOpen ? 1f : 0f;
-        menuCanvas.interactable = isMenuOpen;
-        menuCanvas.blocksRaycasts = isMenuOpen;
-
-        if (rightHandRay != null)
-            rightHandRay.enabled = isMenuOpen;
-
-        // メニューを開いた時に現在値をUIに反映
-        if (isMenuOpen && playerCamera != null)
-        {
-            Vector3 fowardPos = playerCamera.position + playerCamera.forward * menuDistance;
-            menuCanvas.transform.position = fowardPos;
-            menuCanvas.transform.rotation = Quaternion.LookRotation(
-                menuCanvas.transform.position - playerCamera.position);
-        }
-
-        if (isMenuOpen && vrController != null && rotationSpeedSlider != null)
-            rotationSpeedSlider.value = vrController.rotationSpeed;
-
-        // ゲームの一時停止
-       // Time.timeScale = isMenuOpen ? 0f : 1f;
-        Debug.Log(isMenuOpen ? "メニューオープン" : "メニュークローズ");
-    }
-
-    public void OnMasterVolumeChanged(float value)
-        =>AudioListener.volume = value / 100.0f;
-
-    public void OnBGMChanged(float value)
-    {
-        if (bgmSource) bgmSource.volume = value / 100.0f;
-    }
-
-    public void OnSFXChanged(float value)
-    {
-        if (sfxSource) sfxSource.volume = value / 100.0f;
-    }
-
-    public void OnVoiceChanged(float value)
-    {
-        if (voiceSource) voiceSource.volume = value / 100.0f;
-    }
-    public void OnRotationSpeedChanged(float value)
-    {
-        if (vrController != null)
-        {
-            vrController.rotationSpeed = value;
-        }
-    }
-
-    public void OnInstructionToggle()
-    {
-        instructionImage.gameObject.SetActive(!instructionImage.gameObject.activeSelf);
-    }
-
-    public void OnRestartStage()
-    {
-        Debug.Log("未実装の機能(ステージ初めから再開)");
-    }
-
-    public void OnGoToTitle()
-    {
-        SceneManager.LoadScene("TitkeScene");
-    }*/
     [Header("UI設定")]
     [SerializeField] private GameObject menuCanvas; // メニュー全体のキャンバス
-    [SerializeField] private XRRayInteractor rightHandRay; // 右手ポインター
-    [SerializeField] private InputActionProperty menuButton; // メニューボタン入力（例: <XRController>{LeftHand}/menuButton）
+
+    [Header("コントローラー設定")]
+    [SerializeField] GameObject rightController;     //右手コントローラー
+    [SerializeField] MonoBehaviour vrControllerScripts; //通常操作スクリプト
 
     [Header("依存コンポーネント")]
     [SerializeField] private VRController vrController; // VRController参照（視点制御を維持するため）
 
+    VRHookActions inputActions;
+
     private bool isMenuOpen = false;
     public bool IsMenuOpen => isMenuOpen; // 外部から参照可能
 
+    private void Awake()
+    {
+        inputActions = new VRHookActions();
+    }
+
     private void OnEnable()
     {
-        if (menuButton != null)
-            menuButton.action.performed += OnMenuPressed;
+        inputActions.Enable();
+        inputActions.VR.Menu.performed += OnMenuPressed;
+        //if (menuButton != null)
+        //    menuButton.action.performed += OnMenuPressed;
     }
 
     private void OnDisable()
     {
-        if (menuButton != null)
-            menuButton.action.performed -= OnMenuPressed;
+        inputActions.VR.Menu.performed -= OnMenuPressed;
+        inputActions.Disable();
+        //if (menuButton != null)
+        //    menuButton.action.performed -= OnMenuPressed;
     }
 
     private void OnMenuPressed(InputAction.CallbackContext ctx)
@@ -201,14 +59,24 @@ public class VRMenuManager : MonoBehaviour
         if (menuCanvas != null)
             menuCanvas.SetActive(isMenuOpen);
 
-        //// 右手のポインターを有効化 / 無効化
-        //if (rightHandRay != null)
-        //    rightHandRay.enabled = isMenuOpen;
+        // VRControllerに通知（内部操作を止める or 再開）
+        //if (vrController != null)
+        //    Debug.Log("コントローラーの停止");
+        //    vrController.SetMenuState(isMenuOpen);
 
-        // VRControllerには通知のみ（操作の有効/無効は行わない）
-        if (vrController != null)
-            vrController.SetMenuState(isMenuOpen);
+        if (vrControllerScripts != null)
+            vrControllerScripts.enabled = !isMenuOpen;
 
-        Debug.Log(isMenuOpen ? "メニュー表示" : "メニュー非表示");
-    }
+        var rayInteractor = rightController.GetComponent<XRRayInteractor>();
+        rayInteractor.enabled = isMenuOpen;
+
+        var lineVisual = rightController.GetComponent<XRInteractorLineVisual>();
+        if (lineVisual != null)
+            lineVisual.enabled = isMenuOpen;
+
+        // 時間停止（必要なら）
+        Time.timeScale = isMenuOpen ? 0f : 1f;
+
+        Debug.Log(isMenuOpen ? "メニュー表示中：操作停止" : "メニュー終了：操作再開");
+    } 
 }

@@ -144,6 +144,15 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Menu"",
+                    ""type"": ""Button"",
+                    ""id"": ""061560c8-3b2f-46db-abfe-23bcb32c463c"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -210,6 +219,17 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""RightStickPress"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c6da5d68-b53d-459e-9f08-95e4751bdb97"",
+                    ""path"": ""<OculusTouchController>{LeftHand}/menu"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Menu"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -294,6 +314,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
         m_VR_Cancel = m_VR.FindAction("Cancel", throwIfNotFound: true);
         m_VR_RightStick = m_VR.FindAction("RightStick", throwIfNotFound: true);
         m_VR_RightStickPress = m_VR.FindAction("RightStickPress", throwIfNotFound: true);
+        m_VR_Menu = m_VR.FindAction("Menu", throwIfNotFound: true);
         // Menu
         m_Menu = asset.FindActionMap("Menu", throwIfNotFound: true);
         m_Menu_menuButton = m_Menu.FindAction("menuButton", throwIfNotFound: true);
@@ -386,6 +407,7 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_VR_Cancel;
     private readonly InputAction m_VR_RightStick;
     private readonly InputAction m_VR_RightStickPress;
+    private readonly InputAction m_VR_Menu;
     /// <summary>
     /// Provides access to input actions defined in input action map "VR".
     /// </summary>
@@ -421,6 +443,10 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "VR/RightStickPress".
         /// </summary>
         public InputAction @RightStickPress => m_Wrapper.m_VR_RightStickPress;
+        /// <summary>
+        /// Provides access to the underlying input action "VR/Menu".
+        /// </summary>
+        public InputAction @Menu => m_Wrapper.m_VR_Menu;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -465,6 +491,9 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
             @RightStickPress.started += instance.OnRightStickPress;
             @RightStickPress.performed += instance.OnRightStickPress;
             @RightStickPress.canceled += instance.OnRightStickPress;
+            @Menu.started += instance.OnMenu;
+            @Menu.performed += instance.OnMenu;
+            @Menu.canceled += instance.OnMenu;
         }
 
         /// <summary>
@@ -494,6 +523,9 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
             @RightStickPress.started -= instance.OnRightStickPress;
             @RightStickPress.performed -= instance.OnRightStickPress;
             @RightStickPress.canceled -= instance.OnRightStickPress;
+            @Menu.started -= instance.OnMenu;
+            @Menu.performed -= instance.OnMenu;
+            @Menu.canceled -= instance.OnMenu;
         }
 
         /// <summary>
@@ -694,6 +726,13 @@ public partial class @VRHookActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnRightStickPress(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Menu" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMenu(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Menu" which allows adding and removing callbacks.

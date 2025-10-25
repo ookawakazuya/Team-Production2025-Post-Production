@@ -7,7 +7,7 @@ using static VRHookActions;
 
 public class VRController : MonoBehaviour
 {
-    [SerializeField] private VRMenuManager menuManager;
+    [SerializeField]  VRMenuManager menuManager;
 
     [Header("XR Controllers")]
     [SerializeField] GameObject rightController;
@@ -135,11 +135,27 @@ public class VRController : MonoBehaviour
     public void SetMenuState(bool state)
     {
         isMenuOpen = state;
+
+        // メニュー中はレイも非表示
+        if (state)
+        {
+            aimLine.enabled = false;
+            hookLine.enabled = false;
+            aimMarkerInstance.SetActive(false);
+            hookMarkerInstance.SetActive(false);
+        }
+        else
+        {
+            // メニュー閉じたら通常レイ再開
+            aimLine.enabled = true;
+            aimMarkerInstance.SetActive(true);
+        }
     }
 
     // 更新処理
     void Update()
     {
+        if (isMenuOpen) return;
             //  常時視点操作は有効
             CameraRotation();
                 //  入力取得
@@ -374,4 +390,6 @@ public class VRController : MonoBehaviour
         hookMarkerInstance.SetActive(false);
         aimMarkerInstance.SetActive(true);
     }
+
+
 }
