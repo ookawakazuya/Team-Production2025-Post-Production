@@ -2,7 +2,10 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    public static GameManager Instance;
+
+    [Header("初期リスポーン地点")]
+    [SerializeField] private Transform initialRespawnPoint;
 
     private Transform currentRespawnPoint;
 
@@ -11,28 +14,37 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // ゲーム間で保持したい場合
         }
         else
         {
             Destroy(gameObject);
         }
+
+        currentRespawnPoint = initialRespawnPoint;
     }
 
-    public void SetRespawnPoint(Transform newPoint)
+    /// <summary>
+    /// 現在のリスポーン地点を設定
+    /// </summary>
+    public void SetRespawnPoint(Transform point)
     {
-        currentRespawnPoint = newPoint;
+        currentRespawnPoint = point;
+        Debug.Log($"リスポーン地点更新: {point.name}");
     }
 
-    public void RespawnPlayer(GameObject player)
+    /// <summary>
+    /// 現在のリスポーン地点を取得
+    /// </summary>
+    public Transform GetRespawnPoint()
     {
-        if (currentRespawnPoint != null)
-        {
-            player.transform.position = currentRespawnPoint.position;
-        }
-        else
-        {
-            Debug.LogWarning("Respawn point is not set!");
-        }
+        return currentRespawnPoint;
+    }
+
+    /// <summary>
+    /// 初期リスポーン地点を取得
+    /// </summary>
+    public Transform GetInitialRespawnPoint()
+    {
+        return initialRespawnPoint;
     }
 }
