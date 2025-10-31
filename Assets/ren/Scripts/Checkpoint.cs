@@ -18,7 +18,7 @@ public class Checkpoint : MonoBehaviour
             // GameManager にリスポーン地点を更新させる
             GameManager.Instance.UpdateRespawnPoint(transform);
 
-            Debug.Log($"🏁 チェックポイント到達：{checkpointName}");
+            Debug.Log($"チェックポイント到達：{checkpointName}");
         }
     }
 }
