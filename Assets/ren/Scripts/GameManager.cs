@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
     {
         // スタート地点を初期リスポーンに設定（プレイヤーの位置は動かさない）
         currentRespawnPoint = startPoint;
-        Debug.Log($"🎮 ゲーム開始：スタート地点を設定 ({startPoint.name})");
+        Debug.Log($"ゲーム開始：スタート地点を設定 ({startPoint.name})");
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
     public void UpdateRespawnPoint(Transform newPoint)
     {
         currentRespawnPoint = newPoint;
-        Debug.Log($"✅ チェックポイント更新：{newPoint.name}");
+        Debug.Log($" チェックポイント更新：{newPoint.name}");
     }
 }
 

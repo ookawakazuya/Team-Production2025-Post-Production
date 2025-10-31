@@ -30,7 +30,7 @@ public class PlayerDeath : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        Debug.Log("💀 プレイヤー死亡");
+        Debug.Log(" プレイヤー死亡");
 
         // 死亡エフェクト生成
         if (deathEffect != null)
@@ -52,7 +52,7 @@ public class PlayerDeath : MonoBehaviour
         Transform respawnPoint = GameManager.Instance.GetRespawnPoint();
         transform.position = respawnPoint.position;
 
-        Debug.Log($"🔄 プレイヤーがリスポーン ({respawnPoint.name})");
+        Debug.Log($" プレイヤーがリスポーン ({respawnPoint.name})");
 
         // 再びプレイヤーを有効化
         gameObject.SetActive(true);
