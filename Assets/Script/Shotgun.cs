@@ -6,7 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class Shotgun : MonoBehaviour
 {
     [Header("XR 設定")]
-    [SerializeField] private UnityEngine.XR.Interaction.Toolkit.Interactors.XRBaseInputInteractor rightHandInteractor;
+    [SerializeField] ActionBasedController leftHandInteractor;
 
     [Header("照準用 UI（例：照準マーク Image）")]
     [SerializeField] private Image crosshairImage;
@@ -23,44 +23,43 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private GameObject gunPrefab;
     [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
 
+    [Header("Debug用のため削除予定")]
+    [SerializeField] private LineRenderer lineRenderer;
+
     private int pelletCount = 8;     // ショットガンの散弾数
     private float spreadAngle = 0.2f; // 拡散角度
-    private GameObject gunInstance;
-    private InputAction triggerAction;
     private bool isShooting = false;
+    private GameObject gunInstance;
     private GameObject currentBullet;
-
-/*  [SerializeField] Transform target;
-    [SerializeField] Image image;
-    [SerializeField] float rayDistance = 10f;
-
-    [Header("Bullet Settings")]
-    [SerializeField] GameObject bulletPrefab;
-    [SerializeField] float bulletSpeed = 50.0f;
-    [SerializeField] float bulletLifeTime = 0.2f;
-    public Transform firePoint; // 発射位置（空のGameObjectなど）
-    private GameObject currentBullet;
-    private bool Bullet = false;
-    private int pelletCount = 8;       // 発射する弾数
-    private float spreadAngle = 0.2f;   // 拡散角度（度単位）
-*/
+    private InputAction triggerAction;
+    private Vector3 rayDirection;
+    private Vector3 rayOrigin;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // --- 銃の装備 ---
-        if (rightHandInteractor == null)
+        if (leftHandInteractor == null)
         {
-            Debug.LogError("RightHandInteractor が設定されていません。");
+            Debug.LogError("LeftHandInteractor が設定されていません。");
             return;
         }
 
         if (gunPrefab != null)
         {
             gunInstance = Instantiate(gunPrefab);
-            gunInstance.transform.SetParent(rightHandInteractor.transform);
+            gunInstance.transform.SetParent(leftHandInteractor.transform);
             gunInstance.transform.localPosition = gunOffset;
             gunInstance.transform.localRotation = Quaternion.identity;
+        }
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.positionCount = 2;
+            lineRenderer.startWidth = 0.01f;
+            lineRenderer.endWidth = 0.002f;
+            lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
+            lineRenderer.material.color = Color.red;
         }
 
         // --- トリガー入力設定 ---
@@ -72,20 +71,39 @@ public class Shotgun : MonoBehaviour
     void Update()
     {
         // --- 照準処理 ---
-        Vector3 rayOrigin = transform.position; // 自分の位置
-        Vector3 rayDirection = transform.forward; // ターゲットへの方向（正規化）
+        rayOrigin = leftHandInteractor.transform.position; // 自分の位置
+        rayDirection = leftHandInteractor.transform.forward; // ターゲットへの方向（正規化）
 
         Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayを可視化
 
         RaycastHit hit;
+        Vector3 endPoint;
+
         if (Physics.Raycast(rayOrigin, rayDirection.normalized, out hit, rayDistance))
         {
+            endPoint = hit.point;
+
             Debug.Log("Ray hit:");
             crosshairImage.color = Color.green;
 
-            if (currentBullet == null && !isShooting) { Shoot(); isShooting = true; }
+            // トリガーが押されたら Shoot
+            if (!isShooting && leftHandInteractor.activateActionValue.action.WasPressedThisFrame())
+            {
+                Shoot();
+                isShooting = true;
+            }
         }
-        else { crosshairImage.color = Color.red; }
+        else {
+            endPoint = rayOrigin + rayDirection * rayDistance;
+            crosshairImage.color = Color.red;
+        }
+
+        // --- LineRenderer で線を描画 ---
+        if (lineRenderer != null)
+        {
+            lineRenderer.SetPosition(0, rayOrigin);
+            lineRenderer.SetPosition(1, rayOrigin + rayDirection * rayDistance);
+        }
     }
 
     void Shoot() // ショットガンをモデルに弾を飛ばす
@@ -93,7 +111,7 @@ public class Shotgun : MonoBehaviour
         for (int i = 0; i < pelletCount; i++)
         {
             // 玉を生成（向きもfirePointの向きに合わせる）
-            GameObject bullet = Instantiate(bulletPrefab, transform.position, transform.rotation);
+            GameObject bullet = Instantiate(bulletPrefab, leftHandInteractor.transform.position, leftHandInteractor.transform.rotation);
             // Rigidbodyが付いていることを確認して速度を設定
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
 
@@ -104,10 +122,10 @@ public class Shotgun : MonoBehaviour
                 Vector3 randomOffset = Random.insideUnitSphere * spreadAngle;
 
                 // 拡散角度を反映した方向ベクトルを計算
-                Vector3 spreadDirection = (transform.forward + randomOffset).normalized;
+                Vector3 spreadDirection = (rayDirection + randomOffset).normalized;
 
                 // 弾に速度を設定
-                rb.linearVelocity = transform.forward * bulletSpeed;
+                rb.linearVelocity = spreadDirection * bulletSpeed;
             }
 
             // 一定時間後に弾を消す
