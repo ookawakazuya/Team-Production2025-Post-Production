@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 
 public class VRMenuManager : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class VRMenuManager : MonoBehaviour
     [SerializeField] private VRController vrController; // VRController参照（視点制御を維持するため）
 
     VRHookActions inputActions;
+    XRUIInputModule uiInputModule;
+
+    [SerializeField] XRRayInteractor uiRayInteractor;
+    [SerializeField] XRInteractorLineVisual uiLineVisual;
 
     private bool isMenuOpen = false;
     public bool IsMenuOpen => isMenuOpen; // 外部から参照可能
@@ -25,22 +30,21 @@ public class VRMenuManager : MonoBehaviour
     private void Awake()
     {
         inputActions = new VRHookActions();
+        uiInputModule = new XRUIInputModule();
     }
 
     private void OnEnable()
     {
         inputActions.Enable();
         inputActions.VR.Menu.performed += OnMenuPressed;
-        //if (menuButton != null)
-        //    menuButton.action.performed += OnMenuPressed;
+        uiInputModule.Enable();
     }
 
     private void OnDisable()
     {
         inputActions.VR.Menu.performed -= OnMenuPressed;
         inputActions.Disable();
-        //if (menuButton != null)
-        //    menuButton.action.performed -= OnMenuPressed;
+        uiInputModule.Disable();
     }
 
     private void OnMenuPressed(InputAction.CallbackContext ctx)
@@ -60,19 +64,17 @@ public class VRMenuManager : MonoBehaviour
             menuCanvas.SetActive(isMenuOpen);
 
         // VRControllerに通知（内部操作を止める or 再開）
-        //if (vrController != null)
         //    Debug.Log("コントローラーの停止");
-        //    vrController.SetMenuState(isMenuOpen);
 
         if (vrControllerScripts != null)
             vrControllerScripts.enabled = !isMenuOpen;
 
-        var rayInteractor = rightController.GetComponent<XRRayInteractor>();
-        rayInteractor.enabled = isMenuOpen;
+        //  UI操作用レイをメニュー中だけ有効化
+        if (uiRayInteractor != null)
+            uiRayInteractor.gameObject.SetActive(isMenuOpen);
 
-        var lineVisual = rightController.GetComponent<XRInteractorLineVisual>();
-        if (lineVisual != null)
-            lineVisual.enabled = isMenuOpen;
+        if (uiLineVisual != null)
+            uiLineVisual.gameObject.SetActive(isMenuOpen);
 
         // 時間停止（必要なら）
         Time.timeScale = isMenuOpen ? 0f : 1f;

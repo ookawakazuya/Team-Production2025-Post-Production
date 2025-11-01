@@ -12,11 +12,17 @@ public class VRUIButton : MonoBehaviour
             closebutton.onClick.AddListener(CloseMenu);
         }
     }
-    void CloseMenu()
+   public void CloseMenu()
     {
         if(menuPanel != null)
         {
             menuPanel.SetActive(false);
         }
+    }
+
+
+    public void OnClickButton()
+    {
+        Debug.Log("VR Button Clicked!");
     }
 }
