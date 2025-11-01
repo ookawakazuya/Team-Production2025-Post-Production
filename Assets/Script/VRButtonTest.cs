@@ -11,7 +11,7 @@ public class VRButtonTest : MonoBehaviour
             testButton.onClick.AddListener(OnButtonClicked);
     }
 
-    void OnButtonClicked()
+    public void OnButtonClicked()
     {
         Debug.Log("VRƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚Ü‚µ‚½I");
     }
