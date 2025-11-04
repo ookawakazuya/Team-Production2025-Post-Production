@@ -63,7 +63,7 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- トリガー入力設定 ---
-        triggerAction = new InputAction("Fire", binding: "<XRController>{RightHand}/trigger");
+        triggerAction = new InputAction("Fire", binding: "<XRController>{LeftHand}/trigger");
         triggerAction.Enable();
     }
 
@@ -77,9 +77,9 @@ public class Shotgun : MonoBehaviour
         Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayを可視化
 
         RaycastHit hit;
-        Vector3 endPoint;
+        Vector3 endPoint = rayOrigin + rayDirection * rayDistance;
 
-        if (Physics.Raycast(rayOrigin, rayDirection.normalized, out hit, rayDistance))
+        if (Physics.Raycast(rayOrigin, rayDirection, out hit, rayDistance))
         {
             endPoint = hit.point;
 
@@ -103,6 +103,12 @@ public class Shotgun : MonoBehaviour
         {
             lineRenderer.SetPosition(0, rayOrigin);
             lineRenderer.SetPosition(1, rayOrigin + rayDirection * rayDistance);
+
+            // crosshairImage の色を反映
+            if (lineRenderer.material != null)
+            {
+                lineRenderer.material.color = crosshairImage.color;
+            }
         }
     }
 
