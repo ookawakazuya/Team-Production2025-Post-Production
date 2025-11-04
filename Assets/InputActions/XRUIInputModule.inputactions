@@ -16,17 +16,26 @@
                 },
                 {
                     "name": "Click",
-                    "type": "PassThrough",
+                    "type": "Button",
                     "id": "c9d06a20-4c22-4a5a-9317-d70232cf70b4",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
                     "name": "Submit",
-                    "type": "PassThrough",
+                    "type": "Button",
                     "id": "487c31a8-adb2-4e89-8166-d377c70cdd29",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel",
+                    "type": "Button",
+                    "id": "cfc9634d-ef47-4eaa-a8ef-534641cdc9dc",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -59,11 +68,22 @@
                 {
                     "name": "",
                     "id": "96830425-2ee9-469a-9c83-52cc74523088",
-                    "path": "",
+                    "path": "<OculusTouchController>{RightHand}/triggerPressed",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Submit",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4974c28f-e560-4e2a-a8ca-e5ce3b3ab482",
+                    "path": "<OculusTouchController>{RightHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Cancel",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

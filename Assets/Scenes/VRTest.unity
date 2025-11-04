@@ -318,6 +318,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Teleport Interactor
       objectReference: {fileID: 0}
+    - target: {fileID: 2761784063978902507, guid: c1800acf6366418a9b5f610249000331, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3616344554909481683, guid: c1800acf6366418a9b5f610249000331, type: 3}
       propertyPath: m_HapticImpulsePlayer
       value: 
@@ -3129,7 +3133,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &764344508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5814,7 +5818,7 @@ GameObject:
   - component: {fileID: 1381295265}
   - component: {fileID: 1381295264}
   - component: {fileID: 1381295263}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: UIRayOrigin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5848,7 +5852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e988983f96fe1dd48800bcdfc82f23e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LineWidth: 0.005
+  m_LineWidth: 0.05
   m_OverrideInteractorLineLength: 1
   m_LineLength: 10
   m_AutoAdjustLineLength: 0
@@ -5883,7 +5887,7 @@ MonoBehaviour:
   m_SetLineColorGradient: 1
   m_ValidColorGradient:
     serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 1}
+    key0: {r: 0, g: 0.21464849, b: 1, a: 1}
     key1: {r: 1, g: 1, b: 1, a: 1}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
@@ -5908,7 +5912,7 @@ MonoBehaviour:
     atime6: 0
     atime7: 0
     m_Mode: 0
-    m_ColorSpace: -1
+    m_ColorSpace: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
   m_InvalidColorGradient:
@@ -6054,7 +6058,7 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 0, g: 0.45197964, b: 1, a: 1}
       key1: {r: 1, g: 1, b: 1, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
@@ -6079,7 +6083,7 @@ LineRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0
@@ -6639,7 +6643,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503725, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1717954561962503726, guid: f6336ac4ac8b4d34bc5072418cdc62a0, type: 3}
       propertyPath: m_RootOrder
@@ -6906,7 +6910,7 @@ MonoBehaviour:
   m_CheckFor3DOcclusion: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 32
   m_RaycastTriggerInteraction: 1
 --- !u!114 &1495211359
 MonoBehaviour:
@@ -7316,8 +7320,8 @@ MonoBehaviour:
   rightController: {fileID: 879927377}
   vrControllerScripts: {fileID: 764344509}
   vrController: {fileID: 764344509}
-  uiRayInteractor: {fileID: 0}
-  uiLineVisual: {fileID: 0}
+  uiRayInteractor: {fileID: 1381295265}
+  uiLineVisual: {fileID: 1381295263}
 --- !u!1 &1708644622
 GameObject:
   m_ObjectHideFlags: 0
@@ -7866,7 +7870,7 @@ MonoBehaviour:
   m_SendPointerHoverToParent: 1
   m_ClickSpeed: 0.3
   m_MoveDeadzone: 0.6
-  m_RepeatDelay: 0.5
+  m_RepeatDelay: 2.73
   m_RepeatRate: 0.1
   m_TrackedDeviceDragThresholdMultiplier: 2
   m_TrackedScrollDeltaMultiplier: 5
@@ -7878,7 +7882,7 @@ MonoBehaviour:
   m_EnableGamepadInput: 1
   m_EnableJoystickInput: 1
   m_PointAction: {fileID: 2449812621185259363, guid: f50c1d1376585bd418bb7aecffdbf8a6, type: 3}
-  m_LeftClickAction: {fileID: -2075946090604441562, guid: f50c1d1376585bd418bb7aecffdbf8a6, type: 3}
+  m_LeftClickAction: {fileID: 1855836014308820768, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_MiddleClickAction: {fileID: -6289560987278519447, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_RightClickAction: {fileID: -2562941478296515153, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   m_ScrollWheelAction: {fileID: 5825226938762934180, guid: c348712bda248c246b8c49b3db54643f, type: 3}
@@ -8079,6 +8083,10 @@ PrefabInstance:
     - target: {fileID: 267712839713635791, guid: 03113b1058c9a414380555391123b0f7, type: 3}
       propertyPath: m_Name
       value: WireRenderer
+      objectReference: {fileID: 0}
+    - target: {fileID: 267712839713635791, guid: 03113b1058c9a414380555391123b0f7, type: 3}
+      propertyPath: m_Layer
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2922122231147608372, guid: 03113b1058c9a414380555391123b0f7, type: 3}
       propertyPath: startPoint
