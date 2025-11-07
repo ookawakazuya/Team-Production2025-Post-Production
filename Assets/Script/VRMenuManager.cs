@@ -16,13 +16,16 @@ public class VRMenuManager : MonoBehaviour
     [SerializeField] MonoBehaviour vrControllerScripts; //通常操作スクリプト
 
     [Header("依存コンポーネント")]
+
+    [SerializeField] private XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
+    [SerializeField] private XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
+    [SerializeField] private XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
+    [SerializeField] private XRInteractorLineVisual gameLineVisual; // ゲーム用レイの可視化用
+
     [SerializeField] private VRController vrController; // VRController参照（視点制御を維持するため）
 
     VRHookActions inputActions;
     XRUIInputModule uiInputModule;
-
-    [SerializeField] XRRayInteractor uiRayInteractor;
-    [SerializeField] XRInteractorLineVisual uiLineVisual;
 
     private bool isMenuOpen = false;
     public bool IsMenuOpen => isMenuOpen; // 外部から参照可能
@@ -30,21 +33,18 @@ public class VRMenuManager : MonoBehaviour
     private void Awake()
     {
         inputActions = new VRHookActions();
-        uiInputModule = new XRUIInputModule();
     }
 
     private void OnEnable()
     {
         inputActions.Enable();
         inputActions.VR.Menu.performed += OnMenuPressed;
-        uiInputModule.Enable();
     }
 
     private void OnDisable()
     {
         inputActions.VR.Menu.performed -= OnMenuPressed;
         inputActions.Disable();
-        uiInputModule.Disable();
     }
 
     private void OnMenuPressed(InputAction.CallbackContext ctx)
@@ -69,10 +69,14 @@ public class VRMenuManager : MonoBehaviour
         if (vrControllerScripts != null)
             vrControllerScripts.enabled = !isMenuOpen;
 
-        //  UI操作用レイをメニュー中だけ有効化
+        //  ゲーム用レイをOFF、UI用レイをON 
+        if (gameRayInteractor != null)
+            gameRayInteractor.gameObject.SetActive(!isMenuOpen);
+        if (gameLineVisual != null)
+            gameLineVisual.gameObject.SetActive(!isMenuOpen);
+
         if (uiRayInteractor != null)
             uiRayInteractor.gameObject.SetActive(isMenuOpen);
-
         if (uiLineVisual != null)
             uiLineVisual.gameObject.SetActive(isMenuOpen);
 
