@@ -7,80 +7,64 @@ using static VRHookActions;
 
 public class VRController : MonoBehaviour
 {
-    [SerializeField]  VRMenuManager menuManager;
-
     [Header("XR Controllers")]
-    [SerializeField] GameObject rightController;
-    [SerializeField] GameObject leftController;
+    [SerializeField] GameObject rightController;   // 右手コントローラー
+    [SerializeField] GameObject leftController;    // 左手コントローラー
 
-    [Header("フック関連")]
+    [Header("フック関連設定")]
     [SerializeField] Camera mainCamera;
     [SerializeField] CharacterController characterController;
 
-    [SerializeField] float maxWireLength = 300f; // レイの最大距離
-    [SerializeField] float maxMoveSpeed = 30f;   // 最大巻き取り速度
-    [SerializeField] float acceleration = 20f;   // 加速度
-    [SerializeField] float stopDistance = 1f;    // 停止判定距離
+    [SerializeField] float maxWireLength = 300f;   // レイの最大距離
+    [SerializeField] float maxMoveSpeed = 30f;     // 最大移動速度
+    [SerializeField] float acceleration = 20f;     // 加速度
+    [SerializeField] float stopDistance = 1f;      // フック地点停止距離
 
-    [Header("LineRenderer設定")]
-    [SerializeField] LineRenderer hookLine; // ワイヤーレイ
-    [SerializeField] LineRenderer aimLine;  // 照準レイ
-    // 内部状態変数
-
-    bool isGrappling = false;   // フック発射中
-    bool isRetracting = false;  // 巻き取り中
-    bool isClinging = false;    // 壁張り付き中
-    bool isGripCooldown = false;
-    Vector3 grapplePoint;       // 命中地点
-    GameObject grappledObject;
-
-    bool inputLocked = false;    // ワイヤー移動中の操作ロック
-    bool allowCameraOnly = false; // カメラ操作のみ許可フラグ
+    [Header("LineRenderer 設定")]
+    [SerializeField] LineRenderer hookLine;        // フック（ワイヤー）描画用
+    [SerializeField] LineRenderer aimLine;         // 照準用の描画ライン
 
     [Header("マーカー設定")]
     [SerializeField] XRRayInteractor rayInteractor;
     [SerializeField] XRInteractorLineVisual lineVisual;
-    [SerializeField] GameObject markerPrefab;
-    private GameObject aimMarkerInstance;
-    private GameObject hookMarkerInstance;
+    [SerializeField] GameObject markerPrefab;      // マーカーのプレハブ
+    private GameObject aimMarkerInstance;          // 照準レイの終点マーカー
+    private GameObject hookMarkerInstance;         // ワイヤーの終点マーカー
 
     [Header("壁張り付き設定")]
-    [SerializeField] float clingDuration = 5f; // 壁にとどまれる時間
-    float clingTimer = 0f;
-
+    [SerializeField] float clingDuration = 5f;     // 壁に留まれる最大時間
+    bool isClinging = false;                       // 現在壁に張り付き中か
+    float clingTimer = 0f;                         // 壁滞在タイマー
+    GameObject grappledObject;                     // 命中したオブジェクトの参照
 
     [Header("重力設定")]
     [SerializeField] float gravity = -9.81f;
     [SerializeField] float maxFallSpeed = -50.0f;
     [SerializeField] float fallSpeed = 0f;
-    bool useGravity = true; // ← 張り付き中などで無効化する用
 
     [Header("視点移動設定")]
-    [SerializeField] public float  rotationSpeed = 45f; // 回転速度
-    [SerializeField] Transform playerRoot;      // プレイヤーの角度操作対象
+    [SerializeField] float rotationSpeed = 45f;    // 視点回転速度
+    [SerializeField] Transform playerRoot;         // プレイヤー本体のTransform
+    bool stickPressed;
 
-    [Header("タグ設定")]
-    [SerializeField] string wallTag = "Wall"; // 壁タグ設定
-
-    float currentSpeed = 0f; // 現在の巻き取り速度
-
-    public bool IsRetracting => isRetracting;
-    public bool IsClinging => isClinging;
+    // 内部制御フラグ
+    bool isGrappling = false;      // フック発射中か
+    bool isRetracting = false;     // ワイヤー巻取り中か
+    bool wasGripPressed = false;   // 前フレームのグリップ状態
+    float currentSpeed = 0f;       // 現在の移動速度
+    Vector3 grapplePoint;          // フックの到達座標
 
     public VRHookActions HookMap;
-    public VRHookActions UIMap;
+    [SerializeField] string wallTag = "Wall";      // 壁判定用タグ
 
-    bool isMenuOpen = false;
+    public bool IsRetracting => isRetracting; // ワイヤー巻取り中か？
+    public bool IsClinging => isClinging;     // 壁に張り付き中か？
 
-
-
-    // 初期化
     void Awake()
     {
         HookMap = new VRHookActions();
-        //UIMap = new VRHookActions();
 
-        // LineRendererの自動設定
+        // --- LineRenderer初期化 ---
         if (hookLine == null)
         {
             hookLine = gameObject.AddComponent<LineRenderer>();
@@ -89,9 +73,8 @@ public class VRController : MonoBehaviour
             hookLine.material = new Material(Shader.Find("Sprites/Default"));
             hookLine.startColor = Color.white;
             hookLine.endColor = Color.white;
-            hookLine.enabled = false;
         }
-
+        hookLine.enabled = false;
 
         if (aimLine == null)
         {
@@ -103,11 +86,10 @@ public class VRController : MonoBehaviour
             aimLine.material = new Material(Shader.Find("Sprites/Default"));
             aimLine.startColor = Color.green;
             aimLine.endColor = Color.green;
-            aimLine.enabled = true;
         }
+        aimLine.enabled = true;
 
-
-        // マーカー生成
+        // --- マーカー初期化 ---
         if (markerPrefab == null)
         {
             markerPrefab = GameObject.CreatePrimitive(PrimitiveType.Quad);
@@ -117,6 +99,7 @@ public class VRController : MonoBehaviour
             renderer.material = new Material(Shader.Find("Unlit/Color"));
             renderer.material.color = new Color(1f, 0f, 0f, 0.5f);
         }
+
         aimMarkerInstance = Instantiate(markerPrefab);
         aimMarkerInstance.name = "AimMarker";
         aimMarkerInstance.SetActive(true);
@@ -127,131 +110,88 @@ public class VRController : MonoBehaviour
     }
 
     private void OnEnable() => HookMap.Enable();
-    private void OnDisable()
-    {
-        HookMap.Disable();
-    }
+    private void OnDisable() => HookMap.Disable();
 
-    public void SetMenuState(bool state)
-    {
-        isMenuOpen = state;
-
-        // メニュー中はレイも非表示
-        if (state)
-        {
-            aimLine.enabled = false;
-            hookLine.enabled = false;
-            aimMarkerInstance.SetActive(false);
-            hookMarkerInstance.SetActive(false);
-        }
-        else
-        {
-            // メニュー閉じたら通常レイ再開
-            aimLine.enabled = true;
-            aimMarkerInstance.SetActive(true);
-        }
-    }
-
-    // 更新処理
     void Update()
     {
-        if (isMenuOpen) return;
-            //  常時視点操作は有効
-            CameraRotation();
-                //  入力取得
+    // 入力の取得
         bool triggerPressed = HookMap.VR.HookShoot.ReadValue<float>() > 0.5f;
         bool gripPressed = HookMap.VR.Retract.ReadValue<float>() > 0.5f;
-        bool cancelPressed = HookMap.VR.Cancel.ReadValue<float>() > 0.5f;
+        CameraRotation();
 
-        //  入力ロック：ワイヤー移動中は他の操作をブロック
-        if (inputLocked)
-        {
-            if (isRetracting)
-            {
-                AccelerateTowardsHook(); // ← トリガー放しても巻き取り継続
-                UpdateHookLine();
-            }
-            else
-            {
-                UpdateAimLine();
-            }
-            return; // 他の入力は一切処理しない
-        }
-
-        // 壁張り付き処理
+        // --- 壁張り付き中 ---
         if (isClinging)
         {
-            
-            if (gripPressed)
-            {
-                Debug.Log("張り付き：移動開始");
-                isClinging = false;
-                useGravity = true;
-                UpdateAimLine();
-                return;
-            }
-            if (triggerPressed && !isRetracting && isGrappling)
-            {
-                Debug.Log("張り付き　フック解除");                 
-                ShootHook();
-                return;
-            }
+            fallSpeed = 0f;
             clingTimer -= Time.deltaTime;
-  
+
             if (clingTimer <= 0f)
             {
                 Debug.Log("張り付き解除 → 落下開始");
                 isClinging = false;
-                useGravity = true;
                 ReleaseHook();
-                return;
             }
 
-            UpdateAimLine();
+            // トリガーで新しいフック射出
+            if (triggerPressed && !isRetracting && !isGrappling)
+                ShootHook();
 
+            // グリップで張り付き解除
+            if (gripPressed)
+            {
+                Debug.Log("グリップで張り付き解除");
+                isClinging = false;
+                ReleaseHook();
+            }
+
+            aimLine.enabled = true;
+            UpdateAimLine();
             return;
         }
 
-        //  通常のフック処理
-
-        if (triggerPressed)
+        // --- 通常のフック処理 ---
+        if (triggerPressed && !isRetracting && !isGrappling)
         {
-            if (!isGrappling && !isRetracting)
-                ShootHook();
-
-            if (isGrappling && gripPressed && !isRetracting)
-                StartRetract(); // トリガー→グリップで移動開始
+            ShootHook();
         }
-        else
+
+        // グリップ押下で移動開始（トリガー状態は関係なし）
+        if (isGrappling && gripPressed && !isRetracting)
         {
-            // トリガー解除でフックを解除（張り付き時以外）
-            if ((isGrappling || isRetracting) && !isClinging)
+            StartRetract();
+        }
+
+        // トリガーを放しても、巻き取り中は解除しない
+        if (!triggerPressed && !isClinging)
+        {
+            if (isGrappling && !isRetracting)
                 ReleaseHook();
         }
 
-        //  通常移動・重力
+        // --- 移動・落下 ---
         if (isRetracting)
             AccelerateTowardsHook();
         else
             ApplyGravity();
 
-        //  レイ描画更新
-
+        // --- レイ描画 ---
         if (isGrappling)
             UpdateHookLine();
         else
             UpdateAimLine();
     }
 
-    //  視点回転
+    // -------------------------------
+    // 視点回転処理
+    // -------------------------------
     void CameraRotation()
     {
-        Vector2 stick = HookMap.VR.RightStick.ReadValue<Vector2>();
+        Vector2 rightStickInput = HookMap.VR.RightStick.ReadValue<Vector2>();
+
+        if (Mathf.Abs(rightStickInput.x) > 0.2f)
+            playerRoot.Rotate(Vector3.up * rightStickInput.x * rotationSpeed * Time.deltaTime);
+
         bool stickPressed = HookMap.VR.RightStickPress.ReadValue<bool>();
-
-        if (Mathf.Abs(stick.x) > 0.2f)
-            playerRoot.Rotate(Vector3.up * stick.x * rotationSpeed * Time.deltaTime);
-
         if (stickPressed)
         {
             Vector3 euler = playerRoot.eulerAngles;
@@ -260,45 +200,67 @@ public class VRController : MonoBehaviour
         }
     }
 
-
-    //  巻き取り開始
-    void StartRetract()
+    // -------------------------------
+    // 重力適用処理
+    // -------------------------------
+    void ApplyGravity()
     {
-        if(isRetracting)
-        Debug.Log("巻き取り開始");
-        isRetracting = true;
-        isGrappling = true;
-        useGravity = false;
-        currentSpeed = 0f;
-
-        inputLocked = true; // ← 移動中は操作ロック（視点のみ許可）
-        allowCameraOnly = true;
+        if (characterController.isGrounded)
+        {
+            fallSpeed = 0f;
+        }
+        else
+        {
+            fallSpeed += gravity * Time.deltaTime;
+            fallSpeed = Mathf.Max(fallSpeed, maxFallSpeed);
+            characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
+        }
     }
 
-    //  フック射出
+    // -------------------------------
+    // フック発射処理
+    // -------------------------------
     void ShootHook()
     {
         Debug.Log("フック射出");
         Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
+
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             grapplePoint = hit.point;
             grappledObject = hit.collider.gameObject;
             isGrappling = true;
 
+            // レイ切り替え
             aimLine.enabled = false;
             hookLine.enabled = true;
             aimMarkerInstance.SetActive(false);
             hookMarkerInstance.SetActive(true);
-            Debug.Log($"命中: {hit.collider.name}");
+
+            Debug.Log($"フック命中: {hit.collider.name}");
         }
         else
         {
-            Debug.Log("未命中");
+            Debug.Log("フック未命中");
         }
     }
 
-    //  巻き取り処理
+    // -------------------------------
+    // ワイヤー巻取り開始
+    // -------------------------------
+    void StartRetract()
+    {
+        if (isGrappling)
+        {
+            Debug.Log("巻き取り開始");
+            isRetracting = true;
+            currentSpeed = 0f;
+        }
+    }
+
+    // -------------------------------
+    // フック到達点へ加速移動
+    // -------------------------------
     void AccelerateTowardsHook()
     {
         Vector3 direction = grapplePoint - transform.position;
@@ -312,6 +274,7 @@ public class VRController : MonoBehaviour
         }
         else
         {
+            Debug.Log("フック地点に到達");
             if (grappledObject != null && grappledObject.CompareTag(wallTag))
                 StartCling();
             else
@@ -319,77 +282,81 @@ public class VRController : MonoBehaviour
         }
     }
 
-    //  重力処理
-    void ApplyGravity()
+    // -------------------------------
+    // 張り付き開始
+    // -------------------------------
+    void StartCling()
     {
-        if (!useGravity) return; // ← ★張り付き中は無効化
-        if (characterController.isGrounded)
-            fallSpeed = 0f;
-        else
-        {
-            fallSpeed += gravity * Time.deltaTime;
-            fallSpeed = Mathf.Max(fallSpeed, maxFallSpeed);
-            characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
-        }
+        Debug.Log("壁に張り付いた");
+        isRetracting = false;
+        isClinging = true;
+        clingTimer = clingDuration;
+
+        // 重力を無効化
+        fallSpeed = 0f;
+
+        // レイ切り替え
+        hookLine.enabled = false;
+        aimLine.enabled = true;
+        hookMarkerInstance.SetActive(false);
+        aimMarkerInstance.SetActive(true);
     }
 
-    //  レイ更新系
+    // -------------------------------
+    // ワイヤー解除処理
+    // -------------------------------
+    void ReleaseHook()
+    {
+        Debug.Log("フック解除");
+
+        // 張り付き中なら照準レイを維持
+        if (isClinging)
+        {
+            aimLine.enabled = true;
+            aimMarkerInstance.SetActive(true);
+            hookLine.enabled = false;
+            hookMarkerInstance.SetActive(false);
+            return; // ← 張り付き中は他の状態を変えない
+        }
+
+        // 通常の解除処理
+        isGrappling = false;
+        isRetracting = false;
+        grappledObject = null;
+        hookLine.enabled = false;
+        aimLine.enabled = true;
+        hookMarkerInstance.SetActive(false);
+        aimMarkerInstance.SetActive(true);
+    }
+
+    // -------------------------------
+    // レイ描画更新
+    // -------------------------------
     void UpdateHookLine()
     {
+        if (!hookLine.enabled) return;
         hookLine.SetPosition(0, rightController.transform.position);
         hookLine.SetPosition(1, grapplePoint);
+
         hookMarkerInstance.transform.position = grapplePoint;
+        hookMarkerInstance.transform.rotation = Quaternion.LookRotation((transform.position - grapplePoint).normalized);
     }
 
     void UpdateAimLine()
     {
         Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
         Vector3 endPoint = ray.origin + ray.direction * maxWireLength;
-        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
-            endPoint = hit.point;
+        Vector3 normal = -ray.direction;
 
-        aimLine.SetPosition(0, ray.origin);
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        {
+            endPoint = hit.point;
+            normal = hit.normal;
+        }
+
+        aimLine.SetPosition(0, rightController.transform.position);
         aimLine.SetPosition(1, endPoint);
         aimMarkerInstance.transform.position = endPoint;
+        aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
     }
-
-    //  壁張り付き
-    void StartCling()
-    {
-        Debug.Log("壁に張り付いた");
-        isRetracting = false;
-        isGrappling = true;
-        isClinging = true;
-        useGravity = false;
-        clingTimer = clingDuration;
-
-        // レイ切替
-        hookLine.enabled = false;
-        aimLine.enabled = true;
-        hookMarkerInstance.SetActive(false);
-        aimMarkerInstance.SetActive(true);
-
-        // 操作ロック解除
-        inputLocked = false;
-        allowCameraOnly = false;
-    }
-
-    //  フック解除
-    void ReleaseHook()
-    {
-        Debug.Log("フック解除");
-        isGrappling = false;
-        isRetracting = false;
-        useGravity = true;
-
-        inputLocked = false;
-        allowCameraOnly = false;
-
-        hookLine.enabled = false;
-        aimLine.enabled = true;
-        hookMarkerInstance.SetActive(false);
-        aimMarkerInstance.SetActive(true);
-    }
-
-
 }

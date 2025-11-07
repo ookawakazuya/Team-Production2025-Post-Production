@@ -51,7 +51,7 @@ public class HookController : MonoBehaviour
                 lineRenderer.SetPosition(1, origin + direction * maxWireLength);
             }
         }
-        else
+        else if(!IsPlayerMove)
         {
             if (lineRenderer != null && lineRenderer.enabled)
             {
