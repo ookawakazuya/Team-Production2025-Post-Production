@@ -8,7 +8,7 @@ public class Shotgun : MonoBehaviour
     [Header("XR 設定")]
     [SerializeField] ActionBasedController leftHandInteractor;
 
-    [Header("照準用 UI（例：照準マーク Image）")]
+    [Header("照準用 UI")]
     [SerializeField] private Image crosshairImage;
 
     [Header("Ray 設定")]
@@ -18,22 +18,28 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private GameObject bulletPrefab; // 玉のプレハブ
     [SerializeField] private float bulletSpeed = 50.0f; // 飛ぶ速さ
     [SerializeField] private float bulletLifeTime = 0.2f;  // 玉の寿命（秒）
+    [SerializeField] private int maxReserve = 5;  // 最大ストック弾数
 
     [Header("銃モデルの設定")]
     [SerializeField] private GameObject gunPrefab;
     [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
 
-    [Header("Debug用のため削除予定")]
+    [Header("LineRenderer（デバッグ用）")]
     [SerializeField] private LineRenderer lineRenderer;
 
-    private int pelletCount = 8;     // ショットガンの散弾数
+    private int pelletCount = 1; // ショットガンの散弾数
+    private int currentAmmo = 1;  // 現在装填されている弾
+    private int reserveAmmo; // ストック弾
     private float spreadAngle = 0.2f; // 拡散角度
+    private float reloadThresholdY = 0.3f; // リロードを検出する高さ（Y位置）
     private bool isShooting = false;
-    private GameObject gunInstance;
-    private GameObject currentBullet;
+    private bool isReloading = false;
+    // private bool hasBullet = true; // 現在、弾が装填されているか
+    // private GameObject gunInstance;
+    // private GameObject currentBullet;
     private InputAction triggerAction;
+    private Transform rayOrigin;
     private Vector3 rayDirection;
-    private Vector3 rayOrigin;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -45,13 +51,12 @@ public class Shotgun : MonoBehaviour
             return;
         }
 
-        if (gunPrefab != null)
-        {
-            gunInstance = Instantiate(gunPrefab);
-            gunInstance.transform.SetParent(leftHandInteractor.transform);
-            gunInstance.transform.localPosition = gunOffset;
-            gunInstance.transform.localRotation = Quaternion.identity;
-        }
+        // --- 左手トリガーを入力にバインド ---
+        triggerAction = new InputAction("LeftTrigger", binding: "<XRController>{LeftHand}/trigger");
+        triggerAction.Enable();
+
+        // --- ストック初期化 ---
+        reserveAmmo = maxReserve;
 
         if (lineRenderer != null)
         {
@@ -62,62 +67,84 @@ public class Shotgun : MonoBehaviour
             lineRenderer.material.color = Color.red;
         }
 
-        // --- トリガー入力設定 ---
-        triggerAction = new InputAction("Fire", binding: "<XRController>{LeftHand}/trigger");
-        triggerAction.Enable();
+#if false
+        if (gunPrefab != null)
+        {
+            gunInstance = Instantiate(gunPrefab);
+            gunInstance.transform.SetParent(leftHandInteractor.transform);
+            gunInstance.transform.localPosition = gunOffset;
+            gunInstance.transform.localRotation = Quaternion.identity;
+        }
+#endif
     }
 
     // Update is called once per frame
     void Update()
     {
-        // --- 照準処理 ---
-        rayOrigin = leftHandInteractor.transform.position; // 自分の位置
-        rayDirection = leftHandInteractor.transform.forward; // ターゲットへの方向（正規化）
-
-        Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayを可視化
-
         RaycastHit hit;
-        Vector3 endPoint = rayOrigin + rayDirection * rayDistance;
+        Vector3 endPoint;
+ 
+        // --- 照準処理 ---
+        rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
+        rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）
 
-        if (Physics.Raycast(rayOrigin, rayDirection, out hit, rayDistance))
-        {
-            endPoint = hit.point;
+        // Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayを可視化
 
-            Debug.Log("Ray hit:");
-            crosshairImage.color = Color.green;
-
-            // トリガーが押されたら Shoot
-            if (!isShooting && leftHandInteractor.activateActionValue.action.WasPressedThisFrame())
-            {
-                Shoot();
-                isShooting = true;
-            }
-        }
-        else {
-            endPoint = rayOrigin + rayDirection * rayDistance;
-            crosshairImage.color = Color.red;
-        }
+        // --- トリガー入力を取得 ---
+        float triggerValue = triggerAction.ReadValue<float>();
 
         // --- LineRenderer で線を描画 ---
         if (lineRenderer != null)
         {
-            lineRenderer.SetPosition(0, rayOrigin);
-            lineRenderer.SetPosition(1, rayOrigin + rayDirection * rayDistance);
+            lineRenderer.SetPosition(0, rayOrigin.position);
+            lineRenderer.SetPosition(1, rayOrigin.position + rayDirection * rayDistance);
 
-            // crosshairImage の色を反映
+            // --- crosshairImage の色を反映 ---
             if (lineRenderer.material != null)
             {
                 lineRenderer.material.color = crosshairImage.color;
             }
         }
+
+        // --- Raycast 判定 ---
+        if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
+        {
+            endPoint = hit.point;
+            crosshairImage.color = Color.green;
+            Debug.Log("Ray hit:");
+
+            // --- トリガーが押されたら --- 
+            if (!isShooting && triggerValue > 0.9f) { isShooting = true; Shoot(); }
+        }
+        else {
+            endPoint = rayOrigin.position + rayDirection * rayDistance;
+            crosshairImage.color = Color.red;
+        }
+
+
+        // --- Y座標が一定より低くなったらリロード ---
+        if (!isReloading && currentAmmo == 0 && reserveAmmo > 0 && rayOrigin.position.y < reloadThresholdY)
+        {
+            Reload();
+        }
     }
 
-    void Shoot() // ショットガンをモデルに弾を飛ばす
+    void Shoot() // --- 発砲用コード ---
     {
+        if (currentAmmo <= 0)
+        {
+            Debug.Log("弾がありません！リロードしてください。");
+            return;
+        }
+
+        // --- 撃ったので1発減る ---
+        currentAmmo--;
+
         for (int i = 0; i < pelletCount; i++)
         {
             // 玉を生成（向きもfirePointの向きに合わせる）
-            GameObject bullet = Instantiate(bulletPrefab, leftHandInteractor.transform.position, leftHandInteractor.transform.rotation);
+            GameObject bullet = Instantiate(bulletPrefab, rayOrigin.position, rayOrigin.rotation);
+            
             // Rigidbodyが付いていることを確認して速度を設定
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
 
@@ -141,9 +168,36 @@ public class Shotgun : MonoBehaviour
         Invoke(nameof(ClearBulletReference), bulletLifeTime);
     }
 
+    void Reload() 
+    {
+        isReloading = true;
+
+        if (currentAmmo >= 0)
+        {
+            Debug.Log("すでに装填済みです。");
+            return;
+        }
+
+        if (currentAmmo <= 0)
+        {
+            Debug.Log("ストックがありません！");
+            return;
+        }
+
+        reserveAmmo--;
+        currentAmmo++;
+        Debug.Log($"リロード完了：装填弾 {currentAmmo} / ストック {reserveAmmo}");
+
+        Invoke(nameof(ResetReload), 0.5f); // 短い待機で再リロード防止
+    }
+
     void ClearBulletReference()
     {
         isShooting = false;
-        currentBullet = null;
+    }
+
+    void ResetReload()
+    {
+        isReloading = false;
     }
 }
