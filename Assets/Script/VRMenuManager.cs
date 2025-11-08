@@ -85,4 +85,7 @@ public class VRMenuManager : MonoBehaviour
 
         Debug.Log(isMenuOpen ? "メニュー表示中：操作停止" : "メニュー終了：操作再開");
     } 
+
+
+
 }
