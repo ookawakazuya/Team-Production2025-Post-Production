@@ -9,7 +9,7 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 public class VRMenuManager : MonoBehaviour
 {
     [Header("UI設定")]
-    [SerializeField] private GameObject menuCanvas; // メニュー全体のキャンバス
+    [SerializeField] GameObject menuCanvas; // メニュー全体のキャンバス
 
     [Header("コントローラー設定")]
     [SerializeField] GameObject rightController;     //右手コントローラー
@@ -17,22 +17,38 @@ public class VRMenuManager : MonoBehaviour
 
     [Header("依存コンポーネント")]
 
-    [SerializeField] private XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
-    [SerializeField] private XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
-    [SerializeField] private XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
-    [SerializeField] private XRInteractorLineVisual gameLineVisual; // ゲーム用レイの可視化用
+    [SerializeField] LineRenderer uiRay;                    //操作レイ
+    [SerializeField]  XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
+    [SerializeField]  XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
+    [SerializeField]  XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
+    [SerializeField]  XRInteractorLineVisual gameLineVisual; // ゲーム用レイの可視化用
 
-    [SerializeField] private VRController vrController; // VRController参照（視点制御を維持するため）
+    [SerializeField]  VRController vrController; // VRController参照（視点制御を維持するため）
+
+    [Header("その他の設定")]
+    [SerializeField] float uiRayLength = 5.0f;                  //UIレイの長さ
 
     VRHookActions inputActions;
     XRUIInputModule uiInputModule;
 
-    private bool isMenuOpen = false;
+     bool isMenuOpen = false;
     public bool IsMenuOpen => isMenuOpen; // 外部から参照可能
 
     private void Awake()
     {
         inputActions = new VRHookActions();
+
+        // --- LineRenderer 自動生成 ---
+        if (uiRay == null)
+        {
+            uiRay = rightController.AddComponent<LineRenderer>();
+            uiRay.positionCount = 2;
+            uiRay.startWidth = 0.01f;
+            uiRay.endWidth = 0.01f;
+            uiRay.material = new Material(Shader.Find("Unlit/Color"));
+            uiRay.startColor = Color.cyan;
+            uiRay.endColor = Color.cyan;
+        }
     }
 
     private void OnEnable()
@@ -86,6 +102,36 @@ public class VRMenuManager : MonoBehaviour
         Debug.Log(isMenuOpen ? "メニュー表示中：操作停止" : "メニュー終了：操作再開");
     } 
 
+    void UpdateUIRay()
+    {
+        if (uiRay == null || rightController == null) return;
+        {
 
+            //レイの開始位置と方向を右手のコントローラーから取得
+            Vector3 start = rightController.transform.position;
+            Vector3 direction = rightController.transform.forward;
+            Vector3 end = start + direction * uiRayLength;
+
+            if (uiRay.positionCount < 2)
+                uiRay.positionCount = 2;
+
+            //LineRendererの設定
+            uiRay.SetPosition(0, start);
+            uiRay.SetPosition(1, end);
+        }
+    }
+
+    private void Update()
+    {
+        if (isMenuOpen)
+        {
+            uiRay.enabled = true;
+            UpdateUIRay();
+        }
+        else
+        {
+            uiRay.enabled = false;
+        }
+    }
 
 }
