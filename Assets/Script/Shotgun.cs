@@ -114,7 +114,18 @@ public class Shotgun : MonoBehaviour
             Debug.Log("Ray hit:");
 
             // --- トリガーが押されたら --- 
-            if (!isShooting && triggerValue > 0.9f) { isShooting = true; Shoot(); }
+            if (!isShooting && triggerValue > 0.9f) { 
+                isShooting = true; Shoot();
+                Debug.Log("発射");
+
+                // Invoke(nameof(ClearBulletReference), 0.3f); // 0.3秒後に撃てるように戻す
+
+            }
+            // --- トリガーが離されたら ---
+            else if (isShooting && triggerValue < 0.1f)
+            {
+                isShooting = false;
+            }
         }
         else {
             endPoint = rayOrigin.position + rayDirection * rayDistance;
@@ -131,6 +142,12 @@ public class Shotgun : MonoBehaviour
 
     void Shoot() // --- 発砲用コード ---
     {
+        if (reserveAmmo <= 0)
+        {
+            Debug.Log("ストックがありません！");
+            return;
+        }
+
         if (currentAmmo <= 0)
         {
             Debug.Log("弾がありません！リロードしてください。");
@@ -164,29 +181,26 @@ public class Shotgun : MonoBehaviour
             // 一定時間後に弾を消す
             Destroy(bullet, bulletLifeTime); // 一定時間後に玉を自動で消す
         }
-
-        Invoke(nameof(ClearBulletReference), bulletLifeTime);
     }
 
     void Reload() 
     {
-        isReloading = true;
+    if (currentAmmo > 0)
+    {
+        Debug.Log("すでに装填済みです。");
+        return;
+    }
 
-        if (currentAmmo >= 0)
-        {
-            Debug.Log("すでに装填済みです。");
-            return;
-        }
-
-        if (currentAmmo <= 0)
-        {
-            Debug.Log("ストックがありません！");
-            return;
-        }
-
+    if (reserveAmmo > 0)
+    {
+        currentAmmo = 1;
         reserveAmmo--;
-        currentAmmo++;
-        Debug.Log($"リロード完了：装填弾 {currentAmmo} / ストック {reserveAmmo}");
+        Debug.Log("リロード完了！残りストック：" + reserveAmmo);
+    }
+    else
+    {
+        Debug.Log("ストックがありません！");
+    }
 
         Invoke(nameof(ResetReload), 0.5f); // 短い待機で再リロード防止
     }
