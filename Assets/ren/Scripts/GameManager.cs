@@ -1,56 +1,68 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
-/// ゲーム全体の管理を行うクラス。
-/// 主に「スタート地点」と「現在のリスポーン地点（チェックポイント）」を保持する。
-/// チェックポイント到達時にリスポーン地点を更新し、
-/// プレイヤー死亡時に呼ばれることでリスポーン位置を提供する。
+/// ゲーム全体管理クラス。
+/// EnemyController の見た目表示距離を管理し、プレイヤーから遠い敵は見た目を消す。
 /// </summary>
 public class GameManager : MonoBehaviour
 {
-    // シングルトンインスタンス（どこからでもアクセス可能）
     public static GameManager Instance;
 
-    [Header("初期スタート地点（空オブジェクトを指定）")]
+    [Header("初期スタート地点")]
     public Transform startPoint;
 
-    // 現在のリスポーン地点
     private Transform currentRespawnPoint;
+
+    [Header("Enemy管理")]
+    public List<EnemyController> enemies = new List<EnemyController>();
 
     private void Awake()
     {
-        // シングルトン化処理
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
 
         DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
-        // スタート地点を初期リスポーンに設定（プレイヤーの位置は動かさない）
         currentRespawnPoint = startPoint;
-        Debug.Log($"ゲーム開始：スタート地点を設定 ({startPoint.name})");
+
+        if (enemies.Count == 0)
+            enemies.AddRange(FindObjectsOfType<EnemyController>());
     }
 
-    /// <summary>
-    /// 現在のリスポーン地点を返す（死亡時に使用）
-    /// </summary>
-    public Transform GetRespawnPoint()
+    private void Update()
     {
-        return currentRespawnPoint;
+        UpdateEnemiesVisibility();
     }
 
-    /// <summary>
-    /// チェックポイント到達時に呼び出される。
-    /// リスポーン地点を新しいチェックポイントに更新する。
-    /// </summary>
+    private void UpdateEnemiesVisibility()
+    {
+        Transform player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        if (player == null) return;
+
+        foreach (var enemy in enemies)
+        {
+            if (enemy == null) continue;
+
+            float distance = Vector3.Distance(enemy.transform.position, player.position);
+            bool shouldShow = distance <= enemy.visibleDistance;
+
+            Renderer[] renderers = enemy.GetComponentsInChildren<Renderer>();
+            foreach (var rend in renderers)
+            {
+                rend.enabled = shouldShow;
+            }
+        }
+    }
+
+    public Transform GetRespawnPoint() => currentRespawnPoint;
+
     public void UpdateRespawnPoint(Transform newPoint)
     {
         currentRespawnPoint = newPoint;
-        Debug.Log($" チェックポイント更新：{newPoint.name}");
+        Debug.Log($"チェックポイント更新：{newPoint.name}");
     }
 }
-
