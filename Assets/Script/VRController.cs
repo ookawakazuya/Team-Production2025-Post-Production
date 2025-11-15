@@ -21,6 +21,7 @@ public class VRController : MonoBehaviour
     [SerializeField] float stopDistance = 1f;      // フック地点停止距離
 
     [Header("LineRenderer 設定")]
+    [SerializeField] Transform rayOrigin;           //レイの基準点
     [SerializeField] LineRenderer hookLine;        // フック（ワイヤー）描画用
     [SerializeField] LineRenderer aimLine;         // 照準用の描画ライン
 
@@ -328,6 +329,28 @@ public class VRController : MonoBehaviour
         hookMarkerInstance.SetActive(false);
         aimMarkerInstance.SetActive(true);
     }
+    /// <summary>
+    /// 外部からゲームレイをON/OFFする
+    /// </summary>
+    /// <param name="enable"></param>
+    public void EnableGameRay(bool enable)
+    {
+        aimLine.enabled = enable;
+        if (aimMarkerInstance != null) { 
+        aimMarkerInstance.SetActive(enable);
+        }
+    }
+
+    /// <summary>
+    /// 外部からUIレイをON/OFFにする
+    /// </summary>
+    /// <param name="enable"></param>
+    public void EnableUIRay(bool enable)
+    {
+        // XRRayInteractor側でVisibilityを操作する想定
+        rayInteractor.enabled = enable;
+        lineVisual.enabled = enable;
+    }
 
     // -------------------------------
     // レイ描画更新
@@ -335,16 +358,24 @@ public class VRController : MonoBehaviour
     void UpdateHookLine()
     {
         if (!hookLine.enabled) return;
-        hookLine.SetPosition(0, rightController.transform.position);
+
+        if (rayOrigin == null)
+            rayOrigin = rightController.transform;
+
+        hookLine.SetPosition(0, rayOrigin.position);
         hookLine.SetPosition(1, grapplePoint);
 
         hookMarkerInstance.transform.position = grapplePoint;
-        hookMarkerInstance.transform.rotation = Quaternion.LookRotation((transform.position - grapplePoint).normalized);
+        hookMarkerInstance.transform.rotation =
+            Quaternion.LookRotation((transform.position - grapplePoint).normalized);
     }
 
     void UpdateAimLine()
     {
-        Ray ray = new Ray(rightController.transform.position, rightController.transform.forward);
+        if (rayOrigin == null)
+            rayOrigin = rightController.transform;   // 念のため保険
+
+        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         Vector3 endPoint = ray.origin + ray.direction * maxWireLength;
         Vector3 normal = -ray.direction;
 
@@ -354,8 +385,11 @@ public class VRController : MonoBehaviour
             normal = hit.normal;
         }
 
-        aimLine.SetPosition(0, rightController.transform.position);
+        // LineRenderer 更新
+        aimLine.SetPosition(0, rayOrigin.position);
         aimLine.SetPosition(1, endPoint);
+
+        // マーカー更新
         aimMarkerInstance.transform.position = endPoint;
         aimMarkerInstance.transform.rotation = Quaternion.LookRotation(normal);
     }

@@ -21,8 +21,11 @@ public class VRMenuManager : MonoBehaviour
     [SerializeField]  XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
     [SerializeField]  XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
     [SerializeField]  XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
-    [SerializeField]  XRInteractorLineVisual gameLineVisual; // ゲーム用レイの可視化用
+    
 
+    [Header("照準用レイ")]
+    [SerializeField] XRRayInteractor gameRayinteractor;
+    [SerializeField] XRInteractorLineVisual gameLineVisual; // ゲーム用レイの可視化用
     [SerializeField]  VRController vrController; // VRController参照（視点制御を維持するため）
 
     [Header("その他の設定")]
