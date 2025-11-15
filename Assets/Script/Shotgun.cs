@@ -166,16 +166,33 @@ public class Shotgun : MonoBehaviour
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
 
             if (rb != null) {
+                // === 円形拡散の計算 ===
                 // ランダムな角度で拡散
                 // float randomYaw = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Yaw（左右方向）
                 // float randomPitch = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Pitch（上下方向）
-                Vector3 randomOffset = Random.insideUnitSphere * spreadAngle;
+                // Vector3 randomOffset = Random.insideUnitSphere * spreadAngle;
 
                 // 拡散角度を反映した方向ベクトルを計算
-                Vector3 spreadDirection = (rayDirection + randomOffset).normalized;
+                // Vector3 spreadDirection = (rayDirection + randomOffset).normalized;
 
                 // 弾に速度を設定
-                rb.linearVelocity = spreadDirection * bulletSpeed;
+                // rb.linearVelocity = spreadDirection * bulletSpeed;
+
+                // 中心方向（前方）
+                Vector3 forward = rayOrigin.forward;
+
+                // 前方に垂直なベクトルを作る
+                Vector3 right = rayOrigin.right;
+                Vector3 up = rayOrigin.up;
+
+                // 円の中のランダム点を作る（半径 = spreadAngle）
+                Vector2 circle = Random.insideUnitCircle * spreadAngle;
+
+                // 方向ベクトルを組み立て（正面 + 右・上方向の微調整）
+                Vector3 spreadDir = (forward + right * circle.x + up * circle.y).normalized;
+
+                // 弾に速度を与える
+                rb.linearVelocity = spreadDir * bulletSpeed;
             }
 
             // 一定時間後に弾を消す
