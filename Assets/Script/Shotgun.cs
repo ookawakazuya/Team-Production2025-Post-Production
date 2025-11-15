@@ -1,18 +1,21 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit;
+using System.Collections.Generic;
+using UnityEngine.XR;
+// using UnityEngine.XR.Interaction.Toolkit;
+// using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 
 public class Shotgun : MonoBehaviour
 {
     [Header("XR 設定")]
-    [SerializeField] ActionBasedController leftHandInteractor;
+    [SerializeField] Transform leftHandInteractor;
 
     [Header("照準用 UI")]
     [SerializeField] private Image crosshairImage;
 
     [Header("Ray 設定")]
-    [SerializeField] private float rayDistance = 10f;
+    [SerializeField] private float rayDistance = 50f;
 
     [Header("弾の設定")]
     [SerializeField] private GameObject bulletPrefab; // 玉のプレハブ
@@ -27,7 +30,7 @@ public class Shotgun : MonoBehaviour
     [Header("LineRenderer（デバッグ用）")]
     [SerializeField] private LineRenderer lineRenderer;
 
-    private int pelletCount = 1; // ショットガンの散弾数
+    private int pelletCount = 15; // ショットガンの散弾数
     private int currentAmmo = 1;  // 現在装填されている弾
     private int reserveAmmo; // ストック弾
     private float spreadAngle = 0.2f; // 拡散角度
@@ -40,6 +43,7 @@ public class Shotgun : MonoBehaviour
     private InputAction triggerAction;
     private Transform rayOrigin;
     private Vector3 rayDirection;
+    private UnityEngine.XR.InputDevice leftHandDevice;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -52,8 +56,21 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- 左手トリガーを入力にバインド ---
-        triggerAction = new InputAction("LeftTrigger", binding: "<XRController>{LeftHand}/trigger");
-        triggerAction.Enable();
+        // triggerAction = new InputAction("LeftTrigger", binding: "<XRController>{LeftHand}/trigger");
+        // triggerAction.Enable();
+
+        // --- LeftHand の InputDevice を取得 ---
+        var devices = new List<UnityEngine.XR.InputDevice>();
+        InputDevices.GetDevicesAtXRNode(XRNode.LeftHand, devices);
+        if (devices.Count > 0)
+        {
+            leftHandDevice = devices[0];
+            Debug.Log("LeftHand デバイス検出：" + leftHandDevice.name);
+        }
+        else
+        {
+            Debug.LogWarning("LeftHand デバイスが見つかりません！");
+        }
 
         // --- ストック初期化 ---
         reserveAmmo = maxReserve;
@@ -81,37 +98,53 @@ public class Shotgun : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!leftHandDevice.isValid)
+        {
+            var devices = new List<UnityEngine.XR.InputDevice>();
+            UnityEngine.XR.InputDevices.GetDevicesAtXRNode(UnityEngine.XR.XRNode.LeftHand, devices);
+            if (devices.Count > 0) leftHandDevice = devices[0];
+            return;
+        }
+
         RaycastHit hit;
         Vector3 endPoint;
- 
+
         // --- 照準処理 ---
-        rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
-        rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）
+        // rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
+        // rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）        rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
+
+        if (leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float triggerValues))
+        {
+            Vector3 origin = leftHandInteractor.position;
+            rayDirection = leftHandInteractor.forward; // ターゲットへの方向（正規化）
+        }
 
         // Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayを可視化
 
         // --- トリガー入力を取得 ---
         float triggerValue = triggerAction.ReadValue<float>();
 
-        // --- LineRenderer で線を描画 ---
-        if (lineRenderer != null)
-        {
-            lineRenderer.SetPosition(0, rayOrigin.position);
-            lineRenderer.SetPosition(1, rayOrigin.position + rayDirection * rayDistance);
-
-            // --- crosshairImage の色を反映 ---
-            if (lineRenderer.material != null)
-            {
-                lineRenderer.material.color = crosshairImage.color;
-            }
-        }
-
         // --- Raycast 判定 ---
         if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
         {
             endPoint = hit.point;
-            crosshairImage.color = Color.green;
+            crosshairImage.color = Color.red;
+            
             Debug.Log("Ray hit:");
+
+            // --- LineRenderer で線を描画 ---
+            if (lineRenderer != null)
+            {
+                lineRenderer.enabled = true;
+                lineRenderer.SetPosition(0, rayOrigin.position);
+                lineRenderer.SetPosition(1, rayOrigin.position + rayDirection * rayDistance);
+
+                // --- crosshairImage の色を反映 ---
+                if (lineRenderer.material != null)
+                {
+                    lineRenderer.material.color = Color.red;
+                }
+            }
 
             // --- トリガーが押されたら --- 
             if (!isShooting && triggerValue > 0.9f) { 
@@ -129,7 +162,7 @@ public class Shotgun : MonoBehaviour
         }
         else {
             endPoint = rayOrigin.position + rayDirection * rayDistance;
-            crosshairImage.color = Color.red;
+            lineRenderer.enabled = false;
         }
 
 
