@@ -5238,6 +5238,7 @@ GameObject:
   - component: {fileID: 279393826}
   - component: {fileID: 279393825}
   - component: {fileID: 279393824}
+  - component: {fileID: 279393828}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Floor
@@ -5335,6 +5336,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &279393828
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 279393823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 0
+  m_TileSize: 256
+  m_OverrideVoxelSize: 0
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: b103d9bd3a25bc74b94a19fd3514ac52, type: 2}
+  m_BuildHeightMesh: 0
 --- !u!1 &289747311
 GameObject:
   m_ObjectHideFlags: 0
@@ -5564,6 +5597,7 @@ GameObject:
   - component: {fileID: 398667874}
   - component: {fileID: 398667873}
   - component: {fileID: 398667879}
+  - component: {fileID: 398667880}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -5715,6 +5749,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 5
+--- !u!195 &398667880
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398667872}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 1
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &551526711
 GameObject:
   m_ObjectHideFlags: 0
@@ -5938,6 +5994,10 @@ PrefabInstance:
     - target: {fileID: 3930769872163305255, guid: 7c2fae2010cf81a479f845f8431ffba7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4449998178953316082, guid: 7c2fae2010cf81a479f845f8431ffba7, type: 3}
+      propertyPath: detectionRange
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 4449998178953316082, guid: 7c2fae2010cf81a479f845f8431ffba7, type: 3}
       propertyPath: visibleDistance
@@ -15929,6 +15989,7 @@ MonoBehaviour:
   enemies:
   - {fileID: 716179003}
   - {fileID: 309046517}
+  enemyActiveDistance: 60
 --- !u!4 &1275806668
 Transform:
   m_ObjectHideFlags: 0

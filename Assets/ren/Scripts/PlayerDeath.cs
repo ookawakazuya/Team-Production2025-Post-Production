@@ -5,12 +5,12 @@ public class PlayerDeath : MonoBehaviour
     [Header("死亡時に生成するエフェクト（任意）")]
     public GameObject deathEffect;
 
-    private bool isDead = false;
+    bool isDead = false;
 
     /// <summary>
     /// 衝突時に呼ばれる
     /// </summary>
-    private void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("FallZone"))
         {
