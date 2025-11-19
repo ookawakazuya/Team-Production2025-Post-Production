@@ -1,24 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-
-/// <summary>
-/// VRController（関数分割版）
-/// - Aim / Hook を共通 LineRenderer (commonLine) で描画（マテリアル差し替え）
-/// - Aim でヒットした地点は保持し、rayOrigin からの距離が maxWireLength 内であれば先端は固定する
-/// - トリガーで ShootHook（命中時に isGrappling=true）
-/// - グリップで StartRetract（移動開始）。移動中はトリガーを放しても継続。
-/// - 到達時にタグが wallTag のオブジェクトなら StartCling（張り付き）
-/// - UI レイは別管理（VRMenuManager）に任せる。EnableGameRay / EnableUIRay で切替可能
-/// 
-/// 必要な Inspector 設定:
-///  - rayOrigin (Transform) : レイを発生させたいコントローラの子 Transform
-///  - commonLine (LineRenderer)
-///  - aimMaterial / hookMaterial
-///  - characterController
-///  - playerRoot (視点回転の親 transform)
-///  - wallTag (張り付き対象のタグ名)
-///  - VRHookActions input asset がプロジェクトにあること
-/// </summary>
 public class VRController : MonoBehaviour
 {
     [Header("参照設定")]
@@ -438,7 +419,7 @@ public class VRController : MonoBehaviour
         }
 
         // 移動中またはフック刺さり中は Hook レイ（常に grapplePoint へ）
-        if (isRetracting || isGrappling)
+        if (isGrappling || isRetracting)
         {
             commonLine.enabled = true;
             if (hookMaterial != null) commonLine.material = hookMaterial;
@@ -459,46 +440,44 @@ public class VRController : MonoBehaviour
     {
         if (commonLine == null || rayOrigin == null) return;
 
-        // 描画材質は Aim 用
-        if (aimMaterial != null) commonLine.material = aimMaterial;
         commonLine.enabled = true;
+        if (aimMaterial != null) commonLine.material = aimMaterial;
 
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
-        // 1) 新たにヒットしたか確認（毎フレーム）
+
+        // 1) 毎フレーム新しいヒットを調べる
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
-            // ヒットしている場合はヒット位置を保持（コントローラ移動しても先端はここに固定する）
             aimHitPoint = hit.point;
             hasAimHitPoint = true;
-        }
-        else
-        {
-            // ヒットしていないフレーム。だが以前の aimHitPoint が有効で、
-            // rayOrigin からその点までの距離が maxWireLength 以下なら維持する（要求どおりの挙動）
-            if (hasAimHitPoint)
-            {
-                float dist = Vector3.Distance(rayOrigin.position, aimHitPoint);
-                if (dist <= maxWireLength)
-                {
-                    // 以前のヒット地点を維持する（コントローラーを動かしても先端は動かない）
-                    commonLine.SetPosition(0, rayOrigin.position);
-                    commonLine.SetPosition(1, aimHitPoint);
-                    return;
-                }
-                else
-                {
-                    // 範囲外になったので保持解除
-                    hasAimHitPoint = false;
-                    aimHitPoint = Vector3.zero;
-                }
-            }
+
+            commonLine.SetPosition(0, rayOrigin.position);
+            commonLine.SetPosition(1, aimHitPoint);
+            return;
         }
 
-        // 上の分岐で有効な aimHitPoint がない場合は、通常の forward レイを描画
+        // 2) 新しいヒットなし → 前のヒットを保持する場合
+        if (hasAimHitPoint)
+        {
+            float dist = Vector3.Distance(rayOrigin.position, aimHitPoint);
+            if (dist <= maxWireLength)
+            {
+                commonLine.SetPosition(0, rayOrigin.position);
+                commonLine.SetPosition(1, aimHitPoint);
+                return;
+            }
+
+            // 範囲外なら保持を破棄
+            hasAimHitPoint = false;
+            aimHitPoint = Vector3.zero;
+        }
+
+        // 3) 通常の固定距離先端
         Vector3 endPoint = rayOrigin.position + rayOrigin.forward * aimDistance;
         commonLine.SetPosition(0, rayOrigin.position);
         commonLine.SetPosition(1, endPoint);
     }
+
 
     // -----------------------------
     // UI とゲームのレイ切替（VRMenuManager等から呼ぶ）
