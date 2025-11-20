@@ -1,35 +1,36 @@
+// DetectionArea.cs
 using UnityEngine;
 
 /// <summary>
-/// プレイヤー検知専用のTrigger領域。
-/// 自分の親にあるEnemyControllerへイベントを伝えるためのスクリプト。
+/// DetectionArea は Enemy の子オブジェクトに付けるトリガー（例：SphereCollider isTrigger）
+/// プレイヤーが入った/出たを EnemyController に通知する。
 /// </summary>
+[RequireComponent(typeof(Collider))]
 public class DetectionArea : MonoBehaviour
 {
-    // 親（EnemyController）の参照
-    private EnemyController enemyController;
+    EnemyController enemyController;
 
-    /// <summary>
-    /// 開始時に親のEnemyControllerを取得する。
-    /// </summary>
     void Start()
     {
         enemyController = GetComponentInParent<EnemyController>();
+        if (enemyController == null)
+            Debug.LogWarning("DetectionArea: 親に EnemyController が見つかりません。");
     }
 
-    /// <summary>
-    /// プレイヤーが検知範囲に入ったとき、親に通知する。
-    /// </summary>
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        enemyController?.OnChildTriggerEnter(other);
+        if (other.CompareTag("Player"))
+        {
+            // プレイヤーを検知。Transform を渡すことで Enemy 側が直接参照できる
+            enemyController?.OnPlayerDetected(other.transform);
+        }
     }
 
-    /// <summary>
-    /// プレイヤーが検知範囲から出たとき、親に通知する。
-    /// </summary>
-    private void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
-        enemyController?.OnChildTriggerExit(other);
+        if (other.CompareTag("Player"))
+        {
+            enemyController?.OnPlayerLost(other.transform);
+        }
     }
 }

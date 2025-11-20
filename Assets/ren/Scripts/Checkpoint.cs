@@ -10,7 +10,7 @@ public class Checkpoint : MonoBehaviour
     [Header("このチェックポイントの名前（任意）")]
     public string checkpointName = "Checkpoint";
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
         // プレイヤーが触れたら
         if (other.CompareTag("Player"))
