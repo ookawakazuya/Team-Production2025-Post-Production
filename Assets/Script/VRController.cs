@@ -25,6 +25,10 @@ public class VRController : MonoBehaviour
     [Header("その他")]
     [SerializeField] string wallTag = "Wall";          // 張り付き判定用タグ
 
+    // 追加：ヒット地点からこれ以上離れたらフックを自動解除する距離（Inspectorで調整可）
+    [Header("フック解除条件")]
+    [SerializeField] float hookBreakDistance = 2.0f;   // ここを調整してください（例: 2.0f）
+
     // 入力アセット（自作の VRHookActions）
     VRHookActions HookMap;
 
@@ -103,6 +107,10 @@ public class VRController : MonoBehaviour
 
         // --- 状態更新（張り付き処理、フック射出、巻取り開始など） ---
         UpdateStateMachine();
+
+        // --- フックの継続判定（追加） ---
+        // ヒット地点から一定距離以上離れたら自動でフック解除する
+        HandleHookBreakCheck();
 
         // --- 重力と移動 ---
         if (isClinging)
@@ -229,37 +237,30 @@ public class VRController : MonoBehaviour
     // -----------------------------
     void ShootHook()
     {
-        if (rayOrigin == null) { Debug.LogWarning("[VRController] rayOrigin が null で Shoot できません"); return; }
+        if (rayOrigin == null) return;
 
-        // Aimヒット点は一旦クリア。新しい射出では再計算。
-        hasAimHitPoint = false;
-        aimHitPoint = Vector3.zero;
+        // Aim中で保持しているヒットを消さない
+        // → aimHitPoint は AimRay の更新に任せる
+        // hasAimHitPoint = false; ← 削除
 
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
-            // 命中
+            // 命中した点をフック先に固定
             grapplePoint = hit.point;
+
             isGrappling = true;
-            isClinging = false;
             isRetracting = false;
+            isClinging = false;
 
-            // 保持用のAimヒット点（Aim -> Hook 切替を視覚的にスムーズにするため）
-            aimHitPoint = hit.point;
-            hasAimHitPoint = true;
+            // Hookレイに切替
+            if (hookMaterial != null)
+                commonLine.material = hookMaterial;
 
-            // Line のマテリアルを Hook 用に切替（描画は UpdateRayVisuals で行う）
-            if (commonLine != null && hookMaterial != null) commonLine.material = hookMaterial;
-
-            Debug.Log($"[VRController] ShootHook: hit {hit.collider.name} at {grapplePoint}");
-        }
-        else
-        {
-            // 命中なし
-            Debug.Log("[VRController] ShootHook: no hit");
-            // isGrappling は立てない（未命中はフック発射が無効）
+            Debug.Log($"ShootHook Hit: {hit.collider.name}");
         }
     }
+
 
     // -----------------------------
     // 巻き取り開始（グリップ）
@@ -400,37 +401,35 @@ public class VRController : MonoBehaviour
     // -----------------------------
     void UpdateRayVisuals()
     {
-        // safety checks
         if (commonLine == null || rayOrigin == null)
             return;
 
-        // positionCount 保証
-        if (commonLine.positionCount < 2)
-            commonLine.positionCount = 2;
+        commonLine.positionCount = 2;
 
-        // 張り付き中は Aim レイ表示（先端は grapplePoint）
+        // --- Cling 中：常に固定 ---
         if (isClinging)
         {
+            commonLine.material = aimMaterial;
             commonLine.enabled = true;
-            if (aimMaterial != null) commonLine.material = aimMaterial;
             commonLine.SetPosition(0, rayOrigin.position);
             commonLine.SetPosition(1, grapplePoint);
             return;
         }
 
-        // 移動中またはフック刺さり中は Hook レイ（常に grapplePoint へ）
+        // --- Grappling / Retracting：先端固定 ---
         if (isGrappling || isRetracting)
         {
+            commonLine.material = hookMaterial;
             commonLine.enabled = true;
-            if (hookMaterial != null) commonLine.material = hookMaterial;
             commonLine.SetPosition(0, rayOrigin.position);
-            commonLine.SetPosition(1, grapplePoint);
+            commonLine.SetPosition(1, grapplePoint); // ←絶対固定
             return;
         }
 
-        // 通常 Aim 表示
-        UpdateAimRay();
+        // --- 通常 Aim 表示 ---
+        UpdateAimRayFixed();
     }
+
 
     /// <summary>
     /// Aimレイの更新。重要：Aimでヒットした地点は保持し、rayOriginからの距離がmaxWireLength以内なら先端はそのヒット地点に固定する。
@@ -445,7 +444,7 @@ public class VRController : MonoBehaviour
 
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
 
-        // 1) 毎フレーム新しいヒットを調べる
+        // 1 毎フレーム新しいヒットを調べる
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             aimHitPoint = hit.point;
@@ -456,7 +455,7 @@ public class VRController : MonoBehaviour
             return;
         }
 
-        // 2) 新しいヒットなし → 前のヒットを保持する場合
+        // 2 新しいヒットなし → 前のヒットを保持する場合
         if (hasAimHitPoint)
         {
             float dist = Vector3.Distance(rayOrigin.position, aimHitPoint);
@@ -472,11 +471,53 @@ public class VRController : MonoBehaviour
             aimHitPoint = Vector3.zero;
         }
 
-        // 3) 通常の固定距離先端
+        // 3 通常の固定距離先端
         Vector3 endPoint = rayOrigin.position + rayOrigin.forward * aimDistance;
         commonLine.SetPosition(0, rayOrigin.position);
         commonLine.SetPosition(1, endPoint);
     }
+
+    void UpdateAimRayFixed()
+    {
+        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+
+        // ヒットしたら保持
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        {
+            aimHitPoint = hit.point;
+            hasAimHitPoint = true;
+
+            commonLine.material = aimMaterial;
+            commonLine.SetPosition(0, rayOrigin.position);
+            commonLine.SetPosition(1, aimHitPoint);
+            return;
+        }
+
+        // ヒットなし → 過去のヒット点を利用
+        if (hasAimHitPoint)
+        {
+            float dist = Vector3.Distance(rayOrigin.position, aimHitPoint);
+
+            if (dist <= maxWireLength)
+            {
+                commonLine.material = aimMaterial;
+                commonLine.SetPosition(0, rayOrigin.position);
+                commonLine.SetPosition(1, aimHitPoint);
+                return;
+            }
+
+            // 範囲外 → リセット
+            hasAimHitPoint = false;
+            aimHitPoint = Vector3.zero;
+        }
+
+        // ヒットも保持もない → 固定距離レイ
+        Vector3 endPoint = rayOrigin.position + rayOrigin.forward * aimDistance;
+        commonLine.material = aimMaterial;
+        commonLine.SetPosition(0, rayOrigin.position);
+        commonLine.SetPosition(1, endPoint);
+    }
+
 
 
     // -----------------------------
@@ -507,5 +548,31 @@ public class VRController : MonoBehaviour
     public void ForceReleaseHook()
     {
         ReleaseHook();
+    }
+
+    // -----------------------------
+    // 新規：ヒット地点からの離脱チェック（hook解除）
+    // -----------------------------
+    /// <summary>
+    /// フックが刺さっている or 巻取り中 or 張り付き中 のときに、
+    /// プレイヤー(=transform.position) が grapplePoint から設定距離以上離れたら自動でフック解除します。
+    /// </summary>
+    void HandleHookBreakCheck()
+    {
+        // フック関連の状態でなければ監視しない
+        if (!(isGrappling || isRetracting || isClinging))
+            return;
+
+        // safety
+        if (grapplePoint == null)
+            return;
+
+        float dist = Vector3.Distance(transform.position, grapplePoint);
+
+        if (dist > hookBreakDistance)
+        {
+            Debug.Log($"[VRController] HookBreak: distance {dist:F2} exceeded hookBreakDistance {hookBreakDistance:F2} -> ReleaseHook()");
+            ReleaseHook();
+        }
     }
 }
