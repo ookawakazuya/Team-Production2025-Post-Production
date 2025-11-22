@@ -513,7 +513,6 @@ LineRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 5ac02d893cd033f429457eb659507ad8, type: 2}
-  - {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1447,6 +1446,7 @@ MonoBehaviour:
   gravity: -9.81
   maxFallSpeed: -50
   wallTag: Wall
+  hookBreakDistance: 2
   rotationSpeed: 90
 --- !u!114 &5007148432676511451
 MonoBehaviour:

@@ -29,6 +29,8 @@ public class VRController : MonoBehaviour
     [Header("フック解除条件")]
     [SerializeField] float hookBreakDistance = 2.0f;   // ここを調整してください（例: 2.0f）
 
+    bool releaseButtonPressed = false;
+
     // 入力アセット（自作の VRHookActions）
     VRHookActions HookMap;
 
@@ -80,6 +82,8 @@ public class VRController : MonoBehaviour
             Debug.LogWarning("[VRController] commonLine が Inspector に割り当てられていません。");
         }
 
+        hookBreakDistance =  maxWireLength;
+
         // 簡易チェック
         if (rayOrigin == null) Debug.LogWarning("[VRController] rayOrigin が割り当てられていません。");
         if (characterController == null) Debug.LogWarning("[VRController] characterController が割り当てられていません。");
@@ -104,6 +108,7 @@ public class VRController : MonoBehaviour
             SetCommonLineEnabled(false);
             return;
         }
+
 
         // --- 状態更新（張り付き処理、フック射出、巻取り開始など） ---
         UpdateStateMachine();
@@ -154,6 +159,8 @@ public class VRController : MonoBehaviour
         rightStickInput = HookMap.VR.RightStick.ReadValue<Vector2>();
         rightStickPressed = HookMap.VR.RightStickPress.ReadValue<float>() > 0.5f;
         cancelPressed = HookMap.VR.Cancel.ReadValue<float>() > 0.5f;
+
+        releaseButtonPressed = HookMap.VR.Release.ReadValue<float>() > 0.5f;
     }
 
     // -----------------------------
@@ -185,6 +192,13 @@ public class VRController : MonoBehaviour
     // -----------------------------
     void UpdateStateMachine()
     {
+        if (releaseButtonPressed)
+        {
+            Debug.Log("[VRController] Aボタン → フック強制解除");
+            ReleaseHook();
+            return;
+        }
+
         // ---- 張り付き中の特殊処理（張り付き中でもトリガーで新規フック可能、移動はグリップで開始） ----
         if (isClinging)
         {
