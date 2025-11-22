@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.XR;
+using System.Collections.Generic;
 // using UnityEngine.XR.Interaction.Toolkit;
 // using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 
@@ -30,34 +31,31 @@ public class Shotgun : MonoBehaviour
     [Header("LineRenderer（デバッグ用）")]
     [SerializeField] private LineRenderer lineRenderer;
 
-    private int pelletCount = 15; // ショットガンの散弾数
-    private int currentAmmo = 1;  // 現在装填されている弾
-    private int reserveAmmo; // ストック弾
-    private float spreadAngle = 0.2f; // 拡散角度
-    private float reloadThresholdY = 0.3f; // リロードを検出する高さ（Y位置）
-    private bool isShooting = false;
-    private bool isReloading = false;
-    // private bool hasBullet = true; // 現在、弾が装填されているか
-    // private GameObject gunInstance;
+    private GameObject gunInstance;
     // private GameObject currentBullet;
-    private InputAction triggerAction;
+    // private InputAction triggerAction;
     private Transform rayOrigin;
     private Vector3 rayDirection;
     private UnityEngine.XR.InputDevice leftHandDevice;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private int pelletCount = 15; // ショットガンの散弾数
+    private int currentAmmo = 1;  // 現在装填されている弾
+    private int reserveAmmo; // ストック弾
+
+    private float spreadAngle = 0.2f; // 拡散角度
+    private float reloadThresholdY = -0.2f; // リロードを検出する高さ（Y位置）
+
+    private bool isShooting = false;
+    private bool isReloading = false;
+
+    private void Awake()
     {
-        // --- 銃の装備 ---
+        // --- 左コントローラーの初期設定 ---
         if (leftHandInteractor == null)
         {
             Debug.LogError("LeftHandInteractor が設定されていません。");
             return;
         }
-
-        // --- 左手トリガーを入力にバインド ---
-        // triggerAction = new InputAction("LeftTrigger", binding: "<XRController>{LeftHand}/trigger");
-        // triggerAction.Enable();
 
         // --- LeftHand の InputDevice を取得 ---
         var devices = new List<UnityEngine.XR.InputDevice>();
@@ -72,9 +70,16 @@ public class Shotgun : MonoBehaviour
             Debug.LogWarning("LeftHand デバイスが見つかりません！");
         }
 
-        // --- ストック初期化 ---
-        reserveAmmo = maxReserve;
+        // --- 銃を装備 ---
+        if (gunPrefab != null)
+        {
+            gunInstance = Instantiate(gunPrefab);
+            gunInstance.transform.SetParent(leftHandInteractor.transform);
+            gunInstance.transform.localPosition = gunOffset;
+            gunInstance.transform.localRotation = Quaternion.identity;
+        }
 
+        // --- 射線の可視化 ---
         if (lineRenderer != null)
         {
             lineRenderer.positionCount = 2;
@@ -84,52 +89,43 @@ public class Shotgun : MonoBehaviour
             lineRenderer.material.color = Color.red;
         }
 
-#if false
-        if (gunPrefab != null)
-        {
-            gunInstance = Instantiate(gunPrefab);
-            gunInstance.transform.SetParent(leftHandInteractor.transform);
-            gunInstance.transform.localPosition = gunOffset;
-            gunInstance.transform.localRotation = Quaternion.identity;
-        }
-#endif
+        // --- ストック初期化 ---
+        reserveAmmo = maxReserve;
+    }
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
     }
 
     // Update is called once per frame
     void Update()
     {
+        // --- 左手コントローラーの確認 ---
         if (!leftHandDevice.isValid)
         {
             var devices = new List<UnityEngine.XR.InputDevice>();
-            UnityEngine.XR.InputDevices.GetDevicesAtXRNode(UnityEngine.XR.XRNode.LeftHand, devices);
-            if (devices.Count > 0) leftHandDevice = devices[0];
-            return;
+            InputDevices.GetDevicesAtXRNode(XRNode.LeftHand, devices);
+            if (devices.Count > 0) { leftHandDevice = devices[0]; }
         }
+
+        // --- トリガー入力を取得 ---
+        float triggerValue = 0f;
+        leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out triggerValue);
 
         RaycastHit hit;
         Vector3 endPoint;
+        Vector3 origin = leftHandInteractor.position;
 
-        // --- 照準処理 ---
-        // rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
-        // rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）        rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
-
-        if (leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out float triggerValues))
-        {
-            Vector3 origin = leftHandInteractor.position;
-            rayDirection = leftHandInteractor.forward; // ターゲットへの方向（正規化）
-        }
-
-        // Debug.DrawRay(rayOrigin, rayDirection * rayDistance, Color.red); // Rayを可視化
-
-        // --- トリガー入力を取得 ---
-        float triggerValue = triggerAction.ReadValue<float>();
+        Debug.DrawRay(origin, rayDirection * rayDistance, Color.red); // Rayを可視化
+        Debug.Log("isShooting:" + isShooting);
 
         // --- Raycast 判定 ---
         if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
         {
             endPoint = hit.point;
-            crosshairImage.color = Color.red;
-            
+            // crosshairImage.color = Color.red;
+
             Debug.Log("Ray hit:");
 
             // --- LineRenderer で線を描画 ---
@@ -147,7 +143,8 @@ public class Shotgun : MonoBehaviour
             }
 
             // --- トリガーが押されたら --- 
-            if (!isShooting && triggerValue > 0.9f) { 
+            if (!isShooting && triggerValue > 0.9f)
+            {
                 isShooting = true; Shoot();
                 Debug.Log("発射");
 
@@ -160,14 +157,15 @@ public class Shotgun : MonoBehaviour
                 isShooting = false;
             }
         }
-        else {
+        else
+        {
             endPoint = rayOrigin.position + rayDirection * rayDistance;
             lineRenderer.enabled = false;
         }
 
 
         // --- Y座標が一定より低くなったらリロード ---
-        if (!isReloading && currentAmmo == 0 && reserveAmmo > 0 && rayOrigin.position.y < reloadThresholdY)
+        if (!isReloading && currentAmmo == 0 && reserveAmmo > 0 && triggerValue < 0.1f && rayOrigin.position.y < reloadThresholdY)
         {
             Reload();
         }
@@ -194,11 +192,12 @@ public class Shotgun : MonoBehaviour
         {
             // 玉を生成（向きもfirePointの向きに合わせる）
             GameObject bullet = Instantiate(bulletPrefab, rayOrigin.position, rayOrigin.rotation);
-            
+
             // Rigidbodyが付いていることを確認して速度を設定
             Rigidbody rb = bullet.GetComponent<Rigidbody>();
 
-            if (rb != null) {
+            if (rb != null)
+            {
                 // === 円形拡散の計算 ===
                 // ランダムな角度で拡散
                 // float randomYaw = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Yaw（左右方向）
@@ -233,24 +232,24 @@ public class Shotgun : MonoBehaviour
         }
     }
 
-    void Reload() 
+    void Reload() // --- リロード用コード ---
     {
-    if (currentAmmo > 0)
-    {
-        Debug.Log("すでに装填済みです。");
-        return;
-    }
+        if (currentAmmo > 0)
+        {
+            Debug.Log("すでに装填済みです。");
+            return;
+        }
 
-    if (reserveAmmo > 0)
-    {
-        currentAmmo = 1;
-        reserveAmmo--;
-        Debug.Log("リロード完了！残りストック：" + reserveAmmo);
-    }
-    else
-    {
-        Debug.Log("ストックがありません！");
-    }
+        if (reserveAmmo > 0)
+        {
+            currentAmmo = 1;
+            reserveAmmo--;
+            Debug.Log("リロード完了！残りストック：" + reserveAmmo);
+        }
+        else
+        {
+            Debug.Log("ストックがありません！");
+        }
 
         Invoke(nameof(ResetReload), 0.5f); // 短い待機で再リロード防止
     }
