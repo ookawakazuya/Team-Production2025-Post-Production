@@ -556,8 +556,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
+      key0: {r: 0.3764706, g: 0.9137255, b: 0.38039216, a: 1}
+      key1: {r: 0.3764706, g: 0.9137255, b: 0.38039216, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -581,7 +581,7 @@ LineRenderer:
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
+      m_ColorSpace: 0
       m_NumColorKeys: 2
       m_NumAlphaKeys: 2
     numCornerVertices: 0
@@ -1437,16 +1437,16 @@ MonoBehaviour:
   hookMaterial: {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
   characterController: {fileID: 2830542531504712864}
   playerRoot: {fileID: 1186589372743627706}
-  maxWireLength: 100
+  maxWireLength: 20
   aimDistance: 30
   acceleration: 50
-  maxMoveSpeed: 500
+  maxMoveSpeed: 100
   stopDistance: 1
   clingDuration: 5
   gravity: -9.81
   maxFallSpeed: -50
   wallTag: Wall
-  hookBreakDistance: 2
+  hookBreakDistance: 50
   rotationSpeed: 90
 --- !u!114 &5007148432676511451
 MonoBehaviour:
