@@ -4,8 +4,6 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.XR;
 using System.Collections.Generic;
-// using UnityEngine.XR.Interaction.Toolkit;
-// using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 
 public class Shotgun : MonoBehaviour
 {
@@ -16,6 +14,8 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private Image crosshairImage;
 
     [Header("Ray 設定")]
+    [SerializeField] private Transform rayOriginObject;
+    [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float rayDistance = 50f;
 
     [Header("弾の設定")]
@@ -27,9 +27,6 @@ public class Shotgun : MonoBehaviour
     [Header("銃モデルの設定")]
     [SerializeField] private GameObject gunPrefab;
     [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
-
-    [Header("LineRenderer（デバッグ用）")]
-    [SerializeField] private LineRenderer lineRenderer;
 
     private GameObject gunInstance;
     // private GameObject currentBullet;
@@ -115,47 +112,47 @@ public class Shotgun : MonoBehaviour
 
         RaycastHit hit;
         Vector3 endPoint;
-        Vector3 origin = leftHandInteractor.position;
 
-        Debug.DrawRay(origin, rayDirection * rayDistance, Color.red); // Rayを可視化
-        Debug.Log("isShooting:" + isShooting);
+        // --- 照準処理 ---
+        rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
+        rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）
+        Vector3 origin = rayOriginObject.position;
+        Vector3 direction = rayOriginObject.forward;
+
+        Debug.DrawRay(origin, direction * rayDistance, Color.red); // Rayを可視化
+        // Debug.Log("isShooting:" + isShooting);
 
         // --- Raycast 判定 ---
         if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
         {
-            endPoint = hit.point;
-            // crosshairImage.color = Color.red;
-
-            Debug.Log("Ray hit:");
-
-            // --- LineRenderer で線を描画 ---
-            if (lineRenderer != null)
+            if (hit.collider.CompareTag("Enemy"))
             {
-                lineRenderer.enabled = true;
-                lineRenderer.SetPosition(0, rayOrigin.position);
-                lineRenderer.SetPosition(1, rayOrigin.position + rayDirection * rayDistance);
+                endPoint = hit.point;
+                // crosshairImage.color = Color.red;
 
-                // --- crosshairImage の色を反映 ---
-                if (lineRenderer.material != null)
+                Debug.Log("Ray hit:");
+
+                // --- LineRenderer で線を描画 ---
+                if (lineRenderer != null)
                 {
-                    lineRenderer.material.color = Color.red;
+                    lineRenderer.enabled = true;
+                    lineRenderer.SetPosition(0, origin);
+                    lineRenderer.SetPosition(1, endPoint);
+
+                    // --- crosshairImage の色を反映 ---
+                    if (lineRenderer.material != null) { lineRenderer.material.color = Color.red; }
                 }
+
+                // --- トリガーが押されたら --- 
+                if (!isShooting && triggerValue > 0.9f)
+                {
+                    isShooting = true; Shoot();
+                    Debug.Log("発射");
+                }
+                // --- トリガーが離されたら ---
+                else if (isShooting && triggerValue < 0.1f) { isShooting = false; }
             }
 
-            // --- トリガーが押されたら --- 
-            if (!isShooting && triggerValue > 0.9f)
-            {
-                isShooting = true; Shoot();
-                Debug.Log("発射");
-
-                // Invoke(nameof(ClearBulletReference), 0.3f); // 0.3秒後に撃てるように戻す
-
-            }
-            // --- トリガーが離されたら ---
-            else if (isShooting && triggerValue < 0.1f)
-            {
-                isShooting = false;
-            }
         }
         else
         {

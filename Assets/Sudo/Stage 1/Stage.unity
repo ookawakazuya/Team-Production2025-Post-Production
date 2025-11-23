@@ -7872,6 +7872,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1080168838}
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+      propertyPath: rayOriginObject
+      value: 
+      objectReference: {fileID: 1972380049}
+    - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: leftHandInteractor
       value: 
       objectReference: {fileID: 1080168836}
@@ -15833,6 +15837,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 2360113551511670979, guid: f0d4057a9f64e454da975f73d7eed34e, type: 3}
   m_PrefabInstance: {fileID: 1965776921}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1972380049 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2068651206959017574, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+  m_PrefabInstance: {fileID: 1080168833}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1976666196
 GameObject:
