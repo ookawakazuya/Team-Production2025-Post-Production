@@ -1082,19 +1082,19 @@ PrefabInstance:
       objectReference: {fileID: 517779130}
     - target: {fileID: 1564258859301928352, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1817891406666466360, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2166916484654985437, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3604499763649238666, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4195338932849185374, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: targetAudioSource
@@ -1110,11 +1110,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6260791624336316003, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6460402618028170798, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6604585639994650475, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: uiRay
@@ -1198,7 +1198,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7857657668485602001, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8210566485410041550, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -1206,11 +1206,11 @@ PrefabInstance:
       objectReference: {fileID: 517779130}
     - target: {fileID: 9026600507427756651, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9061279996959246342, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1299,6 +1299,18 @@ PrefabInstance:
     - target: {fileID: 4300516808902720252, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: m_Name
       value: PlayerLogic
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5724250489554225883, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7363949735266316613, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
