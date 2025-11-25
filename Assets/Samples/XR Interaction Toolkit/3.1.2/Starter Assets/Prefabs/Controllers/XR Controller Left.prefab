@@ -232,7 +232,7 @@ Transform:
   m_GameObject: {fileID: 1875294053417774924}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.005, z: -0.035}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -987,6 +987,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftHandInteractor: {fileID: 0}
   crosshairImage: {fileID: 0}
+  rayOriginObject: {fileID: 0}
+  lineRenderer: {fileID: 0}
   rayDistance: 50
   bulletPrefab: {fileID: 0}
   bulletSpeed: 50
@@ -994,7 +996,6 @@ MonoBehaviour:
   maxReserve: 5
   gunPrefab: {fileID: 0}
   gunOffset: {x: 0, y: 0, z: 0.1}
-  lineRenderer: {fileID: 0}
 --- !u!120 &3934557886830264792
 LineRenderer:
   serializedVersion: 2

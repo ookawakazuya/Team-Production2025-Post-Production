@@ -82,8 +82,13 @@ public class Shotgun : MonoBehaviour
             lineRenderer.positionCount = 2;
             lineRenderer.startWidth = 0.01f;
             lineRenderer.endWidth = 0.002f;
-            lineRenderer.material = new Material(Shader.Find("Unlit/Color"));
-            lineRenderer.material.color = Color.red;
+
+            // ✅ 透明対応のマテリアルを生成
+            Material transparentMat = new Material(Shader.Find("Unlit/Transparent"));
+            lineRenderer.material = transparentMat;
+
+            // --- 初期は透明にしておく ---
+            SetLineAlpha(0f, Color.red);
         }
 
         // --- ストック初期化 ---
@@ -111,37 +116,23 @@ public class Shotgun : MonoBehaviour
         leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out triggerValue);
 
         RaycastHit hit;
-        Vector3 endPoint;
+        // Vector3 endPoint;
 
         // --- 照準処理 ---
         rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
         rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）
-        Vector3 origin = rayOriginObject.position;
-        Vector3 direction = rayOriginObject.forward;
-
-        Debug.DrawRay(origin, direction * rayDistance, Color.red); // Rayを可視化
-        // Debug.Log("isShooting:" + isShooting);
 
         // --- Raycast 判定 ---
         if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
         {
+            Debug.Log("Ray hit:");
             if (hit.collider.CompareTag("Enemy"))
             {
-                endPoint = hit.point;
+                // endPoint = hit.point;
                 // crosshairImage.color = Color.red;
 
-                Debug.Log("Ray hit:");
-
-                // --- LineRenderer で線を描画 ---
-                if (lineRenderer != null)
-                {
-                    lineRenderer.enabled = true;
-                    lineRenderer.SetPosition(0, origin);
-                    lineRenderer.SetPosition(1, endPoint);
-
-                    // --- crosshairImage の色を反映 ---
-                    if (lineRenderer.material != null) { lineRenderer.material.color = Color.red; }
-                }
+                // 敵に当たった：赤色・非透明
+                SetLineAlpha(1f, Color.red);
 
                 // --- トリガーが押されたら --- 
                 if (!isShooting && triggerValue > 0.9f)
@@ -152,20 +143,25 @@ public class Shotgun : MonoBehaviour
                 // --- トリガーが離されたら ---
                 else if (isShooting && triggerValue < 0.1f) { isShooting = false; }
             }
+            else
+            {
+                // 敵以外に当たった：透明
+                SetLineAlpha(0f, Color.red);
+            }
 
         }
-        else
-        {
-            endPoint = rayOrigin.position + rayDirection * rayDistance;
-            lineRenderer.enabled = false;
-        }
-
 
         // --- Y座標が一定より低くなったらリロード ---
         if (!isReloading && currentAmmo == 0 && reserveAmmo > 0 && triggerValue < 0.1f && rayOrigin.position.y < reloadThresholdY)
         {
             Reload();
         }
+    }
+
+    void LateUpdate()
+    {
+        // 何にも当たってない：透明
+        SetLineAlpha(0f, Color.red);
     }
 
     void Shoot() // --- 発砲用コード ---
@@ -249,6 +245,28 @@ public class Shotgun : MonoBehaviour
         }
 
         Invoke(nameof(ResetReload), 0.5f); // 短い待機で再リロード防止
+    }
+
+    void SetLineAlpha(float alpha, Color color)
+    {
+        if (lineRenderer == null) return;
+
+        // --- LineRenderer を常に描画更新 ---
+        Vector3 origin = rayOriginObject.position;
+        Vector3 direction = rayOriginObject.forward;
+        
+        Debug.DrawRay(origin, direction * rayDistance, Color.red); // Rayを可視化
+
+        // 始点と終点を更新（Ray の見た目）
+        lineRenderer.enabled = true;
+        lineRenderer.SetPosition(0, origin);
+        lineRenderer.SetPosition(1, origin + direction * rayDistance);
+
+        // --- 色を反映 ---
+        if (lineRenderer.material != null) {
+            color.a = Mathf.Clamp01(alpha); // 透明度設定
+            lineRenderer.material.color = color;
+        }
     }
 
     void ClearBulletReference()
