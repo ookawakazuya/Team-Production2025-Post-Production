@@ -12,8 +12,8 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float rotationSpeed = 8f;
 
     [Header("視認距離設定")]
-    [SerializeField] float visibleDistance = 50f;  // 表示
-    [SerializeField] float hideDistance = 51f;     // 非表示（わずかに広い）
+    [SerializeField] float visibleDistance = 50f;
+    [SerializeField] float hideDistance = 51f;
 
     [Header("検知設定")]
     [SerializeField] float losePlayerDistance = 15f;
@@ -29,23 +29,21 @@ public class EnemyController : MonoBehaviour
     [Header("追跡猶予")]
     [SerializeField] float chaseGraceTime = 0.6f;
 
-    //================ HP設定 ====================
-    [Header("HP 設定")]
+    [Header("HP設定")]
     public int maxHP = 100;
     public int currentHP;
 
     [Header("当たり判定コライダー")]
-    public Collider bodyCollider; // 全身
-    public Collider headCollider; // 頭（2倍判定用）
+    public Collider bodyCollider;
+    public Collider headCollider;
 
     [Header("UI")]
     public Transform hpBarRoot;
     public Image hpFillImage;
 
-    private float displayedHP = 1f; // HPバー補完用
+    private float displayedHP = 1f;
 
-    //============================================
-
+    // 内部
     NavMeshAgent agent;
     Transform player;
     Vector3 startPosition;
@@ -53,7 +51,7 @@ public class EnemyController : MonoBehaviour
     float lastSeenPlayerTime = -999f;
 
     Renderer[] renderers;
-    bool isEnabled = true;  // 外部ON/OFF用
+    bool isEnabled = true;
 
     void Awake()
     {
@@ -71,6 +69,16 @@ public class EnemyController : MonoBehaviour
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
+    void OnEnable()
+    {
+        PlayerDeath.OnPlayerDied += OnPlayerDied;
+    }
+
+    void OnDisable()
+    {
+        PlayerDeath.OnPlayerDied -= OnPlayerDied;
+    }
+
     void Update()
     {
         if (!isEnabled)
@@ -79,7 +87,6 @@ public class EnemyController : MonoBehaviour
             return;
         }
 
-        // 状態処理
         switch (currentState)
         {
             case State.Idle:
@@ -93,10 +100,7 @@ public class EnemyController : MonoBehaviour
                 break;
         }
 
-        // 表示/非表示処理
         UpdateVisibilityByDistanceToPlayer();
-
-        // HPバー回転＆更新
         UpdateHPBarRotation();
         UpdateHPFillSmooth();
     }
@@ -147,7 +151,7 @@ public class EnemyController : MonoBehaviour
     }
 
     //===============================
-    // Public API
+    // 公開API
     //===============================
     public void OnPlayerDetected(Transform playerTransform)
     {
@@ -155,22 +159,18 @@ public class EnemyController : MonoBehaviour
 
         player = playerTransform;
         lastSeenPlayerTime = Time.time;
-
         TransitionToChase();
     }
 
     public void OnPlayerLost(Transform playerTransform)
     {
         if (playerTransform == null) return;
-
         lastSeenPlayerTime = Time.time;
     }
 
-    // 敵の外部ON/OFF制御
     public void SetEnabled(bool enabled)
     {
         isEnabled = enabled;
-
         agent.isStopped = !enabled;
 
         foreach (var r in renderers)
@@ -180,9 +180,6 @@ public class EnemyController : MonoBehaviour
             hpBarRoot.gameObject.SetActive(enabled);
     }
 
-    //===============================
-    // ダメージ処理
-    //===============================
     public void ApplyDamage(int damage)
     {
         currentHP -= damage;
@@ -198,25 +195,13 @@ public class EnemyController : MonoBehaviour
     }
 
     //===============================
-    // 弾の当たり判定
+    // プレイヤー死亡通知
     //===============================
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    if (!other.CompareTag("Bullet")) return;
-
-    //    Bullet bullet = other.GetComponent<Bullet>();
-    //    if (bullet == null) return;
-
-    //    int damage = bullet.damage;
-
-    //    // ■ 正確な頭判定
-    //    if (other == headCollider)
-    //    {
-    //        damage *= 2;
-    //    }
-
-    //    ApplyDamage(damage);
-    //}
+    void OnPlayerDied()
+    {
+        // 即座に戻る
+        TransitionToReturn();
+    }
 
     //===============================
     // 状態遷移
@@ -232,7 +217,8 @@ public class EnemyController : MonoBehaviour
     {
         currentState = State.Chase;
         agent.isStopped = false;
-        if (player != null) agent.SetDestination(player.position);
+        if (player != null)
+            agent.SetDestination(player.position);
     }
 
     void TransitionToReturn()
@@ -267,14 +253,10 @@ public class EnemyController : MonoBehaviour
         transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSpeed);
     }
 
-    //===============================
-    // HPバー処理
-    //===============================
     void UpdateHPBarRotation()
     {
         if (hpBarRoot == null || player == null) return;
 
-        // 逆向き問題を完全に防ぐ LookRotation
         Vector3 dir = hpBarRoot.position - player.position;
         dir.y = 0;
 
@@ -286,15 +268,10 @@ public class EnemyController : MonoBehaviour
         if (hpFillImage == null) return;
 
         float target = (float)currentHP / maxHP;
-
         displayedHP = Mathf.Lerp(displayedHP, target, Time.deltaTime * 10f);
-
         hpFillImage.fillAmount = displayedHP;
     }
 
-    //===============================
-    // 表示 / 非表示
-    //===============================
     void UpdateVisibilityByDistanceToPlayer()
     {
         if (player == null) return;
@@ -307,7 +284,7 @@ public class EnemyController : MonoBehaviour
         {
             foreach (var r in renderers) r.enabled = false;
             if (hpBarRoot != null) hpBarRoot.gameObject.SetActive(false);
-            agent.isStopped = true;  // ← NavMesh負荷軽減用
+            agent.isStopped = true;
         }
         else if (shouldShow)
         {

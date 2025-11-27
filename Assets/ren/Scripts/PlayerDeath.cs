@@ -7,9 +7,10 @@ public class PlayerDeath : MonoBehaviour
 
     bool isDead = false;
 
-    /// <summary>
-    /// 衝突時に呼ばれる
-    /// </summary>
+    // 敵に通知用イベント
+    public delegate void PlayerDeathHandler();
+    public static event PlayerDeathHandler OnPlayerDied;
+
     void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("FallZone"))
@@ -28,21 +29,29 @@ public class PlayerDeath : MonoBehaviour
         if (deathEffect != null)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        // 一時的に非表示にする
-        gameObject.SetActive(false);
+        // 敵に死亡通知
+        OnPlayerDied?.Invoke();
 
-        // 2秒後にリスポーン
-        Invoke(nameof(Respawn), 2f);
+        // フェードアウト→非表示→リスポーン
+        FadeController.Instance.FadeOut(1f, () =>
+        {
+            gameObject.SetActive(false);
+            Invoke(nameof(Respawn), 2f);
+        });
     }
 
     void Respawn()
     {
         Transform respawnPoint = GameManager.Instance.GetRespawnPoint();
         transform.position = respawnPoint.position;
-
         Debug.Log($"プレイヤーがリスポーン ({respawnPoint.name})");
 
         gameObject.SetActive(true);
-        isDead = false;
+
+        // フェードイン
+        FadeController.Instance.FadeIn(1f, () =>
+        {
+            isDead = false;
+        });
     }
 }
