@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
+
 public class VRController : MonoBehaviour
 {
     [Header("参照設定")]
@@ -28,16 +30,18 @@ public class VRController : MonoBehaviour
     [Header("フック解除条件")]
     [SerializeField] float hookBreakDistance = 2.0f;   // プレイヤーがこの距離以上離れたら自動で解除
 
+    [SerializeField] XRInteractorLineVisual lineVisual;
+
     // 入力アセット（自作の VRHookActions）
     VRHookActions HookMap;
 
-    // 内部状態フラグ
-    bool isGrappling = false;      // フックが刺さっている（命中している）状態
+    // 状態フラグ
+    bool isGrappling = false;      // フックが刺さっている（命中している）状態（見た目用）
     bool isRetracting = false;     // ワイヤー移動中（引き寄せ中）
     bool isClinging = false;       // 壁に張り付いている
     bool isGameRayEnabled = true;  // ゲーム用レイ有効フラグ（UI切替用）
 
-    // 一時フラグ：張り付き中にトリガーで出した一時フックかどうか
+    // 張り付き中にトリガーで出した「一時フック」フラグ
     bool tempGrappleFromCling = false;
 
     // 状態パラメータ
@@ -48,30 +52,29 @@ public class VRController : MonoBehaviour
     float currentSpeed = 0f;
     float fallSpeed = 0f;
 
-    // カメラ回転用
     [Header("視点移動")]
     [SerializeField] float rotationSpeed = 45f; // 右スティック横倒しの回転速度
 
-    // 入力保持（読み取りは ReadInputs()）
+    // 入力保持
     Vector2 rightStickInput = Vector2.zero;
     bool rightStickPressed = false;
     bool triggerPressed = false;
-    bool prevTriggerPressed = false; // 前フレームのトリガー状態（Down/Up 検出用）
+    bool prevTriggerPressed = false; // 前フレームのトリガー状態
     bool gripPressed = false;
-    bool prevGripPressed = false;    // 前フレームのグリップ状態（Down検出用）
+    bool prevGripPressed = false;    // 前フレームのグリップ状態
     bool cancelPressed = false;
 
-    // public プロパティ（外部から参照可能に）
+    
+
+    // プロパティ
     public bool IsRetracting => isRetracting;
     public bool IsClinging => isClinging;
     public bool IsGrappling => isGrappling;
 
     void Awake()
     {
-        // 入力アセット初期化
         HookMap = new VRHookActions();
 
-        // LineRenderer の初期化（必ず2点）
         if (commonLine != null)
         {
             commonLine.positionCount = 2;
@@ -91,35 +94,30 @@ public class VRController : MonoBehaviour
 
     void Update()
     {
-        // --- 入力をまとめて取得 ---
         ReadInputs();
-
-        // --- カメラ回転（右スティック横倒しのみ） ---
         HandleCameraRotation();
 
-        // --- UIメニュー中はゲーム入力をブロック（VRMenuManagerが呼ぶEnableGameRayで制御） ---
+        // UIメニュー中はゲームレイを消して入力停止（VRMenuManager が制御）
         if (!isGameRayEnabled)
         {
             SetCommonLineEnabled(false);
-            // Update 前フレーム入力保存しておく（UIから戻ったときの不整合防止）
-            prevTriggerPressed = triggerPressed;
+            prevTriggerPressed = triggerPressed; // 不整合防止
             prevGripPressed = gripPressed;
             return;
         }
 
-        // --- トリガーの優先処理: Down / Up を検出して即時処理（トリガー最優先） ---
+        // トリガーの優先処理（Down / Up）
         HandleTriggerPriority();
 
-        // --- 以降はトリガー処理がなかった場合の通常状態遷移 ---
-        UpdateStateMachine();
+        // トリガー優先処理で処理している場合、以降は通常処理へ進む
+        UpdateStateMachine(); // グリップ処理など
 
-        // --- フック継続判定（離脱で自動解除） ---
+        // フック継続判定（ヒット地点から遠ざかったら解除）
         HandleHookBreakCheck();
 
-        // --- 重力と移動 ---
+        // 重力・移動
         if (isClinging)
         {
-            // 張り付き中は重力無効
             fallSpeed = 0f;
             clingTimer -= Time.deltaTime;
             if (clingTimer <= 0f)
@@ -136,10 +134,12 @@ public class VRController : MonoBehaviour
                 ApplyGravity();
         }
 
-        // --- レイ描画更新 ---
-        UpdateRayVisuals();
 
-        // --- 前フレーム入力保存（最後に） ---
+            UpdateRayVisuals();
+     
+        
+
+        // 前フレーム状態の更新（最後）
         prevTriggerPressed = triggerPressed;
         prevGripPressed = gripPressed;
     }
@@ -159,27 +159,28 @@ public class VRController : MonoBehaviour
     }
 
     // -----------------------------
-    // トリガー優先処理（Down/Up を検出して即時対応）
+    // トリガー優先処理（Down/Up）※トリガー最優先
     // -----------------------------
     void HandleTriggerPriority()
     {
-        // トリガー押下（Down）
+        // Down
         if (triggerPressed && !prevTriggerPressed)
         {
             OnTriggerDown();
         }
 
-        // トリガー解放（Up）
+        // Up
         if (!triggerPressed && prevTriggerPressed)
         {
             OnTriggerUp();
         }
     }
 
-    // トリガーダウン時の処理
+    // トリガー押下（Down）の処理
     void OnTriggerDown()
     {
-        // Cling 中は「一時フック」扱いにする（後でトリガーUpで解除してCling復帰）
+        lineVisual.enabled = false;
+        // Cling 中かつトリガーDownなら「一時フック」を狙う（Cling 維持）
         if (isClinging)
         {
             Debug.Log("[VRController] Cling中のトリガーDown -> 一時フック発射");
@@ -187,7 +188,7 @@ public class VRController : MonoBehaviour
             return;
         }
 
-        // 通常時はトリガーでフックを射出（まだ刺さってなくて巻取り中でない場合のみ）
+        // 通常時はトリガーでフック射出（まだ刺さっておらず巻取り中でない場合）
         if (!isGrappling && !isRetracting)
         {
             Debug.Log("[VRController] TriggerDown -> ShootHook");
@@ -196,22 +197,22 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // トリガーアップ時の処理
+    // トリガー解放（Up）の処理
     void OnTriggerUp()
     {
-        // Cling 中に一時フックを出していた場合、その「一時フック」を解除してClingに戻る
+        lineVisual.enabled = true;
+        // Cling 中に出した一時フックがあるならそれだけ解除して Cling 維持
         if (tempGrappleFromCling)
         {
             Debug.Log("[VRController] Cling中の一時フックを解除（TriggerUp） -> Cling 継続");
             tempGrappleFromCling = false;
-            // いま表示している一時的な isGrappling を解除して Cling を保つ
             isGrappling = false;
             isRetracting = false;
             if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
             return;
         }
 
-        // 通常時：トリガーを放したら（巻取り中でなければ）フック解除
+        // 通常時：刺さっているが巻取り中でなければトリガー放しでフック解除
         if (isGrappling && !isRetracting && !isClinging)
         {
             Debug.Log("[VRController] TriggerUp -> ReleaseHook");
@@ -219,27 +220,28 @@ public class VRController : MonoBehaviour
             return;
         }
 
-        // --- 巻取り中にトリガーを離したらキャンセル（フック解除）---
+        // 巻取り中にトリガーを放したらキャンセル（仕様）
         if (isRetracting && !triggerPressed)
         {
-            Debug.Log("[VRController] トリガー離し → 巻取りキャンセル");
+            Debug.Log("[VRController] 巻取り中にトリガー放し -> ReleaseHook (巻取りキャンセル)");
             ReleaseHook();
             return;
         }
     }
 
+    // -----------------------------
+    // カメラ回転（右スティック横倒しのみ）
+    // -----------------------------
     void HandleCameraRotation()
     {
         if (playerRoot == null) return;
 
-        // 横入力のみ反応
         float x = rightStickInput.x;
         if (Mathf.Abs(x) > 0.2f)
         {
             playerRoot.Rotate(Vector3.up * x * rotationSpeed * Time.deltaTime);
         }
 
-        // スティック押し込みで Y 軸を 0 にリセット
         if (rightStickPressed)
         {
             Vector3 e = playerRoot.eulerAngles;
@@ -250,24 +252,11 @@ public class VRController : MonoBehaviour
     }
 
     // -----------------------------
-    // 状態遷移（上のトリガー優先を通過した後の処理）
+    // トリガー優先通過後の状態処理（グリップ系など）
     // -----------------------------
-    void UpdateStateMachine() 
-    { 
-        // 張り付き中のグリップ処理：Cling 中にグリップ押下で張り付き解除（落下）
-        if (isClinging)
-        {
-            if (gripPressed && !prevGripPressed) // 押した瞬間(Down)のみ処理
-            {
-                Debug.Log("[VRController] Cling中にグリップDown -> 張り付き解除して落下");
-                EndClingAndFall();
-                return;
-            }
-            // Cling中はそれ以外の通常処理を行わない（Aimレイは表示）
-            return;
-        }
-
-        // グリップ押下で巻き取り開始（isGrappling が true のとき）
+    void UpdateStateMachine()
+    {
+        // 1) グリップ押下での巻き取り開始（Down の瞬間 を検出）
         if (isGrappling && gripPressed && !prevGripPressed && !isRetracting)
         {
             Debug.Log("[VRController] GripDown -> StartRetract");
@@ -275,23 +264,45 @@ public class VRController : MonoBehaviour
             return;
         }
 
-        // --- 巻取り中にトリガーを離したらキャンセル（フック解除）---
+        // 2) Cling 中のグリップ処理（優先順注意）
+        //    - もし Cling 中かつ一時フックが存在する (tempGrappleFromCling==true)
+        //      -> グリップDown で巻き取り開始（Cling を解除して移動へ）
+        if (isClinging)
+        {
+            if (gripPressed && !prevGripPressed)
+            {
+                if (tempGrappleFromCling && isGrappling)
+                {
+                    // トリガーで一時フックを出してからグリップ押下したケース（期待される動作）
+                    Debug.Log("[VRController] Cling中 + tempGrapple -> GripDown -> StartRetract");
+                    StartRetract();
+                    return;
+                }
+                else
+                {
+                    // 一時フックなしの単独グリップ押下は「張り付き解除（落下）」にする
+                    Debug.Log("[VRController] Cling中にグリップDown -> 張り付き解除して落下");
+                    EndClingAndFall();
+                    return;
+                }
+            }
+            // Cling中はそれ以外の通常処理をしない（Aimレイは表示）
+            return;
+        }
+
+        // 3) 巻取り中にトリガーを離したら既に OnTriggerUp 側で解除しているが二重チェックとして
         if (isRetracting && !triggerPressed)
         {
-            Debug.Log("[VRController] トリガー離し → 巻取りキャンセル");
+            Debug.Log("[VRController] 巻取り中にトリガーが離れている -> ReleaseHook (二重チェック)");
             ReleaseHook();
             return;
         }
 
-        // 通常時のフック処理（トリガー押し）
-        if (triggerPressed && !isGrappling && !isRetracting)
-        {
-            ShootHook();
-        }
+        // 4) 通常時のトリガー押し（Hold中）での発射は HandleTriggerPriority で処理済み
     }
 
     // -----------------------------
-    // フック発射（通常）
+    // フック射出（通常）
     // -----------------------------
     void ShootHook()
     {
@@ -301,6 +312,9 @@ public class VRController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             grapplePoint = hit.point;
+            aimHitPoint = hit.point;     // Aim 先端をセット（先端固定用）
+            hasAimHitPoint = true;
+
             isGrappling = true;
             isRetracting = false;
             isClinging = false;
@@ -316,7 +330,7 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // Cling中の「一時フック」を発射（トリガーDown 時の挙動）
+    // Cling中の「一時フック」を発射（トリガーDown 時）
     void ShootHook_FromCling()
     {
         if (rayOrigin == null) return;
@@ -325,9 +339,12 @@ public class VRController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             grapplePoint = hit.point;
+            aimHitPoint = hit.point;
+            hasAimHitPoint = true;
+
             isGrappling = true;
             isRetracting = false;
-            // isClinging は true のままにしておく（Cling 維持）
+            // Cling 維持
             tempGrappleFromCling = true;
 
             if (hookMaterial != null) commonLine.material = hookMaterial;
@@ -341,14 +358,14 @@ public class VRController : MonoBehaviour
     }
 
     // -----------------------------
-    // 巻き取り開始（グリップ）
+    // 巻き取り開始（グリップDown）
     // -----------------------------
     void StartRetract()
     {
         if (!isGrappling) return;
         isRetracting = true;
         currentSpeed = 0f;
-        hasAimHitPoint = false; // 移動開始したらAimの保持は不要
+        hasAimHitPoint = false; // 移動開始したら Aim の保持は不要
 
         // 一時フックからの巻取りなら、張り付きフラグはキャンセルしておく
         tempGrappleFromCling = false;
@@ -418,19 +435,15 @@ public class VRController : MonoBehaviour
         Debug.Log("[VRController] StartCling: 壁に張り付き開始");
     }
 
-    // -----------------------------
-    // 張り付き終了（落下開始）
-    // -----------------------------
+    // 張り付き解除＆落下開始
     void EndClingAndFall()
     {
         isClinging = false;
         ReleaseHook();
-        // 落下は ApplyGravity() が行う
+        // 落下は ApplyGravity で処理される
     }
 
-    // -----------------------------
     // フック解除
-    // -----------------------------
     void ReleaseHook()
     {
         isGrappling = false;
@@ -463,47 +476,47 @@ public class VRController : MonoBehaviour
     }
 
     // -----------------------------
-    // レイ表示の切替・更新
+    // レイ描画の切り替え・更新
+    //   先端（SetPosition(0)） = aimHitPoint or grapplePoint
+    //   末端（SetPosition(1)） = rayOrigin.position
     // -----------------------------
     void UpdateRayVisuals()
     {
+
         if (commonLine == null || rayOrigin == null)
             return;
 
         commonLine.positionCount = 2;
 
-        // --- Hook または Retract 中は絶対固定 ---
+        // Hook / Retract 中：先端は固定（grapplePoint or aimHitPointが優先）
         if (isGrappling || isRetracting)
         {
             commonLine.enabled = true;
             if (hookMaterial != null) commonLine.material = hookMaterial;
 
-            // 刺さった地点 → 手元へのレイ
-            commonLine.SetPosition(0, grapplePoint);
+            Vector3 start = hasAimHitPoint ? aimHitPoint : grapplePoint;
+            commonLine.SetPosition(0, start);
             commonLine.SetPosition(1, rayOrigin.position);
-
             return;
         }
 
-        // --- 張り付き中 ---
+        // Cling 中：Aim材質で先端固定（grapplePoint）
         if (isClinging)
         {
             commonLine.enabled = true;
             if (aimMaterial != null) commonLine.material = aimMaterial;
 
-            // 常に刺さり位置固定
-            commonLine.SetPosition(0, grapplePoint);
+            Vector3 start = hasAimHitPoint ? aimHitPoint : grapplePoint;
+            commonLine.SetPosition(0, start);
             commonLine.SetPosition(1, rayOrigin.position);
-
             return;
         }
 
-        // --- 通常時は Aim の仕様に従う ---
+        // 通常 Aim 表示
         UpdateAimRayFixed();
     }
 
-
-    // Aim更新（ヒット点を保持）
+    // Aim 更新（ヒット点を保持する）
     void UpdateAimRayFixed()
     {
         if (commonLine == null || rayOrigin == null) return;
@@ -516,8 +529,8 @@ public class VRController : MonoBehaviour
             hasAimHitPoint = true;
 
             commonLine.material = aimMaterial;
-            commonLine.SetPosition(0, rayOrigin.position);
-            commonLine.SetPosition(1, aimHitPoint);
+            commonLine.SetPosition(0, aimHitPoint);            // ここも先端を 0 に揃える
+            commonLine.SetPosition(1, rayOrigin.position);
             return;
         }
 
@@ -527,8 +540,8 @@ public class VRController : MonoBehaviour
             if (dist <= maxWireLength)
             {
                 commonLine.material = aimMaterial;
-                commonLine.SetPosition(0, rayOrigin.position);
-                commonLine.SetPosition(1, aimHitPoint);
+                commonLine.SetPosition(0, aimHitPoint);
+                commonLine.SetPosition(1, rayOrigin.position);
                 return;
             }
             hasAimHitPoint = false;
@@ -537,13 +550,11 @@ public class VRController : MonoBehaviour
 
         Vector3 endPoint = rayOrigin.position + rayOrigin.forward * aimDistance;
         commonLine.material = aimMaterial;
-        commonLine.SetPosition(0, rayOrigin.position);
-        commonLine.SetPosition(1, endPoint);
+        commonLine.SetPosition(0, endPoint); // no hit -> start at fixed forward point
+        commonLine.SetPosition(1, rayOrigin.position);
     }
 
-    // -----------------------------
-    // UI とゲームのレイ切替（VRMenuManager等から呼ぶ）
-    // -----------------------------
+    // UI / ゲームレイ切替
     public void EnableGameRay(bool enable)
     {
         isGameRayEnabled = enable;
@@ -562,9 +573,7 @@ public class VRController : MonoBehaviour
         commonLine.enabled = enabled;
     }
 
-    // -----------------------------
-    // 新規：ヒット地点からの離脱チェック（hook解除）
-    // -----------------------------
+    // ヒット地点からの離脱で自動解除
     void HandleHookBreakCheck()
     {
         if (!(isGrappling || isRetracting || isClinging))
@@ -579,9 +588,7 @@ public class VRController : MonoBehaviour
         }
     }
 
-    // -----------------------------
-    // 外部トリガー（あれば呼べる）
-    // -----------------------------
+    // 外部強制解除
     public void ForceReleaseHook()
     {
         ReleaseHook();
