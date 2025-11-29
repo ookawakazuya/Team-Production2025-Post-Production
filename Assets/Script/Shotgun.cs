@@ -124,9 +124,9 @@ public class Shotgun : MonoBehaviour
         // --- Raycast 判定 ---
         if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
         {
-            Debug.Log("Ray hit:");
             if (hit.collider.CompareTag("Enemy"))
             {
+                Debug.Log("Ray hit:");
                 // endPoint = hit.point;
                 // crosshairImage.color = Color.red;
 
