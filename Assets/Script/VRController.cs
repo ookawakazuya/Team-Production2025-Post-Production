@@ -24,6 +24,11 @@ public class VRController : MonoBehaviour
     [SerializeField] float gravity = -9.81f;           // 重力
     [SerializeField] float maxFallSpeed = -50f;
 
+    [Header("ワイヤー移動遅延設定")]
+    [SerializeField] float retractStartDelay = 0.3f;
+    float retractDelayTime = 0f;
+    bool waitingRetractStart = false;
+
     [Header("その他")]
     [SerializeField] string wallTag = "Wall";          // 張り付き判定用タグ
 
@@ -136,9 +141,19 @@ public class VRController : MonoBehaviour
 
 
             UpdateRayVisuals();
-     
-        
 
+        if (waitingRetractStart)
+        {
+            retractDelayTime += Time.deltaTime;
+            if(retractDelayTime >= retractStartDelay)
+            {
+                Debug.Log("[VRController] 巻取り遅延");
+                waitingRetractStart = false;
+                retractDelayTime = 0f;
+                StartRetract();
+            }
+        }
+        
         // 前フレーム状態の更新（最後）
         prevTriggerPressed = triggerPressed;
         prevGripPressed = gripPressed;
@@ -256,15 +271,16 @@ public class VRController : MonoBehaviour
     // -----------------------------
     void UpdateStateMachine()
     {
-        // 1) グリップ押下での巻き取り開始（Down の瞬間 を検出）
+        //  グリップ押下での巻き取り開始（Down の瞬間 を検出）
         if (isGrappling && gripPressed && !prevGripPressed && !isRetracting)
         {
-            Debug.Log("[VRController] GripDown -> StartRetract");
-            StartRetract();
+            Debug.Log("[VRController] GripDown -> 巻取り待機開始");
+            waitingRetractStart = true;
+            retractDelayTime = 0f;
             return;
         }
 
-        // 2) Cling 中のグリップ処理（優先順注意）
+        //  Cling 中のグリップ処理（優先順注意）
         //    - もし Cling 中かつ一時フックが存在する (tempGrappleFromCling==true)
         //      -> グリップDown で巻き取り開始（Cling を解除して移動へ）
         if (isClinging)
@@ -290,7 +306,7 @@ public class VRController : MonoBehaviour
             return;
         }
 
-        // 3) 巻取り中にトリガーを離したら既に OnTriggerUp 側で解除しているが二重チェックとして
+        //  巻取り中にトリガーを離したら既に OnTriggerUp 側で解除しているが二重チェックとして
         if (isRetracting && !triggerPressed)
         {
             Debug.Log("[VRController] 巻取り中にトリガーが離れている -> ReleaseHook (二重チェック)");
@@ -298,7 +314,7 @@ public class VRController : MonoBehaviour
             return;
         }
 
-        // 4) 通常時のトリガー押し（Hold中）での発射は HandleTriggerPriority で処理済み
+        //  通常時のトリガー押し（Hold中）での発射は HandleTriggerPriority で処理済み
     }
 
     // -----------------------------
