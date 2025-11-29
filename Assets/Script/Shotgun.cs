@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.XR;
-using System.Collections.Generic;
 
 public class Shotgun : MonoBehaviour
 {
@@ -35,7 +34,7 @@ public class Shotgun : MonoBehaviour
     private Vector3 rayDirection;
     private UnityEngine.XR.InputDevice leftHandDevice;
 
-    private int pelletCount = 15; // ショットガンの散弾数
+    private int pelletCount = 1; // ショットガンの散弾数
     private int currentAmmo = 1;  // 現在装填されている弾
     private int reserveAmmo; // ストック弾
 
