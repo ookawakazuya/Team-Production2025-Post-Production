@@ -3349,6 +3349,10 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+      propertyPath: rayDistance
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: bulletPrefab
       value: 
       objectReference: {fileID: 980066629352789684, guid: 23212ce5d851cf1439a861d2c32883e4, type: 3}
