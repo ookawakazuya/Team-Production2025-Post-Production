@@ -11,23 +11,14 @@ public class EnemyController : MonoBehaviour
     [SerializeField] float moveSpeed = 3f;
     [SerializeField] float rotationSpeed = 8f;
 
-    [Header("視認距離設定")]
-    [SerializeField] float visibleDistance = 50f;
-    [SerializeField] float hideDistance = 51f;
-
-    [Header("検知設定")]
-    [SerializeField] float losePlayerDistance = 15f;
-
-    [Header("床チェック")]
-    [SerializeField] LayerMask floorLayer;
-    [SerializeField] float groundCheckHeight = 0.1f;
-    [SerializeField] float forwardGroundCheckDistance = 0.8f;
+    [Header("検知距離")]
+    [Tooltip("プレイヤーがこの距離以内で追跡開始")]
+    [SerializeField] float chaseDistance = 15f;
+    [Tooltip("プレイヤーがこの距離以上で追跡解除")]
+    [SerializeField] float returnDistance = 16f;
 
     [Header("戻り動作")]
     [SerializeField] float returnStopThreshold = 0.25f;
-
-    [Header("追跡猶予")]
-    [SerializeField] float chaseGraceTime = 0.6f;
 
     [Header("HP設定")]
     public int maxHP = 100;
@@ -40,18 +31,12 @@ public class EnemyController : MonoBehaviour
     [Header("UI")]
     public Transform hpBarRoot;
     public Image hpFillImage;
-
     private float displayedHP = 1f;
 
-    // 内部
     NavMeshAgent agent;
     Transform player;
     Vector3 startPosition;
     State currentState = State.Idle;
-    float lastSeenPlayerTime = -999f;
-
-    Renderer[] renderers;
-    bool isEnabled = true;
 
     void Awake()
     {
@@ -59,7 +44,6 @@ public class EnemyController : MonoBehaviour
         agent.updateRotation = false;
         agent.speed = moveSpeed;
 
-        renderers = GetComponentsInChildren<Renderer>();
         currentHP = maxHP;
     }
 
@@ -81,105 +65,67 @@ public class EnemyController : MonoBehaviour
 
     void Update()
     {
-        if (!isEnabled)
+        if (player == null)
         {
-            agent.isStopped = true;
-            return;
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (player == null) return;
         }
+
+        float dist = Vector3.Distance(transform.position, player.position);
 
         switch (currentState)
         {
             case State.Idle:
                 agent.isStopped = true;
+                if (dist <= chaseDistance)
+                    TransitionToChase();
                 break;
+
             case State.Chase:
-                HandleChase();
+                if (dist >= returnDistance)
+                    TransitionToReturn();
+                else
+                    HandleChase();
                 break;
+
             case State.Return:
-                HandleReturn();
+                if (dist <= chaseDistance)
+                    TransitionToChase();
+                else
+                    HandleReturn();
                 break;
         }
 
-        UpdateVisibilityByDistanceToPlayer();
         UpdateHPBarRotation();
         UpdateHPFillSmooth();
     }
 
-    //===============================
+    //========================
     // 追跡処理
-    //===============================
+    //========================
     void HandleChase()
     {
-        if (player == null)
-        {
-            TransitionToReturn();
-            return;
-        }
-
         agent.isStopped = false;
         agent.SetDestination(player.position);
-
         FaceTarget(player.position);
-
-        if (!IsForwardGroundSafe())
-            agent.isStopped = true;
-
-        float dist = Vector3.Distance(transform.position, player.position);
-        if (dist > losePlayerDistance && Time.time - lastSeenPlayerTime > chaseGraceTime)
-        {
-            TransitionToReturn();
-        }
     }
 
-    //===============================
-    // 戻り処理
-    //===============================
+    //========================
+    // 元の位置へ戻る処理
+    //========================
     void HandleReturn()
     {
         agent.isStopped = false;
         agent.SetDestination(startPosition);
-
         FaceTarget(startPosition);
 
-        if (!IsForwardGroundSafe())
-            agent.isStopped = true;
-
         if (Vector3.Distance(transform.position, startPosition) <= returnStopThreshold)
-        {
             TransitionToIdle();
-        }
     }
 
-    //===============================
-    // 公開API
-    //===============================
-    public void OnPlayerDetected(Transform playerTransform)
-    {
-        if (playerTransform == null) return;
-
-        player = playerTransform;
-        lastSeenPlayerTime = Time.time;
-        TransitionToChase();
-    }
-
-    public void OnPlayerLost(Transform playerTransform)
-    {
-        if (playerTransform == null) return;
-        lastSeenPlayerTime = Time.time;
-    }
-
-    public void SetEnabled(bool enabled)
-    {
-        isEnabled = enabled;
-        agent.isStopped = !enabled;
-
-        foreach (var r in renderers)
-            r.enabled = enabled;
-
-        if (hpBarRoot != null)
-            hpBarRoot.gameObject.SetActive(enabled);
-    }
-
+    //========================
+    // ダメージ処理
+    //========================
     public void ApplyDamage(int damage)
     {
         currentHP -= damage;
@@ -194,18 +140,17 @@ public class EnemyController : MonoBehaviour
         Destroy(gameObject);
     }
 
-    //===============================
+    //========================
     // プレイヤー死亡通知
-    //===============================
+    //========================
     void OnPlayerDied()
     {
-        // 即座に戻る
         TransitionToReturn();
     }
 
-    //===============================
+    //========================
     // 状態遷移
-    //===============================
+    //========================
     void TransitionToIdle()
     {
         currentState = State.Idle;
@@ -228,21 +173,9 @@ public class EnemyController : MonoBehaviour
         agent.SetDestination(startPosition);
     }
 
-    //===============================
-    // 補助
-    //===============================
-    bool IsForwardGroundSafe()
-    {
-        Vector3 forward = agent.desiredVelocity.sqrMagnitude > 0.01f ?
-                          agent.desiredVelocity.normalized :
-                          transform.forward;
-
-        Vector3 origin = transform.position + Vector3.up * groundCheckHeight;
-        Vector3 forwardPoint = origin + forward * forwardGroundCheckDistance;
-
-        return Physics.Raycast(forwardPoint, Vector3.down, 2f, floorLayer);
-    }
-
+    //========================
+    // 補助処理
+    //========================
     void FaceTarget(Vector3 targetPos)
     {
         Vector3 dir = targetPos - transform.position;
@@ -269,28 +202,7 @@ public class EnemyController : MonoBehaviour
 
         float target = (float)currentHP / maxHP;
         displayedHP = Mathf.Lerp(displayedHP, target, Time.deltaTime * 10f);
+
         hpFillImage.fillAmount = displayedHP;
-    }
-
-    void UpdateVisibilityByDistanceToPlayer()
-    {
-        if (player == null) return;
-
-        float dist = Vector3.Distance(transform.position, player.position);
-        bool shouldShow = (dist <= visibleDistance);
-        bool shouldHide = (dist >= hideDistance);
-
-        if (shouldHide)
-        {
-            foreach (var r in renderers) r.enabled = false;
-            if (hpBarRoot != null) hpBarRoot.gameObject.SetActive(false);
-            agent.isStopped = true;
-        }
-        else if (shouldShow)
-        {
-            foreach (var r in renderers) r.enabled = true;
-            if (hpBarRoot != null) hpBarRoot.gameObject.SetActive(true);
-            agent.isStopped = false;
-        }
     }
 }
