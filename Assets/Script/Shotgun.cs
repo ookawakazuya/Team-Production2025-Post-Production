@@ -20,7 +20,7 @@ public class Shotgun : MonoBehaviour
     [Header("弾の設定")]
     [SerializeField] private GameObject bulletPrefab; // 玉のプレハブ
     [SerializeField] private float bulletSpeed = 50.0f; // 飛ぶ速さ
-    [SerializeField] private float bulletLifeTime = 0.2f;  // 玉の寿命（秒）
+    [SerializeField] private float bulletLifeTime = 1.0f;  // 玉の寿命（秒）
     [SerializeField] private int maxReserve = 5000;  // 最大ストック弾数
 
     [Header("銃モデルの設定")]
@@ -84,6 +84,16 @@ public class Shotgun : MonoBehaviour
 
             // ✅ 透明対応のマテリアルを生成
             Material transparentMat = new Material(Shader.Find("Unlit/Transparent"));
+
+            // --- 🔧 透明描画設定を強制適用 ---
+            // transparentMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            // transparentMat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            // transparentMat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            // transparentMat.SetInt("_ZWrite", 0); // 深度書き込みを無効
+            // transparentMat.DisableKeyword("_ALPHATEST_ON");
+            // transparentMat.EnableKeyword("_ALPHABLEND_ON");
+            // transparentMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+
             lineRenderer.material = transparentMat;
 
             // --- 初期は透明にしておく ---
@@ -128,12 +138,16 @@ public class Shotgun : MonoBehaviour
             if (hit.collider.CompareTag("Enemy"))
             {
                 Debug.Log("Ray hit:");
-                // lineRenderer.enabled = true;
+                lineRenderer.enabled = true;
                 // endPoint = hit.point;
                 // crosshairImage.color = Color.red;
 
+                // 🟢 LineRenderer の始点・終点を毎フレーム更新
+                lineRenderer.SetPosition(0, rayOrigin.position);
+                lineRenderer.SetPosition(1, hit.point);
+
                 // 敵に当たった：赤色・非透明
-                SetLineAlpha(1f, Color.red);
+                //SetLineAlpha(1f, Color.red);
 
                 // --- トリガーが押されたら --- 
                 if (!isShooting && triggerValue > 0.9f)
@@ -147,8 +161,8 @@ public class Shotgun : MonoBehaviour
             else
             {
                 // 敵以外に当たった：透明
-                SetLineAlpha(0f, Color.red);
-                // lineRenderer.enabled = false;
+                //SetLineAlpha(0f, Color.red);
+                lineRenderer.enabled = false;
             }
 
         }
@@ -163,7 +177,7 @@ public class Shotgun : MonoBehaviour
     void LateUpdate()
     {
         // 何にも当たってない：透明
-        SetLineAlpha(0f, Color.red);
+        SetLineAlpha(1f, Color.red);
     }
 
     void Shoot() // --- 発砲用コード ---

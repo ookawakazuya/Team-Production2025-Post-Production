@@ -3350,7 +3350,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: rayDistance
-      value: 15
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: bulletPrefab
@@ -3360,6 +3360,10 @@ PrefabInstance:
       propertyPath: lineRenderer
       value: 
       objectReference: {fileID: 1080168838}
+    - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+      propertyPath: bulletLifeTime
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: rayOriginObject
       value: 
@@ -5698,7 +5702,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2002735746967027275, guid: d5c991a379703c84f8fc7ae81a8320cc, type: 3}
       propertyPath: m_TagString
-      value: Untagged
+      value: Enemy
       objectReference: {fileID: 0}
     - target: {fileID: 8691103505495242005, guid: d5c991a379703c84f8fc7ae81a8320cc, type: 3}
       propertyPath: m_Name
