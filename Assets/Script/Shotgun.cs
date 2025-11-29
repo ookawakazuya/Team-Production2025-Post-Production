@@ -21,7 +21,7 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private GameObject bulletPrefab; // 玉のプレハブ
     [SerializeField] private float bulletSpeed = 50.0f; // 飛ぶ速さ
     [SerializeField] private float bulletLifeTime = 0.2f;  // 玉の寿命（秒）
-    [SerializeField] private int maxReserve = 5;  // 最大ストック弾数
+    [SerializeField] private int maxReserve = 5000;  // 最大ストック弾数
 
     [Header("銃モデルの設定")]
     [SerializeField] private GameObject gunPrefab;
@@ -35,11 +35,11 @@ public class Shotgun : MonoBehaviour
     private UnityEngine.XR.InputDevice leftHandDevice;
 
     private int pelletCount = 1; // ショットガンの散弾数
-    private int currentAmmo = 1;  // 現在装填されている弾
+    private int currentAmmo = 5000;  // 現在装填されている弾
     private int reserveAmmo; // ストック弾
 
     private float spreadAngle = 0.2f; // 拡散角度
-    private float reloadThresholdY = -0.2f; // リロードを検出する高さ（Y位置）
+    private float reloadThresholdY = 0.3f; // リロードを検出する高さ（Y位置）
 
     private bool isShooting = false;
     private bool isReloading = false;
@@ -88,6 +88,7 @@ public class Shotgun : MonoBehaviour
 
             // --- 初期は透明にしておく ---
             SetLineAlpha(0f, Color.red);
+            // lineRenderer.enabled = false;
         }
 
         // --- ストック初期化 ---
@@ -127,6 +128,7 @@ public class Shotgun : MonoBehaviour
             if (hit.collider.CompareTag("Enemy"))
             {
                 Debug.Log("Ray hit:");
+                // lineRenderer.enabled = true;
                 // endPoint = hit.point;
                 // crosshairImage.color = Color.red;
 
@@ -146,12 +148,13 @@ public class Shotgun : MonoBehaviour
             {
                 // 敵以外に当たった：透明
                 SetLineAlpha(0f, Color.red);
+                // lineRenderer.enabled = false;
             }
 
         }
 
         // --- Y座標が一定より低くなったらリロード ---
-        if (!isReloading && currentAmmo == 0 && reserveAmmo > 0 && triggerValue < 0.1f && rayOrigin.position.y < reloadThresholdY)
+        if (reserveAmmo > 0 && triggerValue < 0.1f && rayOrigin.position.y < reloadThresholdY)
         {
             Reload();
         }
@@ -190,6 +193,13 @@ public class Shotgun : MonoBehaviour
 
             if (rb != null)
             {
+                // === 真っすぐ発射 ===
+                Vector3 shootDirection = rayOrigin.forward.normalized;
+
+                // 弾に速度を与える
+                rb.linearVelocity = shootDirection * bulletSpeed;
+
+#if false
                 // === 円形拡散の計算 ===
                 // ランダムな角度で拡散
                 // float randomYaw = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Yaw（左右方向）
@@ -217,6 +227,7 @@ public class Shotgun : MonoBehaviour
 
                 // 弾に速度を与える
                 rb.linearVelocity = spreadDir * bulletSpeed;
+#endif
             }
 
             // 一定時間後に弾を消す
