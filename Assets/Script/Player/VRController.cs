@@ -36,6 +36,8 @@ public class VRController : MonoBehaviour
     [SerializeField] float hookBreakDistance = 2.0f;   // プレイヤーがこの距離以上離れたら自動で解除
 
     [SerializeField] XRInteractorLineVisual lineVisual;
+    [SerializeField] HapticController haptic;
+    [SerializeField] bool isRightHand = true;   //左右の判断
 
     // 入力アセット（自作の VRHookActions）
     VRHookActions HookMap;
@@ -338,6 +340,9 @@ public class VRController : MonoBehaviour
 
             if (hookMaterial != null) commonLine.material = hookMaterial;
 
+            if (haptic != null)
+                haptic.VibrateWallHit(isRightHand);
+
             Debug.Log($"ShootHook Hit: {hit.collider.name} at {grapplePoint}");
         }
         else
@@ -448,6 +453,10 @@ public class VRController : MonoBehaviour
 
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
 
+        if (haptic != null)
+        {
+            haptic.VibrateArrivedWall(isRightHand);   
+        }
         Debug.Log("[VRController] StartCling: 壁に張り付き開始");
     }
 
