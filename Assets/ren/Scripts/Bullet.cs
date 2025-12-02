@@ -2,12 +2,24 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public int damage = 20;      // 基本ダメージ
-    public float destroyTime = 3f;
+    [Header("弾の基本設定")]
+    [SerializeField] private float bulletSpeed = 50.0f; // 飛ぶ速さ
 
+    public int damage = 20; // 基本ダメージ
+    public float destroyTime = 3f;　// 弾の寿命
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Destroy(gameObject, destroyTime);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        // --- 前方に進む ---
+        float moveDistance = bulletSpeed * Time.deltaTime;
+        transform.position += transform.forward * moveDistance;
     }
 
     void OnCollisionEnter(Collision collision)
@@ -32,6 +44,10 @@ public class Bullet : MonoBehaviour
             }
 
             enemy.ApplyDamage(finalDamage);
+        }
+        else
+        {
+            Debug.Log("Hit something else: " + collision.collider.name);
         }
 
         Destroy(gameObject);
