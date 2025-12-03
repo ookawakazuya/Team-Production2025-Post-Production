@@ -46,7 +46,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BottomPower: -0.29
+    - _BottomPower: -0.3
     - _FresnelPower: 0.5
     - _Metallic: 0
     - _QueueControl: 0
@@ -58,14 +58,18 @@ Material:
     - _VoronoiAmount: 0.2
     - _VoronoiAngleOffset: 0.2
     - _VoronoiScale: 3
+    - _Wave_Speed: 0.5
+    - _Wave_Speed_1: 0.3
+    - _Wave_Strength: 0.1
+    - _Wave_Strength_1: 0.3
     m_Colors:
     - _BottomRemap: {r: 0, g: 0.3, b: 0, a: 0}
     - _FresnelColor: {r: 9.51876, g: 1.103058, b: 0, a: 0}
     - _LavaColor: {r: 38.075047, g: 7.2397995, b: 0, a: 0}
-    - _LavaNormalSpeed: {r: 0, g: -0.01, b: 0, a: 0}
-    - _LavaRemap: {r: -0.05, g: 1, b: 0, a: 0}
-    - _LavaScale: {r: 5, g: 5, b: 0, a: 0}
-    - _LavaSpeed: {r: 0, g: -0.02, b: 0, a: 0}
+    - _LavaNormalSpeed: {r: 0, g: 0, b: 0, a: 0}
+    - _LavaRemap: {r: 0, g: 1, b: 0, a: 0}
+    - _LavaScale: {r: 4, g: 4, b: 0, a: 0}
+    - _LavaSpeed: {r: 0.05, g: 0.05, b: 0, a: 0}
     - _SimpleNoiseSpeed: {r: 0, g: 0.05, b: 0, a: 0}
     - _VoronoiSpeed: {r: 0, g: 0.01, b: 0, a: 0}
   m_BuildTextureStacks: []
