@@ -28,21 +28,21 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private GameObject gunPrefab;
     [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
 
-    private GameObject gunInstance;
-    // private GameObject currentBullet;
-    // private InputAction triggerAction;
-    private Transform rayOrigin;
-    private Transform bulletDirection;
-    private Vector3 rayDirection;
-    private Vector3 hitPoint; // Rayの終点を一時保存
     private UnityEngine.XR.InputDevice leftHandDevice;
+    private HapticController hapticC;
+    private GameObject gunInstance;
+    private Text reserveText;
+    private Transform rayOrigin;  // コントローラーの位置情報
+    private Transform bulletDirection;
+    private Vector3 rayDirection;  // ターゲットへの方向（正規化）
+    private Vector3 hitPoint; // Rayの終点を一時保存
 
     private int pelletCount = 1; // ショットガンの散弾数
     private int currentAmmo = 1;  // 現在装填されている弾
     private int reserveAmmo; // ストック弾
 
     private float spreadAngle = 0.2f; // 拡散角度
-    private float reloadThresholdY = 0.3f; // リロードを検出する高さ（Y位置）
+    private float reloadThresholdY = -2.9f; // リロードを検出する高さ（Y位置）
 
     private bool isShooting = false;
     private bool isReloading = false;
@@ -87,7 +87,10 @@ public class Shotgun : MonoBehaviour
             lineRenderer.positionCount = 2;
             lineRenderer.startWidth = 0.02f;
             lineRenderer.endWidth = 0.01f;
-            lineRenderer.enabled = false; // 最初は非表示
+
+            // --- 最初は非表示 ---
+            lineRenderer.enabled = false;
+
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
             lineRenderer.startColor = Color.red;
             lineRenderer.endColor = Color.red;
@@ -100,7 +103,24 @@ public class Shotgun : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // --- 自動生成を監視開始 ---
         StartCoroutine(AutoAmmoReserve());
+
+        // --- シーン内から取得 ---
+        hapticC = FindObjectOfType<HapticController>();
+        if (hapticC == null) { Debug.Log("HapticController がシーンに存在しません！"); }
+
+        // --- 名前で探す ---
+        GameObject textObj = GameObject.Find("ReserveText");
+        if (textObj != null)
+        {
+            reserveText = textObj.GetComponent<Text>();
+            UpdateReserveText();
+        }
+        else
+        {
+            Debug.LogWarning("ReserveText が見つかりません。名前を確認してください。");
+        }
     }
 
     // Update is called once per frame
@@ -119,8 +139,8 @@ public class Shotgun : MonoBehaviour
         leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out triggerValue);
 
         // --- 照準処理 ---
-        rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
-        rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）
+        rayOrigin = leftHandInteractor.transform;
+        rayDirection = rayOrigin.forward;
         bulletDirection = bulletrObject.transform;
 
         // --- LineRenderer を常に描画更新 ---
@@ -136,10 +156,10 @@ public class Shotgun : MonoBehaviour
                 shouldDraw = true;
 
                 // hit.collider で当たったオブジェクトの Collider にアクセスできる
-                Debug.Log("Ray hit: " + hit.collider.name);
+                // Debug.Log("Ray hit: " + hit.collider.name);
 
                 // 当たったオブジェクトのタグも確認できる
-                Debug.Log("Hit tag: " + hit.collider.tag);
+                // Debug.Log("Hit tag: " + hit.collider.tag);
 
                 Debug.DrawRay(rayOrigin.position, rayDirection * rayDistance, Color.red);
             }
@@ -154,11 +174,14 @@ public class Shotgun : MonoBehaviour
         if (!isShooting && triggerValue > 0.9f)
         {
             isShooting = true;
-            // ShootSingle();
-            Debug.Log("発射");
+            ShootSingle();
+            // Debug.Log("発射");
         }
         // --- トリガーが離されたら ---
         else if (isShooting && triggerValue < 0.1f) { isShooting = false; }
+
+        // Debug.Log("postion.y" + rayOrigin.position.y);
+        // Debug.Log($"Y座標: {rayOrigin.position.y}, 閾値: {reloadThresholdY}");
 
         // --- Y座標が一定より低くなったらリロード ---
         if (reserveAmmo > 0 && triggerValue < 0.1f && rayOrigin.position.y < reloadThresholdY)
@@ -167,11 +190,14 @@ public class Shotgun : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Lineをきれいに描画するための関数
+    /// </summary>
     void LateUpdate()
     {
         if (shouldDraw && hasHit)
         {
-            // 当たった先までLineRendererで描画
+            // --- 当たった先までLineRendererで描画 ---
             lineRenderer.enabled = true;
             lineRenderer.SetPosition(0, rayOriginObject.position);
             lineRenderer.SetPosition(1, hitPoint);
@@ -201,14 +227,17 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     void ShootSingle()
     {
-        // チェック（弾数確認）
+        // --- チェック（弾数確認）---
         if (!CanShoot()) return;
 
-        // 1発減る
+        // --- 1発減る ---
         currentAmmo--;
 
-        // 弾プレハブを発射位置・向きで生成
+        // --- 弾プレハブを発射位置・向きで生成 ---
         Instantiate(bulletPrefab, bulletDirection.position, bulletDirection.rotation);
+
+        // --- 振動を与える ---
+        if (hapticC != null) { hapticC.VibrateWallHit(false); }
     }
 
 #if false
@@ -291,7 +320,11 @@ public class Shotgun : MonoBehaviour
         }
 
         isReloading = true;
-        Invoke(nameof(ResetReload), 0.5f); // 短い待機で再リロード防止
+
+        // --- 短い待機で再リロード防止 ---
+        Invoke(nameof(ResetReload), 0.5f);
+
+        UpdateReserveText();
     }
 
     void ResetReload()
@@ -299,19 +332,34 @@ public class Shotgun : MonoBehaviour
         isReloading = false;
     }
 
+    /// <summary>
+    /// ストック自動生成
+    /// </summary>
     IEnumerator AutoAmmoReserve()
     {
         while (true)
         {
-            // ストックが3以下なら生成開始
+            // --- ストックが3以下なら生成開始 ---
             if (reserveAmmo < 3)
             {
                 reserveAmmo++;
+                UpdateReserveText();
                 Debug.Log("ストックを補充！ 現在：" + reserveAmmo);
             }
 
-            // 一定時間待機（例：5秒ごと）
+            // --- 一定時間待機（例：5秒ごと）---
             yield return new WaitForSeconds(autoAmmoDelay);
+        }
+    }
+
+    /// <summary>
+    /// ストックをtextで表示
+    /// </summary>
+    void UpdateReserveText()
+    {
+        if (reserveText != null)
+        {
+            reserveText.text = $"×{reserveAmmo}";
         }
     }
 }
