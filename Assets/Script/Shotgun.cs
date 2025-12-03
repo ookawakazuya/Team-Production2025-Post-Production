@@ -4,11 +4,13 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.XR;
 using System.Collections;
+using static UnityEditorInternal.ReorderableList;
 
 public class Shotgun : MonoBehaviour
 {
     [Header("XR 設定")]
-    [SerializeField] Transform leftHandInteractor;
+    [SerializeField] private Transform playerHead;
+    [SerializeField] private Transform leftHandInteractor;
 
     // [Header("照準用 UI")]
     // [SerializeField] private Image crosshairImage;
@@ -28,6 +30,10 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private GameObject gunPrefab;
     [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
 
+    [Header("サウンド")]
+    [SerializeField] private AudioSource audioSource; // AudioSource コンポーネント
+    [SerializeField] private AudioClip fireSE;
+
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
     private GameObject gunInstance;
@@ -42,7 +48,7 @@ public class Shotgun : MonoBehaviour
     private int reserveAmmo; // ストック弾
 
     private float spreadAngle = 0.2f; // 拡散角度
-    private float reloadThresholdY = -2.9f; // リロードを検出する高さ（Y位置）
+    private float reloadThresholdY = 0.6f; // リロードを検出する高さ（Y位置）
 
     private bool isShooting = false;
     private bool isReloading = false;
@@ -97,7 +103,7 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- ストック初期化 ---
-        reserveAmmo = 0;
+        reserveAmmo = 10;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -180,13 +186,19 @@ public class Shotgun : MonoBehaviour
         // --- トリガーが離されたら ---
         else if (isShooting && triggerValue < 0.1f) { isShooting = false; }
 
-        // Debug.Log("postion.y" + rayOrigin.position.y);
         // Debug.Log($"Y座標: {rayOrigin.position.y}, 閾値: {reloadThresholdY}");
 
         // --- Y座標が一定より低くなったらリロード ---
-        if (reserveAmmo > 0 && triggerValue < 0.1f && rayOrigin.position.y < reloadThresholdY)
+        if (reserveAmmo > 0 && triggerValue < 0.1f)
         {
-            Reload();
+            // --- 相対位置で判定 ---
+            float relativeY = rayOrigin.position.y - playerHead.position.y;
+            Debug.Log("relativeY：" + relativeY);
+            if (relativeY < reloadThresholdY)
+            {
+                Debug.Log("リロード開始");
+                Reload();
+            }
         }
     }
 
@@ -238,6 +250,9 @@ public class Shotgun : MonoBehaviour
 
         // --- 振動を与える ---
         if (hapticC != null) { hapticC.VibrateWallHit(false); }
+
+        // --- 発砲音 ---
+        if (audioSource != null && fireSE != null) { audioSource.PlayOneShot(fireSE); }
     }
 
 #if false
@@ -327,6 +342,9 @@ public class Shotgun : MonoBehaviour
         UpdateReserveText();
     }
 
+    /// <summary>
+    /// リロード用の関数
+    /// </summary>
     void ResetReload()
     {
         isReloading = false;
@@ -357,9 +375,14 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     void UpdateReserveText()
     {
-        if (reserveText != null)
-        {
-            reserveText.text = $"×{reserveAmmo}";
-        }
+        if (reserveText != null) { reserveText.text = $"×{reserveAmmo}"; }
+
+        // --- 位置調整 ---
+        Vector2 pos = reserveText.rectTransform.anchoredPosition;
+
+        if (reserveAmmo >= 10) { pos.x = -5; }
+        else { pos.x = -16; }
+
+        reserveText.rectTransform.anchoredPosition = pos;
     }
 }
