@@ -10,21 +10,19 @@ public class Shotgun : MonoBehaviour
     [Header("XR 設定")]
     [SerializeField] Transform leftHandInteractor;
 
-    [Header("照準用 UI")]
-    [SerializeField] private Image crosshairImage;
+    // [Header("照準用 UI")]
+    // [SerializeField] private Image crosshairImage;
 
     [Header("Ray 設定")]
     [SerializeField] private Transform rayOriginObject;
     [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private float rayDistance = 50f;
-    [SerializeField] private float displayTime = 0.5f; // 表示する時間（秒）
 
     [Header("弾の設定")]
     [SerializeField] private Transform bulletrObject;
     [SerializeField] private GameObject bulletPrefab; // 弾のプレハブ
-    [SerializeField] private float bulletSpeed = 50.0f; // 飛ぶ速さ
-    [SerializeField] private float bulletLifeTime = 0.2f;  // 玉の寿命（秒）
-    [SerializeField] private int maxReserve = 5000;  // 最大ストック弾数
+    [SerializeField] private int maxReserve = 1000;  // 最大ストック弾数
+    [SerializeField] private float autoAmmoDelay = 5f; // ストック生成間隔（秒）
 
     [Header("銃モデルの設定")]
     [SerializeField] private GameObject gunPrefab;
@@ -36,10 +34,11 @@ public class Shotgun : MonoBehaviour
     private Transform rayOrigin;
     private Transform bulletDirection;
     private Vector3 rayDirection;
+    private Vector3 hitPoint; // Rayの終点を一時保存
     private UnityEngine.XR.InputDevice leftHandDevice;
 
     private int pelletCount = 1; // ショットガンの散弾数
-    private int currentAmmo = 5000;  // 現在装填されている弾
+    private int currentAmmo = 1;  // 現在装填されている弾
     private int reserveAmmo; // ストック弾
 
     private float spreadAngle = 0.2f; // 拡散角度
@@ -47,6 +46,8 @@ public class Shotgun : MonoBehaviour
 
     private bool isShooting = false;
     private bool isReloading = false;
+    private bool hasHit = false; // Rayが当たったか
+    private bool shouldDraw = false; // LateUpdateで描画すべきかs
     private bool hideCoroutineRunning = false;
 
     private void Awake()
@@ -93,12 +94,13 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- ストック初期化 ---
-        reserveAmmo = maxReserve;
+        reserveAmmo = 0;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        StartCoroutine(AutoAmmoReserve());
     }
 
     // Update is called once per frame
@@ -116,37 +118,22 @@ public class Shotgun : MonoBehaviour
         float triggerValue = 0f;
         leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out triggerValue);
 
-
         // --- 照準処理 ---
         rayOrigin = leftHandInteractor.transform; // コントローラーの位置情報
         rayDirection = rayOrigin.forward; // ターゲットへの方向（正規化）
         bulletDirection = bulletrObject.transform;
 
         // --- LineRenderer を常に描画更新 ---
-        Vector3 origin = rayOriginObject.position;
-        Vector3 direction = rayOriginObject.forward;
-
         RaycastHit hit;
 
-
-        // --- Raycast 判定 ---
         if (triggerValue > 0.3f)
         {
-            Vector3 endPoint = rayOrigin.position + rayDirection * rayDistance; ;
-
+            // --- Raycast 判定 ---
             if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
             {
-                // 当たった先までLineRendererで描画
-                lineRenderer.enabled = true;
-                lineRenderer.SetPosition(0, origin);
-                lineRenderer.SetPosition(1, hit.point);
-
-                // Coroutineで一定時間後に非表示
-                // コルーチンを重複開始させない
-                if (!hideCoroutineRunning)
-                {
-                    StartCoroutine(HideLineAfterTime(displayTime));
-                }
+                hitPoint = hit.point;
+                hasHit = true;
+                shouldDraw = true;
 
                 // hit.collider で当たったオブジェクトの Collider にアクセスできる
                 Debug.Log("Ray hit: " + hit.collider.name);
@@ -156,6 +143,11 @@ public class Shotgun : MonoBehaviour
 
                 Debug.DrawRay(rayOrigin.position, rayDirection * rayDistance, Color.red);
             }
+            else { hasHit = false; }
+        }
+        else if (triggerValue < 0.1f)
+        {
+            shouldDraw = false;
         }
 
         // --- トリガーが押されたら --- 
@@ -177,26 +169,16 @@ public class Shotgun : MonoBehaviour
 
     void LateUpdate()
     {
-    }
-    void SetLineAlpha(float alpha, Color color)
-    {
-        if (lineRenderer == null) return;
-
-        // --- LineRenderer を常に描画更新 ---
-        Vector3 origin = rayOriginObject.position;
-        Vector3 direction = rayOriginObject.forward;
-        
-        Debug.DrawRay(origin, direction * rayDistance, Color.red); // Rayを可視化
-
-        // 始点と終点を更新（Ray の見た目）
-        lineRenderer.enabled = true;
-        lineRenderer.SetPosition(0, origin);
-        lineRenderer.SetPosition(1, origin + direction * rayDistance);
-
-        // --- 色を反映 ---
-        if (lineRenderer.material != null) {
-            color.a = Mathf.Clamp01(alpha); // 透明度設定
-            lineRenderer.material.color = color;
+        if (shouldDraw && hasHit)
+        {
+            // 当たった先までLineRendererで描画
+            lineRenderer.enabled = true;
+            lineRenderer.SetPosition(0, rayOriginObject.position);
+            lineRenderer.SetPosition(1, hitPoint);
+        }
+        else
+        {
+            lineRenderer.enabled = false;
         }
     }
 
@@ -215,7 +197,7 @@ public class Shotgun : MonoBehaviour
     }
 
     /// <summary>
-    /// 単発ショット
+    /// 単発ショット用コード
     /// </summary>
     void ShootSingle()
     {
@@ -229,6 +211,7 @@ public class Shotgun : MonoBehaviour
         Instantiate(bulletPrefab, bulletDirection.position, bulletDirection.rotation);
     }
 
+#if false
     void Shoot() // --- 発砲用コード ---
     {
         // --- 撃ったので1発減る ---
@@ -250,7 +233,6 @@ public class Shotgun : MonoBehaviour
                 // 弾に速度を与える
                 rb.linearVelocity = shootDirection * bulletSpeed;
 
-#if false
                 // === 円形拡散の計算 ===
                 // ランダムな角度で拡散
                 // float randomYaw = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Yaw（左右方向）
@@ -278,15 +260,18 @@ public class Shotgun : MonoBehaviour
 
                 // 弾に速度を与える
                 rb.linearVelocity = spreadDir * bulletSpeed;
-#endif
             }
 
             // 一定時間後に弾を消す
             Destroy(bullet, bulletLifeTime); // 一定時間後に玉を自動で消す
         }
     }
+#endif
 
-    void Reload() // --- リロード用コード ---
+    /// <summary>
+    /// リロード用コード
+    /// </summary>
+    void Reload()
     {
         if (currentAmmo > 0)
         {
@@ -305,24 +290,28 @@ public class Shotgun : MonoBehaviour
             Debug.Log("ストックがありません！");
         }
 
+        isReloading = true;
         Invoke(nameof(ResetReload), 0.5f); // 短い待機で再リロード防止
-    }
-
-    private IEnumerator HideLineAfterTime(float time)
-    {
-        hideCoroutineRunning = true;
-        yield return new WaitForSeconds(time);
-        lineRenderer.enabled = false;
-        hideCoroutineRunning = false;
-    }
-
-    void ClearBulletReference()
-    {
-        isShooting = false;
     }
 
     void ResetReload()
     {
         isReloading = false;
+    }
+
+    IEnumerator AutoAmmoReserve()
+    {
+        while (true)
+        {
+            // ストックが3以下なら生成開始
+            if (reserveAmmo < 3)
+            {
+                reserveAmmo++;
+                Debug.Log("ストックを補充！ 現在：" + reserveAmmo);
+            }
+
+            // 一定時間待機（例：5秒ごと）
+            yield return new WaitForSeconds(autoAmmoDelay);
+        }
     }
 }
