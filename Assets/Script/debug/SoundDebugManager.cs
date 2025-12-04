@@ -1,32 +1,45 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class SoundDebugManager : MonoBehaviour
 {
-    [Header("参照")]
-    [SerializeField] AudioSource targetAudioSource;   // デバッグ用オーディオ
-    [SerializeField] Slider volumeSlider;             // UI スライダー
+    [Header("Audio Mixer")]
+    [SerializeField] private AudioMixer audioMixer;
 
-    void Start()
+    [Header("Sliders")]
+    [SerializeField] private Slider masterSlider;
+    [SerializeField] private Slider bgmSlider;
+    [SerializeField] private Slider seSlider;
+    [SerializeField] private Slider voiceSlider;
+
+    private const string MASTER = "MasterVolume";
+    private const string BGM = "BGMVolume";
+    private const string SE = "SEVolume";
+    private const string VOICE = "VoiceVolume";
+
+    private void Start()
     {
-        if (targetAudioSource == null)
-            Debug.LogWarning("[SoundDebug] targetAudioSource が未設定です");
-
-        if (volumeSlider == null)
-            Debug.LogWarning("[SoundDebug] volumeSlider が未設定です");
-        else
-        {
-            // 初期値をAudioSourceに同期
-            volumeSlider.value = targetAudioSource.volume;
-
-            // スライダー変更時に音量を反映
-            volumeSlider.onValueChanged.AddListener(OnVolumeChanged);
-        }
+        Init(masterSlider, MASTER);
+        Init(bgmSlider, BGM);
+        Init(seSlider, SE);
+        Init(voiceSlider, VOICE);
     }
 
-    void OnVolumeChanged(float value)
+    private void Init(Slider slider, string param)
     {
-        if (targetAudioSource != null)
-            targetAudioSource.volume = value;
+        if (slider == null) return;
+
+        slider.minValue = 0.0001f;
+        slider.maxValue = 1f;
+        slider.value = 1f;
+
+        slider.onValueChanged.AddListener(value =>
+        {
+            audioMixer.SetFloat(param, Mathf.Log10(value) * 20f);
+        });
+
+        // 初期値を適用
+        audioMixer.SetFloat(param, Mathf.Log10(slider.value) * 20f);
     }
 }

@@ -6,9 +6,18 @@ public class HapticController : MonoBehaviour
     InputDevice leftHand;
     InputDevice rightHand;
 
+    float retractCooldown = 0f;
+
     void Start()
     {
         InitDevices();
+    }
+
+
+    public void Update()
+    {
+        if (retractCooldown > 0f)
+            retractCooldown -= Time.deltaTime;
     }
 
     void InitDevices()
@@ -82,5 +91,24 @@ public class HapticController : MonoBehaviour
             VibrateRight(amplitude, duration);
         else
             VibrateLeft(amplitude, duration);
+    }
+
+    /// <summary>
+    /// ƒƒCƒ„[ˆÚ“®’†‚ÌU“®
+    /// </summary>
+    /// <param name="isRightHand"></param>
+    public void VibrateRetracting(bool isRightHand)
+    {
+        if (retractCooldown > 0f) return;
+
+        float amplitude = 0.1f;
+        float duration = 0.02f;
+
+        if (isRightHand)
+            VibrateRight(amplitude, duration);
+        else
+            VibrateLeft(amplitude, duration);
+
+        retractCooldown = 0.05f;
     }
 }

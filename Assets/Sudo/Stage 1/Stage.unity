@@ -2008,6 +2008,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4536448008652211967, guid: 47f6cc5d4f9d551468ac0b3075c70022, type: 3}
   m_PrefabInstance: {fileID: 418232103}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &434393218 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1438584583665146177, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
+  m_PrefabInstance: {fileID: 1080168833}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &434595785
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4841,6 +4846,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 161770545234403556, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: targetCamera
+      value: 
+      objectReference: {fileID: 2133078241}
     - target: {fileID: 167288575327373750, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -4933,6 +4942,42 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: uiRay
+      value: 
+      objectReference: {fileID: 451322939}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: uiLineVisual
+      value: 
+      objectReference: {fileID: 451322938}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: vrController
+      value: 
+      objectReference: {fileID: 1080168837}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: gameLineVisual
+      value: 
+      objectReference: {fileID: 2081738535}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: rightController
+      value: 
+      objectReference: {fileID: 434393218}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: uiRayInteractor
+      value: 
+      objectReference: {fileID: 451322940}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: gameRayInteractor
+      value: 
+      objectReference: {fileID: 2081738536}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: gameRayinteractor
+      value: 
+      objectReference: {fileID: 2081738536}
+    - target: {fileID: 3976308721179975624, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: vrControllerScripts
+      value: 
+      objectReference: {fileID: 1080168837}
     - target: {fileID: 4340942752672152884, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: targetCamera
       value: 
@@ -4981,6 +5026,18 @@ PrefabInstance:
       propertyPath: vrControllerScripts
       value: 
       objectReference: {fileID: 1080168837}
+    - target: {fileID: 7556737461220217911, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7556737461220217911, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7556737461220217911, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
     - target: {fileID: 7857657668485602001, guid: 45dd24c6bb82ddd47b6da20a098304aa, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
