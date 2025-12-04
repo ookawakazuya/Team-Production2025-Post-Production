@@ -368,6 +368,11 @@ public class VRController : MonoBehaviour
             // Cling 維持
             tempGrappleFromCling = true;
 
+            // ★ Cling中にワイヤー発射した時の弱振動追加 here ★
+            if (haptic != null)
+                haptic.VibrateWallHit(isRightHand);
+
+
             if (hookMaterial != null) commonLine.material = hookMaterial;
 
             Debug.Log($"ShootHook_FromCling Hit: {hit.collider.name} (temp)");
@@ -411,6 +416,10 @@ public class VRController : MonoBehaviour
             currentSpeed = Mathf.Min(currentSpeed, maxMoveSpeed);
             Vector3 move = direction.normalized * currentSpeed * Time.deltaTime;
             characterController.Move(move);
+            // ★ 巻取り中の連続弱振動 here ★
+            if (haptic != null)
+                haptic.VibrateRetracting(isRightHand);
+
         }
         else
         {

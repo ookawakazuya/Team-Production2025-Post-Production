@@ -19,6 +19,6 @@ public class FollowCameraUI : MonoBehaviour
         // âÒì]ï‚ê≥
         Vector3 forward = targetCamera.forward;
         forward.y = 0; // êÖïΩÇÃÇ›
-        transform.rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(0, 180, 0);
+        transform.rotation = Quaternion.LookRotation(forward) * Quaternion.Euler(0, 0, 0);
     }
 }
