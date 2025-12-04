@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class VRController : MonoBehaviour
 {
@@ -71,7 +73,15 @@ public class VRController : MonoBehaviour
     bool prevGripPressed = false;    // 前フレームのグリップ状態
     bool cancelPressed = false;
 
-    
+    [Header("視覚警告（ビネット）")]
+    [SerializeField] Volume volume;
+    Vignette vignette;
+    [SerializeField] float warningStartRate = 3.0f;
+    // clingDuration の何割以下になったら暗くするか
+    [SerializeField] float maxVignetteIntensity = 0.45f;
+
+
+
 
     // プロパティ
     public bool IsRetracting => isRetracting;
@@ -94,6 +104,9 @@ public class VRController : MonoBehaviour
         }
 
         hookBreakDistance = Mathf.Max(hookBreakDistance, 0.1f);
+
+        if (volume != null)
+            volume.profile.TryGet(out vignette);
     }
 
     void OnEnable() => HookMap?.Enable();
@@ -127,10 +140,29 @@ public class VRController : MonoBehaviour
         {
             fallSpeed = 0f;
             clingTimer -= Time.deltaTime;
+            float rate = clingTimer / clingDuration;
+            float timeer = clingDuration / warningStartRate;
+
+            if (vignette != null)
+            {
+                if (rate <= timeer)
+                {
+                    float t = Mathf.InverseLerp(timeer, 0f, rate);
+                    vignette.intensity.value = Mathf.Lerp(0f, maxVignetteIntensity, t);
+                }
+                else
+                {
+                    // まだ余裕あるなら暗さリセット
+                    vignette.intensity.value = 0f;
+                }
+            }
             if (clingTimer <= 0f)
             {
                 Debug.Log("[VRController] 張り付き時間終了 -> 落下開始");
                 EndClingAndFall();
+
+                if (vignette != null)
+                    vignette.intensity.value = 0f; // リセット
             }
         }
         else
@@ -368,7 +400,7 @@ public class VRController : MonoBehaviour
             // Cling 維持
             tempGrappleFromCling = true;
 
-            // ★ Cling中にワイヤー発射した時の弱振動追加 here ★
+            //  Cling中にワイヤー発射した時の弱振動追加
             if (haptic != null)
                 haptic.VibrateWallHit(isRightHand);
 
@@ -416,7 +448,7 @@ public class VRController : MonoBehaviour
             currentSpeed = Mathf.Min(currentSpeed, maxMoveSpeed);
             Vector3 move = direction.normalized * currentSpeed * Time.deltaTime;
             characterController.Move(move);
-            // ★ 巻取り中の連続弱振動 here ★
+            // 巻取り中の連続弱振動 here 
             if (haptic != null)
                 haptic.VibrateRetracting(isRightHand);
 

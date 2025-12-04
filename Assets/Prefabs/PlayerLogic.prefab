@@ -1802,6 +1802,9 @@ MonoBehaviour:
   haptic: {fileID: 262828655666202814}
   isRightHand: 1
   rotationSpeed: 90
+  volume: {fileID: 0}
+  warningStartRate: 3
+  maxVignetteIntensity: 0.45
 --- !u!114 &5007148432676511451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2150,7 +2153,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
