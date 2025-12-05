@@ -183,6 +183,7 @@ public class Shotgun : MonoBehaviour
         {
             isShooting = true;
             ShootSingle();
+            // ShootSpread();
             // Debug.Log("発射");
         }
         // --- トリガーが離されたら ---
@@ -191,12 +192,20 @@ public class Shotgun : MonoBehaviour
         // Debug.Log($"Y座標: {rayOrigin.position.y}, 閾値: {reloadThresholdY}");
 
         // --- Y座標が一定より低くなったらリロード ---
-        if (reserveAmmo > 0 && triggerValue < 0.1f)
+        if (triggerValue < 0.1f)
         {
             // --- 相対位置で判定 ---
             float relativeY = rayOrigin.position.y - playerHead.position.y;
             Debug.Log("relativeY：" + relativeY);
-            if (relativeY < reloadThresholdY)
+
+            // --- 無限モード時 ---
+            if (infiniteAmmo && relativeY < reloadThresholdY)
+            {
+                Debug.Log("リロード開始（無限モード）");
+                Reload();
+            }
+            // --- 通常モード時 ---
+            else if (!infiniteAmmo && reserveAmmo > 0 && relativeY < reloadThresholdY)
             {
                 Debug.Log("リロード開始");
                 Reload();
