@@ -1,31 +1,23 @@
-﻿// GameManager.cs
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ゲーム全体管理クラス
+/// ゲーム全体を管理するクラス
 /// - シングルトン
-/// - Enemy の登録管理（Start時に自動登録）
-/// - プレイヤーからの距離に応じて Enemy のアクティブ/非アクティブを切り替える（見た目や処理負荷軽減）
-///   -> 実際のレンダリング ON/OFF は EnemyController 側で行う（EnemyController.SetEnabled）
+/// - Enemy の登録・復活管理
+/// - プレイヤーのリスポーンポイント管理
 /// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     [Header("初期スタート地点")]
-    [Tooltip("プレイヤーのリスポーン起点")]
     public Transform startPoint;
 
     Transform currentRespawnPoint;
 
     [Header("Enemy管理")]
-    [Tooltip("シーン内の Enemy を自動登録（空の場合）")]
     public List<EnemyController> enemies = new List<EnemyController>();
-
-    [Header("最適化設定")]
-    [Tooltip("この距離より離れている敵は非アクティブ扱いにする")]
-    public float enemyActiveDistance = 60f;
 
     Transform player;
 
@@ -49,9 +41,8 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (player == null) player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        if (player == null) return;
-
+        if (player == null)
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
     public Transform GetRespawnPoint() => currentRespawnPoint;
@@ -63,7 +54,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 動的に Enemy を登録したい場合に呼ぶ（Spawner などから）
+    /// Enemy を動的に登録
     /// </summary>
     public void RegisterEnemy(EnemyController enemy)
     {
@@ -71,9 +62,15 @@ public class GameManager : MonoBehaviour
             enemies.Add(enemy);
     }
 
-    public void UnregisterEnemy(EnemyController enemy)
+    /// <summary>
+    /// プレイヤーが死亡後リスポーン時に敵を全復活させる
+    /// </summary>
+    public void RespawnAllEnemies()
     {
-        if (enemies.Contains(enemy))
-            enemies.Remove(enemy);
+        foreach (var enemy in enemies)
+        {
+            if (enemy == null) continue;
+            enemy.Respawn();
+        }
     }
 }
