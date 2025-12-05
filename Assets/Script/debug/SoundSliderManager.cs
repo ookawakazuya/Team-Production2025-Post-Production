@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 
-public class SoundDebugManager : MonoBehaviour
+public class SoundSliderManager : MonoBehaviour
 {
     [Header("Audio Mixer")]
     [SerializeField] private AudioMixer audioMixer;

@@ -41,6 +41,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 101386168158630467}
     m_Modifications:
     - target: {fileID: 1451423851779964504, guid: 0fcb2c95a21d50e44b654c2e7814aa66, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 1451423851779964504, guid: 0fcb2c95a21d50e44b654c2e7814aa66, type: 3}
       propertyPath: m_TagString
       value: Wall
       objectReference: {fileID: 0}
@@ -52,6 +56,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 61ed0cb1ba84a934da2c86bcf307d25e, type: 2}
+    - target: {fileID: 5724601185760301915, guid: 0fcb2c95a21d50e44b654c2e7814aa66, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5724601185760301915, guid: 0fcb2c95a21d50e44b654c2e7814aa66, type: 3}
       propertyPath: m_IsActive
       value: 1
