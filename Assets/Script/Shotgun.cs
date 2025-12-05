@@ -35,6 +35,10 @@ public class Shotgun : MonoBehaviour
     // [SerializeField] private AudioSource audioSource; // AudioSource コンポーネント
     // [SerializeField] private AudioClip fireSE;
 
+    [Header("振動設定")]
+    [SerializeField] HapticController haptic;
+    [SerializeField] bool isLeftHand = true;   //左右の判断
+
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
     private EnemyController enemyC;
@@ -250,6 +254,10 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     void ShootSingle()
     {
+        if (haptic != null)
+            haptic.VibrateFiring(isLeftHand);
+        if (haptic != null)
+         haptic.VibrateLingeringSound(isLeftHand);
         // --- チェック（弾数確認）---
         if (!CanShoot()) return;
 
@@ -317,6 +325,8 @@ public class Shotgun : MonoBehaviour
             return;
         }
 
+        if (haptic != null)
+         haptic.VibrateReload(isLeftHand);
         // --- 無限モード ---
         if (infiniteAmmo)
         {
