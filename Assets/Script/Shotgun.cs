@@ -196,7 +196,7 @@ public class Shotgun : MonoBehaviour
         {
             // --- 相対位置で判定 ---
             float relativeY = rayOrigin.position.y - playerHead.position.y;
-            Debug.Log("relativeY：" + relativeY);
+            // Debug.Log("relativeY：" + relativeY);
 
             // --- 無限モード時 ---
             if (infiniteAmmo && relativeY < reloadThresholdY)
@@ -261,6 +261,12 @@ public class Shotgun : MonoBehaviour
 
         // --- 振動を与える ---
         if (hapticC != null) { hapticC.VibrateWallHit(false); }
+
+        // デバッグ用
+        if (SoundManager.Instance == null)
+            Debug.LogError("SoundManager.Instance が null です！");
+        else
+            Debug.Log("SoundManager 再生チェック OK");
 
         // --- 発砲音 ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
