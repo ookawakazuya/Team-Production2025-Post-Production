@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &7198699584048696590
+--- !u!1 &2687576182194575797
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,40 +8,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3411119746368194907}
-  - component: {fileID: 8427239352436909031}
-  - component: {fileID: 4442643099399988386}
+  - component: {fileID: 6028242955554130778}
+  - component: {fileID: 3820349321384387539}
+  - component: {fileID: 7800968012304455962}
   m_Layer: 0
-  m_Name: Fog
+  m_Name: EnemyDeathFog
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3411119746368194907
+  m_IsActive: 0
+--- !u!4 &6028242955554130778
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7198699584048696590}
+  m_GameObject: {fileID: 2687576182194575797}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.7, z: -9.05}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!2083052967 &8427239352436909031
+--- !u!2083052967 &3820349321384387539
 VisualEffect:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7198699584048696590}
+  m_GameObject: {fileID: 2687576182194575797}
   m_Enabled: 1
-  m_Asset: {fileID: 8926484042661614526, guid: bfebde70c09c58c4d9e0435cd4f50c7c, type: 3}
+  m_Asset: {fileID: 8926484042661614526, guid: 0820a922697f6a84f8a29e305a01832b, type: 3}
   m_InitialEventName: OnPlay
   m_InitialEventNameOverriden: 0
   m_StartSeed: 0
@@ -71,15 +71,15 @@ VisualEffect:
       m_Array: []
     m_Bool:
       m_Array: []
---- !u!73398921 &4442643099399988386
+--- !u!73398921 &7800968012304455962
 VFXRenderer:
   serializedVersion: 1
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7198699584048696590}
-  m_Enabled: 1
+  m_GameObject: {fileID: 2687576182194575797}
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
