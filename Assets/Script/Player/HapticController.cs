@@ -116,10 +116,6 @@ public class HapticController : MonoBehaviour
     /// èeÇÃîΩìÆ
     /// </summary>
     /// <param name="isLeftHand"></param>
-    ///[SerializeField] HapticController haptic;
-    ///[SerializeField] bool isLeftHand = true;   //ç∂âEÇÃîªíf
-    ///if (haptic != null)
-    ///haptic.VibrateFiring(isLeftHand);
     public void VibrateFiring(bool isLeftHand)
     {
         float amplitude = 1.0f;
@@ -135,8 +131,7 @@ public class HapticController : MonoBehaviour
     /// ó]âC
     /// </summary>
     /// <param name="isLeftHand"></param>
-    ///if (haptic != null)
-    ///haptic.VibrateLingeringSound(isLeftHand);
+
     public void VibrateLingeringSound(bool isLeftHand)
     {
         float amplitude = 0.3f;
@@ -149,11 +144,9 @@ public class HapticController : MonoBehaviour
     }
 
     /// <summary>
-    /// ó]âC
+    /// ÉäÉçÅ[Éh
     /// </summary>
     /// <param name="isLeftHand"></param>
-    ///if (haptic != null)
-    ///haptic.VibrateReload(isLeftHand);
     public void VibrateReload(bool isLeftHand)
     {
         float amplitude = 0.1f;
