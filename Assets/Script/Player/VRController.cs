@@ -81,6 +81,10 @@ public class VRController : MonoBehaviour
     [SerializeField] float maxVignetteIntensity = 0.45f;
 
 
+    [Header("サウンド関係")]
+    [SerializeField] char[] SoundNames;
+
+
 
 
     // プロパティ
@@ -229,6 +233,7 @@ public class VRController : MonoBehaviour
     void OnTriggerDown()
     {
         lineVisual.enabled = false;
+        SoundManager.Instance.PlaySE("SE_Hook_01");
         // Cling 中かつトリガーDownなら「一時フック」を狙う（Cling 維持）
         if (isClinging)
         {
@@ -361,6 +366,7 @@ public class VRController : MonoBehaviour
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
+            SoundManager.Instance.PlaySE("SE_Hook_02");
             grapplePoint = hit.point;
             aimHitPoint = hit.point;     // Aim 先端をセット（先端固定用）
             hasAimHitPoint = true;
@@ -391,6 +397,7 @@ public class VRController : MonoBehaviour
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
+            SoundManager.Instance.PlaySE("SE_Hook_02");
             grapplePoint = hit.point;
             aimHitPoint = hit.point;
             hasAimHitPoint = true;
@@ -421,6 +428,7 @@ public class VRController : MonoBehaviour
     void StartRetract()
     {
         if (!isGrappling) return;
+        SoundManager.Instance.PlaySE("SE_Hook_03");//ループSEに変更予定
         isRetracting = true;
         currentSpeed = 0f;
         hasAimHitPoint = false; // 移動開始したら Aim の保持は不要
@@ -428,7 +436,7 @@ public class VRController : MonoBehaviour
         // 一時フックからの巻取りなら、張り付きフラグはキャンセルしておく
         tempGrappleFromCling = false;
         isClinging = false;
-
+        SoundManager.Instance.StopSE();
         Debug.Log("[VRController] StartRetract: 巻き取り開始");
     }
 
@@ -472,6 +480,7 @@ public class VRController : MonoBehaviour
             if (hitWall)
             {
                 StartCling(grapplePoint, hitObj);
+                SoundManager.Instance.StopSE();//のちにループ用に置き換え
             }
             else
             {
@@ -498,6 +507,7 @@ public class VRController : MonoBehaviour
         {
             haptic.VibrateArrivedWall(isRightHand);   
         }
+        SoundManager.Instance.PlaySE("SE_Harituki");
         Debug.Log("[VRController] StartCling: 壁に張り付き開始");
     }
 
@@ -506,6 +516,8 @@ public class VRController : MonoBehaviour
     {
         isClinging = false;
         ReleaseHook();
+
+        SoundManager.Instance.StopSE();
         // 落下は ApplyGravity で処理される
     }
 
@@ -520,7 +532,7 @@ public class VRController : MonoBehaviour
         hasAimHitPoint = false;
 
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
-
+        SoundManager.Instance.StopSE();//のちにループ停止を挟む
         Debug.Log("[VRController] ReleaseHook: フック解除");
     }
 
@@ -530,9 +542,20 @@ public class VRController : MonoBehaviour
     void ApplyGravity()
     {
         if (characterController == null) return;
+        bool isCurrentlyGrounded = characterController.isGrounded;
 
-        if (characterController.isGrounded)
-            fallSpeed = 0f;
+        if(isCurrentlyGrounded)
+        {
+            if (fallSpeed < 0f)
+            {
+                fallSpeed = 0f;
+                SoundManager.Instance.PlaySE("SE_Player_01");
+            }
+            else
+            {
+                fallSpeed = 0f;
+            }
+        }
         else
         {
             fallSpeed += gravity * Time.deltaTime;
