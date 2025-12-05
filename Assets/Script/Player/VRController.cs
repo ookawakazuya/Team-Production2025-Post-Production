@@ -428,7 +428,7 @@ public class VRController : MonoBehaviour
     void StartRetract()
     {
         if (!isGrappling) return;
-        SoundManager.Instance.PlaySE("SE_Hook_03");//ループSEに変更予定
+        SoundManager.Instance.PlaySELoop("SE_Hook_03");//ループSEに変更予定
         isRetracting = true;
         currentSpeed = 0f;
         hasAimHitPoint = false; // 移動開始したら Aim の保持は不要
@@ -480,7 +480,7 @@ public class VRController : MonoBehaviour
             if (hitWall)
             {
                 StartCling(grapplePoint, hitObj);
-                SoundManager.Instance.StopSE();//のちにループ用に置き換え
+                SoundManager.Instance.StopSELoop();//のちにループ用に置き換え
             }
             else
             {
@@ -532,7 +532,7 @@ public class VRController : MonoBehaviour
         hasAimHitPoint = false;
 
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
-        SoundManager.Instance.StopSE();//のちにループ停止を挟む
+        SoundManager.Instance.StopSELoop();//のちにループ停止を挟む
         Debug.Log("[VRController] ReleaseHook: フック解除");
     }
 
