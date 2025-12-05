@@ -1,266 +1,214 @@
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
+using UnityEngine.VFX;
 
-/// <summary>
-/// 敵キャラクターの基本挙動:
-/// - Idle / Chase / Return の3ステート
-/// - HP管理
-/// - Player死亡時はReturn
-/// - 倒されたら非アクティブ化
-/// - GameManager の Respawn() で復活
-/// </summary>
-[RequireComponent(typeof(NavMeshAgent))]
 public class EnemyController : MonoBehaviour
 {
-    //========================
-    // 死亡イベント
-    //========================
-    public static event System.Action<EnemyController> OnEnemyDied;
-    public bool IsDead { get; private set; } = false;
-
     public enum State { Idle, Chase, Return }
 
     [Header("基本設定")]
-    [SerializeField] float moveSpeed = 3f;
-    [SerializeField] float rotationSpeed = 8f;
+    public float maxHP = 100f;
+    public float moveSpeed = 3f;
+    public float rotationSpeed = 8f;
+    public float chaseDistance = 10f;
+    public float returnDistance = 15f;
 
-    [Header("検知距離")]
-    [SerializeField] float chaseDistance = 15f;
-    [SerializeField] float returnDistance = 16f;
+    [Header("視認距離スポーン管理")]
+    public float spawnDistance = 15f;
+    public float hideDistance = 16f;
 
-    [Header("戻り動作")]
-    [SerializeField] float returnStopThreshold = 0.25f;
+    [Header("VFX")]
+    public VisualEffect spawnVFX;
+    public VisualEffect deathVFX;
 
-    [Header("HP設定")]
-    public int maxHP = 100;
-    public int currentHP;
+    Transform player;
+    NavMeshAgent agent;
 
-    [Header("当たり判定コライダー")]
-    public Collider bodyCollider;
-    public Collider headCollider;
-
-    [Header("UI")]
-    public Transform hpBarRoot;
-    public Image hpFillImage;
+    // HP管理
+    float currentHP;
     float displayedHP = 1f;
 
-    NavMeshAgent agent;
-    Transform player;
-
+    // 敵の初期位置
     Vector3 startPosition;
     Quaternion startRotation;
 
+    // 状態
     State currentState = State.Idle;
+
+    // 非表示管理
+    bool isVisible = false;
+
+    // 死亡状態
+    public bool IsDead { get; private set; } = false;
+
+    // コライダー（★ public に変更）
+    public Collider bodyCollider;
+    public Collider headCollider;
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.updateRotation = false;
         agent.speed = moveSpeed;
 
-        currentHP = maxHP;
+        bodyCollider = GetComponent<Collider>();
+        headCollider = transform.Find("HeadCollider")?.GetComponent<Collider>();
+
+        startPosition = transform.position;
+        startRotation = transform.rotation;
     }
 
     void Start()
     {
-        startPosition = transform.position;
-        startRotation = transform.rotation;
-
+        currentHP = maxHP;
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
 
-        GameManager.Instance.RegisterEnemy(this);
-    }
-
-    void OnEnable()
-    {
-        PlayerDeath.OnPlayerDied += OnPlayerDied;
-    }
-
-    void OnDisable()
-    {
-        PlayerDeath.OnPlayerDied -= OnPlayerDied;
+        GameManager.Instance?.RegisterEnemy(this);
     }
 
     void Update()
     {
-        if (IsDead) return;
+        if (player == null) return;
 
-        if (player == null)
+        float dist = Vector3.Distance(player.position, transform.position);
+
+        if (!IsDead)
         {
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
-            if (player == null) return;
+            if (!isVisible && dist < spawnDistance)
+                ShowEnemy();
+
+            if (isVisible && dist > hideDistance)
+                HideEnemy();
         }
 
-        float dist = Vector3.Distance(transform.position, player.position);
+        if (!isVisible) return;
+        if (IsDead) return;
 
         switch (currentState)
         {
             case State.Idle:
-                agent.isStopped = true;
                 if (dist <= chaseDistance)
-                    TransitionToChase();
+                    currentState = State.Chase;
                 break;
 
             case State.Chase:
-                if (dist >= returnDistance)
-                    TransitionToReturn();
-                else
-                    HandleChase();
+                agent.isStopped = false;
+                agent.SetDestination(player.position);
+
+                if (dist > returnDistance)
+                    currentState = State.Return;
                 break;
 
             case State.Return:
-                if (dist <= chaseDistance)
-                    TransitionToChase();
-                else
-                    HandleReturn();
+                agent.isStopped = false;
+                agent.SetDestination(startPosition);
+
+                if (Vector3.Distance(transform.position, startPosition) < 1f)
+                {
+                    currentState = State.Idle;
+                    agent.isStopped = true;
+                }
                 break;
         }
-
-        UpdateHPBarRotation();
-        UpdateHPFillSmooth();
     }
 
-    //------------------------
-    // 追跡
-    //------------------------
-    void HandleChase()
-    {
-        agent.isStopped = false;
-        agent.SetDestination(player.position);
-        FaceTarget(player.position);
-    }
-
-    //------------------------
-    // 元の位置へ戻る
-    //------------------------
-    void HandleReturn()
-    {
-        agent.isStopped = false;
-        agent.SetDestination(startPosition);
-        FaceTarget(startPosition);
-
-        if (Vector3.Distance(transform.position, startPosition) <= returnStopThreshold)
-            TransitionToIdle();
-    }
-
-    //------------------------
-    // ダメージ処理
-    //------------------------
-    public void ApplyDamage(int damage)
+    // =========================================================
+    // ■ HP処理
+    // =========================================================
+    public void TakeDamage(float damage)
     {
         if (IsDead) return;
 
         currentHP -= damage;
-        if (currentHP < 0) currentHP = 0;
+        displayedHP = currentHP / maxHP;
 
-        if (currentHP == 0)
+        if (currentHP <= 0f)
             Die();
     }
 
+    // ★ Bullet.cs 用の互換関数
+    public void ApplyDamage(float damage)
+    {
+        TakeDamage(damage);
+    }
+
+    // =========================================================
+    // ■ 死亡処理
+    // =========================================================
     void Die()
     {
-        if (IsDead) return;
-
         IsDead = true;
+        isVisible = false;
 
-        OnEnemyDied?.Invoke(this);
+        agent.isStopped = true;
+        agent.enabled = false;
 
-        // 破壊ではなく非アクティブ化
+        bodyCollider.enabled = false;
+        if (headCollider != null) headCollider.enabled = false;
+
+        if (deathVFX) Instantiate(deathVFX, transform.position, Quaternion.identity);
+
+        Shotgun shotgun = FindFirstObjectByType<Shotgun>(); //ここにショットガンの玉追加書いたよ！！！！！！！！
+        if (shotgun != null)
+            shotgun.plusAmmo();
+
         gameObject.SetActive(false);
     }
 
-    //------------------------
-    // プレイヤー死亡
-    //------------------------
-    void OnPlayerDied()
+    // =========================================================
+    // ■ プレイヤー距離で出現
+    // =========================================================
+    void ShowEnemy()
     {
-        if (IsDead) return;
-        TransitionToReturn();
-    }
-
-    //------------------------
-    // ステート遷移
-    //------------------------
-    void TransitionToIdle()
-    {
-        currentState = State.Idle;
-        agent.ResetPath();
-        agent.isStopped = true;
-    }
-
-    void TransitionToChase()
-    {
-        currentState = State.Chase;
-        agent.isStopped = false;
-        if (player != null)
-            agent.SetDestination(player.position);
-    }
-
-    void TransitionToReturn()
-    {
-        currentState = State.Return;
-        agent.isStopped = false;
-        agent.SetDestination(startPosition);
-    }
-
-    //------------------------
-    // 復活処理（GameManagerが呼ぶ）
-    //------------------------
-    public void Respawn()
-    {
-        // 完全復活
+        isVisible = true;
         gameObject.SetActive(true);
 
-        transform.position = startPosition;
-        transform.rotation = startRotation;
+        agent.enabled = true;
+        agent.isStopped = false;
+
+        if (spawnVFX)
+            Instantiate(spawnVFX, transform.position, Quaternion.identity);
+    }
+
+    // =========================================================
+    // ■ プレイヤー距離で非表示
+    // =========================================================
+    void HideEnemy()
+    {
+        isVisible = false;
+
+        agent.isStopped = true;
+        agent.enabled = false;
+
+        if (deathVFX)
+            Instantiate(deathVFX, transform.position, Quaternion.identity);
+
+        gameObject.SetActive(false);
+    }
+
+    // =========================================================
+    // ■ GameManager から呼ばれる「完全復活」
+    // =========================================================
+    public void Respawn()
+    {
+        IsDead = false;
+        isVisible = false;
 
         currentHP = maxHP;
         displayedHP = 1f;
 
-        IsDead = false;
+        transform.position = startPosition;
+        transform.rotation = startRotation;
+
+        agent.enabled = true;
+        agent.Warp(startPosition);
+        agent.isStopped = true;
+        agent.ResetPath();
 
         bodyCollider.enabled = true;
         if (headCollider != null) headCollider.enabled = true;
 
-        agent.enabled = true;
-        agent.Warp(startPosition);
-
         currentState = State.Idle;
-        agent.ResetPath();
-        agent.isStopped = true;
-    }
 
-    //------------------------
-    // 補助処理
-    //------------------------
-    void FaceTarget(Vector3 targetPos)
-    {
-        Vector3 dir = targetPos - transform.position;
-        dir.y = 0;
-        if (dir.sqrMagnitude < 0.001f) return;
-
-        Quaternion targetRot = Quaternion.LookRotation(dir);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * rotationSpeed);
-    }
-
-    void UpdateHPBarRotation()
-    {
-        if (hpBarRoot == null || player == null) return;
-
-        Vector3 dir = hpBarRoot.position - player.position;
-        dir.y = 0;
-
-        hpBarRoot.rotation = Quaternion.LookRotation(dir);
-    }
-
-    void UpdateHPFillSmooth()
-    {
-        if (hpFillImage == null) return;
-
-        float target = (float)currentHP / maxHP;
-        displayedHP = Mathf.Lerp(displayedHP, target, Time.deltaTime * 10f);
-
-        hpFillImage.fillAmount = displayedHP;
+        gameObject.SetActive(false);
     }
 }
