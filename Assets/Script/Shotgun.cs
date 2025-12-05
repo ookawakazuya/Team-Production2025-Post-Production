@@ -25,17 +25,19 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private GameObject bulletPrefab; // 弾のプレハブ
     [SerializeField] private int maxReserve = 1000;  // 最大ストック弾数
     [SerializeField] private float autoAmmoDelay = 5f; // ストック生成間隔（秒）
+    [SerializeField] private bool infiniteAmmo = false; // デバッグ用トグル
 
-    [Header("銃モデルの設定")]
-    [SerializeField] private GameObject gunPrefab;
-    [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
+    // [Header("銃モデルの設定")]
+    // [SerializeField] private GameObject gunPrefab;
+    // [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
 
-    [Header("サウンド")]
-    [SerializeField] private AudioSource audioSource; // AudioSource コンポーネント
-    [SerializeField] private AudioClip fireSE;
+    // [Header("サウンド")]
+    // [SerializeField] private AudioSource audioSource; // AudioSource コンポーネント
+    // [SerializeField] private AudioClip fireSE;
 
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
+    private EnemyController enemyC;
     private GameObject gunInstance;
     private Text reserveText;
     private Transform rayOrigin;  // コントローラーの位置情報
@@ -79,13 +81,13 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- 銃を装備 ---
-        if (gunPrefab != null)
-        {
-            gunInstance = Instantiate(gunPrefab);
-            gunInstance.transform.SetParent(leftHandInteractor.transform);
-            gunInstance.transform.localPosition = gunOffset;
-            gunInstance.transform.localRotation = Quaternion.identity;
-        }
+        /* if (gunPrefab != null)
+           {
+               gunInstance = Instantiate(gunPrefab);
+               gunInstance.transform.SetParent(leftHandInteractor.transform);
+               gunInstance.transform.localPosition = gunOffset;
+               gunInstance.transform.localRotation = Quaternion.identity;
+           } */
 
         // --- 射線の可視化 ---
         if (lineRenderer != null)
@@ -103,7 +105,7 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- ストック初期化 ---
-        reserveAmmo = 10;
+        reserveAmmo = 0;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -113,7 +115,7 @@ public class Shotgun : MonoBehaviour
         StartCoroutine(AutoAmmoReserve());
 
         // --- シーン内から取得 ---
-        hapticC = FindObjectOfType<HapticController>();
+        hapticC = FindFirstObjectByType<HapticController>();
         if (hapticC == null) { Debug.Log("HapticController がシーンに存在しません！"); }
 
         // --- 名前で探す ---
@@ -252,65 +254,42 @@ public class Shotgun : MonoBehaviour
         if (hapticC != null) { hapticC.VibrateWallHit(false); }
 
         // --- 発砲音 ---
-        if (audioSource != null && fireSE != null) { audioSource.PlayOneShot(fireSE); }
+        SoundManager.Instance?.PlaySE("SE_Gun_01");
     }
 
-#if false
-    void Shoot() // --- 発砲用コード ---
+    /// <summary>
+    /// 拡散ショット用コード
+    /// </summary>
+    void ShootSpread()
     {
-        // --- 撃ったので1発減る ---
+        // --- チェック（弾数確認）---
+        if (!CanShoot()) return;
+
+        // --- 1発減る ---
         currentAmmo--;
 
+        // --- 拡散発射 ---
         for (int i = 0; i < pelletCount; i++)
         {
-            // 玉を生成（向きもfirePointの向きに合わせる）
-            GameObject bullet = Instantiate(bulletPrefab, rayOrigin.position, rayOrigin.rotation);
+            // 拡散方向を計算
+            Vector3 forward = rayOrigin.forward;
+            Vector3 right = rayOrigin.right;
+            Vector3 up = rayOrigin.up;
 
-            // Rigidbodyが付いていることを確認して速度を設定
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+            // 単位円内のランダム点（角度ベースで拡散）
+            Vector2 circle = Random.insideUnitCircle * Mathf.Tan(spreadAngle * Mathf.Deg2Rad);
+            Vector3 spreadDir = (forward + right * circle.x + up * circle.y).normalized;
 
-            if (rb != null)
-            {
-                // === 真っすぐ発射 ===
-                Vector3 shootDirection = rayOrigin.forward.normalized;
+            // 弾の向きを Quaternion で設定
+            Quaternion spreadRot = Quaternion.LookRotation(spreadDir);
 
-                // 弾に速度を与える
-                rb.linearVelocity = shootDirection * bulletSpeed;
-
-                // === 円形拡散の計算 ===
-                // ランダムな角度で拡散
-                // float randomYaw = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Yaw（左右方向）
-                // float randomPitch = Random.Range(-spreadAngle / 2f, spreadAngle / 2f); // Pitch（上下方向）
-                // Vector3 randomOffset = Random.insideUnitSphere * spreadAngle;
-
-                // 拡散角度を反映した方向ベクトルを計算
-                // Vector3 spreadDirection = (rayDirection + randomOffset).normalized;
-
-                // 弾に速度を設定
-                // rb.linearVelocity = spreadDirection * bulletSpeed;
-
-                // 中心方向（前方）
-                Vector3 forward = rayOrigin.forward;
-
-                // 前方に垂直なベクトルを作る
-                Vector3 right = rayOrigin.right;
-                Vector3 up = rayOrigin.up;
-
-                // 円の中のランダム点を作る（半径 = spreadAngle）
-                Vector2 circle = Random.insideUnitCircle * spreadAngle;
-
-                // 方向ベクトルを組み立て（正面 + 右・上方向の微調整）
-                Vector3 spreadDir = (forward + right * circle.x + up * circle.y).normalized;
-
-                // 弾に速度を与える
-                rb.linearVelocity = spreadDir * bulletSpeed;
-            }
-
-            // 一定時間後に弾を消す
-            Destroy(bullet, bulletLifeTime); // 一定時間後に玉を自動で消す
+            // 弾を生成（向きを持たせる）
+            Instantiate(bulletPrefab, rayOrigin.position, spreadRot);
         }
+
+        // --- 発砲SE ---
+        SoundManager.Instance?.PlaySE("SE_Gun_01");
     }
-#endif
 
     /// <summary>
     /// リロード用コード
@@ -323,11 +302,22 @@ public class Shotgun : MonoBehaviour
             return;
         }
 
+        // --- 無限モード ---
+        if (infiniteAmmo)
+        {
+            currentAmmo = 1;
+            Debug.Log("【DEBUG】無限ストック：リロードしました！");
+            SoundManager.Instance?.PlaySE("SE_Gun_02");
+            return;
+        }
+
+        // --- 通常モード ---
         if (reserveAmmo > 0)
         {
             currentAmmo = 1;
             reserveAmmo--;
             Debug.Log("リロード完了！残りストック：" + reserveAmmo);
+            SoundManager.Instance?.PlaySE("SE_Gun_02");
         }
         else
         {
@@ -355,8 +345,16 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     IEnumerator AutoAmmoReserve()
     {
+
         while (true)
         {
+            // --- 無限モードなら何もしない ---
+            if (infiniteAmmo)
+            {
+                yield return null; // 次のフレームまで待機（ループ維持）
+                continue;
+            }
+
             // --- ストックが3以下なら生成開始 ---
             if (reserveAmmo < 3)
             {
@@ -375,14 +373,28 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     void UpdateReserveText()
     {
-        if (reserveText != null) { reserveText.text = $"×{reserveAmmo}"; }
+        if (reserveText == null) return;
+
+        // --- テキスト内容の更新 ---
+        if (infiniteAmmo) { reserveText.text = "×∞"; }  // 無限モード表示
+        else { reserveText.text = $"×{reserveAmmo}"; }
 
         // --- 位置調整 ---
         Vector2 pos = reserveText.rectTransform.anchoredPosition;
 
-        if (reserveAmmo >= 10) { pos.x = -5; }
+        if (infiniteAmmo) { pos.x = -16; }
+        else if (reserveAmmo >= 10) { pos.x = -5; }
         else { pos.x = -16; }
 
         reserveText.rectTransform.anchoredPosition = pos;
+    }
+
+    /// <summary>
+    /// Enemyを倒したら弾の追加
+    /// EnemyController.cs で呼ぶ
+    /// </summary>
+    public void plusAmmo()
+    {
+        reserveAmmo++;
     }
 }
