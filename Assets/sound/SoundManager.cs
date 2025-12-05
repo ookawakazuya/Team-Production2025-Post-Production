@@ -89,4 +89,12 @@ public class SoundManager : MonoBehaviour
     {
         bgmSource.Stop();
     }
+
+    /// <summary>
+    /// SE‚Ì’âŽ~
+    /// </summary>
+    public void StopSE()
+    {
+        seSource.Stop();
+    }
 }

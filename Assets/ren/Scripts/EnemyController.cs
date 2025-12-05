@@ -5,6 +5,12 @@ using UnityEngine.UI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyController : MonoBehaviour
 {
+    //========================
+    // 追加部分
+    //========================
+    public static event System.Action<EnemyController> OnEnemyDied; // 死亡イベント
+    public bool IsDead { get; private set; } = false; // 死亡フラグ
+
     public enum State { Idle, Chase, Return }
 
     [Header("基本設定")]
@@ -65,6 +71,8 @@ public class EnemyController : MonoBehaviour
 
     void Update()
     {
+        if (IsDead) return; // 死亡していたら動作しない
+
         if (player == null)
         {
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -128,6 +136,8 @@ public class EnemyController : MonoBehaviour
     //========================
     public void ApplyDamage(int damage)
     {
+        if (IsDead) return;
+
         currentHP -= damage;
         if (currentHP < 0) currentHP = 0;
 
@@ -137,6 +147,13 @@ public class EnemyController : MonoBehaviour
 
     void Die()
     {
+        if (IsDead) return;
+
+        IsDead = true;
+
+        // 死亡通知
+        OnEnemyDied?.Invoke(this);
+
         Destroy(gameObject);
     }
 
@@ -145,6 +162,7 @@ public class EnemyController : MonoBehaviour
     //========================
     void OnPlayerDied()
     {
+        if (IsDead) return;
         TransitionToReturn();
     }
 
