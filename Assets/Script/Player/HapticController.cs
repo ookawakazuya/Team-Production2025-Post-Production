@@ -111,4 +111,57 @@ public class HapticController : MonoBehaviour
 
         retractCooldown = 0.05f;
     }
+
+    /// <summary>
+    /// èeÇÃîΩìÆ
+    /// </summary>
+    /// <param name="isLeftHand"></param>
+    ///[SerializeField] HapticController haptic;
+    ///[SerializeField] bool isLeftHand = true;   //ç∂âEÇÃîªíf
+    ///if (haptic != null)
+    ///haptic.VibrateFiring(isLeftHand);
+    public void VibrateFiring(bool isLeftHand)
+    {
+        float amplitude = 1.0f;
+        float duration = 0.15f;
+
+        if (isLeftHand)
+            VibrateLeft(amplitude, duration);
+        else
+            VibrateRight(amplitude, duration);
+    }
+
+    /// <summary>
+    /// ó]âC
+    /// </summary>
+    /// <param name="isLeftHand"></param>
+    ///if (haptic != null)
+    ///haptic.VibrateLingeringSound(isLeftHand);
+    public void VibrateLingeringSound(bool isLeftHand)
+    {
+        float amplitude = 0.3f;
+        float duration = 4.0f;
+
+        if (isLeftHand)
+            VibrateLeft(amplitude, duration);
+        else
+            VibrateRight(amplitude, duration);
+    }
+
+    /// <summary>
+    /// ó]âC
+    /// </summary>
+    /// <param name="isLeftHand"></param>
+    ///if (haptic != null)
+    ///haptic.VibrateReload(isLeftHand);
+    public void VibrateReload(bool isLeftHand)
+    {
+        float amplitude = 0.1f;
+        float duration = 0.5f;
+
+        if (isLeftHand)
+            VibrateLeft(amplitude, duration);
+        else
+            VibrateRight(amplitude, duration);
+    }
 }
