@@ -84,6 +84,9 @@ public class VRController : MonoBehaviour
     [Header("サウンド関係")]
     [SerializeField] char[] SoundNames;
 
+    [Header("エフェクト")]
+    [SerializeField] ParticleSystem hookHitParticle;
+
 
 
 
@@ -111,6 +114,15 @@ public class VRController : MonoBehaviour
 
         if (volume != null)
             volume.profile.TryGet(out vignette);
+
+        if (volume != null)
+            volume.profile.TryGet(out vignette);
+
+        // --- 【追加】パーティクルシステムの初期設定 ---
+        if (hookHitParticle == null)
+        {
+            Debug.LogWarning("[VRController] hookHitParticle が Inspector に割り当てられていません。");
+        }
     }
 
     void OnEnable() => HookMap?.Enable();
@@ -381,6 +393,8 @@ public class VRController : MonoBehaviour
             if (haptic != null)
                 haptic.VibrateWallHit(isRightHand);
 
+            PlayHookHitParticle(grapplePoint, hit.normal);
+
             Debug.Log($"ShootHook Hit: {hit.collider.name} at {grapplePoint}");
         }
         else
@@ -414,6 +428,8 @@ public class VRController : MonoBehaviour
 
             if (hookMaterial != null) commonLine.material = hookMaterial;
 
+            PlayHookHitParticle(grapplePoint, hit.normal);
+
             Debug.Log($"ShootHook_FromCling Hit: {hit.collider.name} (temp)");
         }
         else
@@ -437,6 +453,8 @@ public class VRController : MonoBehaviour
         tempGrappleFromCling = false;
         isClinging = false;
         SoundManager.Instance.StopSE();
+        //パーティクルの停止
+        StopHookHitParticle();
         Debug.Log("[VRController] StartRetract: 巻き取り開始");
     }
 
@@ -533,6 +551,7 @@ public class VRController : MonoBehaviour
 
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
         SoundManager.Instance.StopSELoop();//のちにループ停止を挟む
+        StopHookHitParticle();
         Debug.Log("[VRController] ReleaseHook: フック解除");
     }
 
@@ -676,6 +695,31 @@ public class VRController : MonoBehaviour
             ReleaseHook();
         }
     }
+
+    // ヒット地点でパーティクルを再生
+    void PlayHookHitParticle(Vector3 position, Vector3 normal)
+    {
+        if (hookHitParticle == null) return;
+
+        // パーティクルの位置と向き（壁の法線方向）を設定
+        hookHitParticle.transform.position = position;
+        hookHitParticle.transform.rotation = Quaternion.LookRotation(normal); // 法線方向に回転
+
+        // 一度停止し、すぐに再生することで、パーティクルをリセット
+        hookHitParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        hookHitParticle.Play();
+    }
+
+    // パーティクルを停止
+    void StopHookHitParticle()
+    {
+        if (hookHitParticle == null) return;
+
+        // パーティクルを停止（必要に応じて、終了するまで残りのエミットを待つ）
+        // 今回は移動開始・解除時なので即座に消すか、自然に消えるまでエミットのみ停止するなどが考えられます
+        hookHitParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+    }
+
 
     // 外部強制解除
     public void ForceReleaseHook()
