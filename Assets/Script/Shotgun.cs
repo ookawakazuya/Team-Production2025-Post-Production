@@ -268,7 +268,7 @@ public class Shotgun : MonoBehaviour
         // --- 発砲音 ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
 
-        if (hapticC != null) { hapticC.VibrateLingeringSound(isLeftHand); }
+        // if (hapticC != null) { hapticC.VibrateLingeringSound(isLeftHand); }
     }
 
     /// <summary>
