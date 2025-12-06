@@ -13,7 +13,11 @@ public class PlayerDeath : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Enemy") || collision.gameObject.CompareTag("FallZone"))
+
+    }
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Enemy") || other.gameObject.CompareTag("FallZone"))
         {
             Die();
         }
