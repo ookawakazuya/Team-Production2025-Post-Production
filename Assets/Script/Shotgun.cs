@@ -96,13 +96,27 @@ public class Shotgun : MonoBehaviour
             // --- 最初は非表示 ---
             lineRenderer.enabled = false;
 
+            // --- マテリアル設定 ---
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = Color.red;
-            lineRenderer.endColor = Color.red;
+
+            // --- グラデーションカラー設定 ---
+            Gradient gradient = new Gradient();
+            gradient.SetKeys(
+                new GradientColorKey[] {
+                    new GradientColorKey(Color.red, 0.0f),   // 始点：赤
+                    new GradientColorKey(Color.red, 1.0f)    // 終点：同じ赤
+                },
+                new GradientAlphaKey[] {
+                    new GradientAlphaKey(1.0f, 0.0f),        // 始点：不透明
+                    new GradientAlphaKey(0.2f, 1.0f)         // 終点：薄く
+                }
+            );
+
+            lineRenderer.colorGradient = gradient;
         }
 
         // --- ストック初期化 ---
-        reserveAmmo = 0;
+        reserveAmmo = 10;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -412,5 +426,7 @@ public class Shotgun : MonoBehaviour
     public void plusAmmo()
     {
         reserveAmmo++;
+        UpdateReserveText();
+
     }
 }
