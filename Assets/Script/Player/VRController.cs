@@ -35,7 +35,7 @@ public class VRController : MonoBehaviour
     [SerializeField] string wallTag = "Wall";          // 張り付き判定用タグ
 
     [Header("フック解除条件")]
-    [SerializeField] float hookBreakDistance = 2.0f;   // プレイヤーがこの距離以上離れたら自動で解除
+    [SerializeField] float hookBreakDistance = 2.0f;   // プレイヤーがこの距離以上離れたら自動で解除                        
 
     [SerializeField] XRInteractorLineVisual lineVisual;
     [SerializeField] HapticController haptic;
@@ -57,9 +57,13 @@ public class VRController : MonoBehaviour
     Vector3 grapplePoint;          // 命中位置（フック）
     Vector3 aimHitPoint;           // Aim時にRaycastが当たった位置（固定用）
     bool hasAimHitPoint = false;   // Aim時にヒットを保持しているか
+    bool wasGrounded = true;       //前フレームの接地状態
+
     float clingTimer = 0f;
     float currentSpeed = 0f;
     float fallSpeed = 0f;
+
+
 
     [Header("視点移動")]
     [SerializeField] float rotationSpeed = 45f; // 右スティック横倒しの回転速度
@@ -82,7 +86,8 @@ public class VRController : MonoBehaviour
 
 
     [Header("サウンド関係")]
-    [SerializeField] char[] SoundNames;
+    [SerializeField] float minLandingSpeed = -1.0f;
+
 
     [Header("エフェクト")]
     [SerializeField] ParticleSystem hookHitParticle;
@@ -565,10 +570,14 @@ public class VRController : MonoBehaviour
 
         if(isCurrentlyGrounded)
         {
+            if (!wasGrounded && fallSpeed < minLandingSpeed)
+            {
+                // 着地時のSEを再生
+                SoundManager.Instance.PlaySE("SE_Player_01");
+            }
             if (fallSpeed < 0f)
             {
                 fallSpeed = 0f;
-                SoundManager.Instance.PlaySE("SE_Player_01");
             }
             else
             {
@@ -581,6 +590,8 @@ public class VRController : MonoBehaviour
             fallSpeed = Mathf.Max(fallSpeed, maxFallSpeed);
             characterController.Move(new Vector3(0, fallSpeed, 0) * Time.deltaTime);
         }
+        // 最後に、現在の接地状態を次のフレームのために保存
+        wasGrounded = isCurrentlyGrounded;
     }
 
     // -----------------------------
