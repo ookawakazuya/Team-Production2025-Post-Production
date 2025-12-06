@@ -31,14 +31,6 @@ public class Shotgun : MonoBehaviour
     // [SerializeField] private GameObject gunPrefab;
     // [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
 
-    // [Header("サウンド")]
-    // [SerializeField] private AudioSource audioSource; // AudioSource コンポーネント
-    // [SerializeField] private AudioClip fireSE;
-
-    [Header("振動設定")]
-    [SerializeField] HapticController haptic;
-    [SerializeField] bool isLeftHand = true;   //左右の判断
-
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
     private EnemyController enemyC;
@@ -54,13 +46,14 @@ public class Shotgun : MonoBehaviour
     private int reserveAmmo; // ストック弾
 
     private float spreadAngle = 0.2f; // 拡散角度
-    private float reloadThresholdY = 0.6f; // リロードを検出する高さ（Y位置）
+    private float reloadThresholdY = 0.9f; // リロードを検出する高さ（Y位置）
 
     private bool isShooting = false;
     private bool isReloading = false;
     private bool hasHit = false; // Rayが当たったか
     private bool shouldDraw = false; // LateUpdateで描画すべきかs
     private bool hideCoroutineRunning = false;
+    private bool isLeftHand = true; //左右の判断
 
     private void Awake()
     {
@@ -158,7 +151,7 @@ public class Shotgun : MonoBehaviour
         // --- LineRenderer を常に描画更新 ---
         RaycastHit hit;
 
-        if (triggerValue > 0.3f)
+        if (triggerValue > 0f)
         {
             // --- Raycast 判定 ---
             if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
@@ -254,21 +247,17 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     void ShootSingle()
     {
-        if (haptic != null)
-            haptic.VibrateFiring(isLeftHand);
-        if (haptic != null)
-         haptic.VibrateLingeringSound(isLeftHand);
         // --- チェック（弾数確認）---
         if (!CanShoot()) return;
+
+        // --- 振動を与える ---
+        if (hapticC != null) { hapticC.VibrateFiring(isLeftHand); }
 
         // --- 1発減る ---
         currentAmmo--;
 
         // --- 弾プレハブを発射位置・向きで生成 ---
         Instantiate(bulletPrefab, bulletDirection.position, bulletDirection.rotation);
-
-        // --- 振動を与える ---
-        if (hapticC != null) { hapticC.VibrateWallHit(false); }
 
         // デバッグ用
         if (SoundManager.Instance == null)
@@ -278,6 +267,8 @@ public class Shotgun : MonoBehaviour
 
         // --- 発砲音 ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
+
+        if (hapticC != null) { hapticC.VibrateLingeringSound(isLeftHand); }
     }
 
     /// <summary>
@@ -325,8 +316,6 @@ public class Shotgun : MonoBehaviour
             return;
         }
 
-        if (haptic != null)
-         haptic.VibrateReload(isLeftHand);
         // --- 無限モード ---
         if (infiniteAmmo)
         {
@@ -348,6 +337,8 @@ public class Shotgun : MonoBehaviour
         {
             Debug.Log("ストックがありません！");
         }
+
+        if (hapticC != null) { hapticC.VibrateReload(isLeftHand); }
 
         isReloading = true;
 
