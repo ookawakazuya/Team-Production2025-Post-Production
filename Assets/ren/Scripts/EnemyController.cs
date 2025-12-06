@@ -1,11 +1,17 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.VFX;
+using UnityEngine.UI;
+using System.Collections;
 
+[RequireComponent(typeof(NavMeshAgent))]
 public class EnemyController : MonoBehaviour
 {
     public enum State { Idle, Chase, Return }
 
+    // -----------------------
+    // Inspector
+    // -----------------------
     [Header("基本設定")]
     public float maxHP = 100f;
     public float moveSpeed = 3f;
@@ -13,202 +19,258 @@ public class EnemyController : MonoBehaviour
     public float chaseDistance = 10f;
     public float returnDistance = 15f;
 
-    [Header("視認距離スポーン管理")]
+    [Header("出現・消失距離")]
     public float spawnDistance = 15f;
     public float hideDistance = 16f;
 
-    [Header("VFX")]
-    public VisualEffect spawnVFX;
-    public VisualEffect deathVFX;
-
-    Transform player;
-    NavMeshAgent agent;
-
-    // HP管理
-    float currentHP;
-    float displayedHP = 1f;
-
-    // 敵の初期位置
-    Vector3 startPosition;
-    Quaternion startRotation;
-
-    // 状態
-    State currentState = State.Idle;
-
-    // 非表示管理
-    bool isVisible = false;
-
-    // 死亡状態
-    public bool IsDead { get; private set; } = false;
-
-    // コライダー（★ public に変更）
+    [Header("モデル / コライダー")]
+    public Renderer[] modelRenderers;
     public Collider bodyCollider;
     public Collider headCollider;
 
+    [Header("VFX (子オブジェクト)")]
+    public VisualEffect spawnVFX;
+    public VisualEffect deathVFX;
+
+    [Header("HP UI")]
+    public Slider hpSlider; // CanvasのSliderをアタッチ
+
+    // -----------------------
+    // 内部キャッシュ
+    // -----------------------
+    Transform player;
+    NavMeshAgent agent;
+    Shotgun shotgun;
+
+    float currentHP;
+    State currentState = State.Idle;
+    bool isVisible = false;
+    public bool IsDead { get; private set; } = false;
+
+    Vector3 startPosition;
+    Quaternion startRotation;
+
+    Coroutine spawnVFXCoroutine;
+    Coroutine deathVFXCoroutine;
+
+    // -----------------------
+    // 初期設定
+    // -----------------------
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         agent.speed = moveSpeed;
 
-        bodyCollider = GetComponent<Collider>();
-        headCollider = transform.Find("HeadCollider")?.GetComponent<Collider>();
-
         startPosition = transform.position;
         startRotation = transform.rotation;
+
+        if (modelRenderers.Length == 0)
+            modelRenderers = GetComponentsInChildren<Renderer>(true);
     }
 
     void Start()
     {
         currentHP = maxHP;
+        hpSlider?.gameObject.SetActive(false);
+
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        shotgun = FindFirstObjectByType<Shotgun>();
 
         GameManager.Instance?.RegisterEnemy(this);
+
+        SetVisible(false, immediate: true);
     }
 
+    // -----------------------
+    // 更新処理
+    // -----------------------
     void Update()
     {
-        if (player == null) return;
+        if (player == null)
+        {
+            player = GameObject.FindGameObjectWithTag("Player")?.transform;
+            if (player == null) return;
+        }
 
         float dist = Vector3.Distance(player.position, transform.position);
 
         if (!IsDead)
         {
-            if (!isVisible && dist < spawnDistance)
-                ShowEnemy();
-
-            if (isVisible && dist > hideDistance)
-                HideEnemy();
+            if (!isVisible && dist < spawnDistance) ShowEnemy();
+            else if (isVisible && dist > hideDistance) HideEnemy();
         }
 
-        if (!isVisible) return;
-        if (IsDead) return;
+        if (!isVisible || IsDead) return;
 
         switch (currentState)
         {
             case State.Idle:
-                if (dist <= chaseDistance)
-                    currentState = State.Chase;
+                agent.isStopped = true;
+                if (dist <= chaseDistance) currentState = State.Chase;
                 break;
 
             case State.Chase:
                 agent.isStopped = false;
-                agent.SetDestination(player.position);
-
-                if (dist > returnDistance)
-                    currentState = State.Return;
+                SafeSetDestination(player.position);
+                if (dist > returnDistance) currentState = State.Return;
                 break;
 
             case State.Return:
                 agent.isStopped = false;
-                agent.SetDestination(startPosition);
-
+                SafeSetDestination(startPosition);
                 if (Vector3.Distance(transform.position, startPosition) < 1f)
                 {
-                    currentState = State.Idle;
                     agent.isStopped = true;
+                    currentState = State.Idle;
                 }
                 break;
         }
     }
 
-    // =========================================================
-    // ■ HP処理
-    // =========================================================
+    // -----------------------
+    // ダメージ処理
+    // -----------------------
+    public void ApplyDamage(float damage) => TakeDamage(damage);
+
     public void TakeDamage(float damage)
     {
         if (IsDead) return;
 
         currentHP -= damage;
-        displayedHP = currentHP / maxHP;
+        hpSlider.value = currentHP / maxHP;
 
-        if (currentHP <= 0f)
-            Die();
+        if (currentHP <= 0f) Die();
     }
 
-    // ★ Bullet.cs 用の互換関数
-    public void ApplyDamage(float damage)
-    {
-        TakeDamage(damage);
-    }
-
-    // =========================================================
-    // ■ 死亡処理
-    // =========================================================
     void Die()
     {
+        if (IsDead) return;
         IsDead = true;
-        isVisible = false;
 
-        agent.isStopped = true;
-        agent.enabled = false;
+        SetVisible(false, immediate: true);
+        PlayDeathVFX();
 
-        bodyCollider.enabled = false;
-        if (headCollider != null) headCollider.enabled = false;
-
-        if (deathVFX) Instantiate(deathVFX, transform.position, Quaternion.identity);
-
-        Shotgun shotgun = FindFirstObjectByType<Shotgun>(); //ここにショットガンの玉追加書いたよ！！！！！！！！
-        if (shotgun != null)
-            shotgun.plusAmmo();
-
-        gameObject.SetActive(false);
+        shotgun?.plusAmmo();
     }
 
-    // =========================================================
-    // ■ プレイヤー距離で出現
-    // =========================================================
+    // -----------------------
+    // 出現・消失
+    // -----------------------
     void ShowEnemy()
     {
-        isVisible = true;
-        gameObject.SetActive(true);
-
-        agent.enabled = true;
-        agent.isStopped = false;
-
-        if (spawnVFX)
-            Instantiate(spawnVFX, transform.position, Quaternion.identity);
+        if (IsDead) return;
+        SetVisible(true);
+        PlaySpawnVFX();
+        hpSlider?.gameObject.SetActive(true);
     }
 
-    // =========================================================
-    // ■ プレイヤー距離で非表示
-    // =========================================================
     void HideEnemy()
     {
-        isVisible = false;
-
-        agent.isStopped = true;
-        agent.enabled = false;
-
-        if (deathVFX)
-            Instantiate(deathVFX, transform.position, Quaternion.identity);
-
-        gameObject.SetActive(false);
+        if (IsDead) return;
+        SetVisible(false);
+        hpSlider?.gameObject.SetActive(false);
+        PlayDeathVFX();
     }
 
-    // =========================================================
-    // ■ GameManager から呼ばれる「完全復活」
-    // =========================================================
+    void SetVisible(bool visible, bool immediate = false)
+    {
+        isVisible = visible;
+
+        foreach (var r in modelRenderers)
+            if (r != null) r.enabled = visible;
+
+        if (bodyCollider) bodyCollider.enabled = visible;
+        if (headCollider) headCollider.enabled = visible;
+
+        if (agent)
+        {
+            agent.isStopped = !visible;
+            if (immediate)
+            {
+                agent.Warp(transform.position);
+                agent.ResetPath();
+            }
+        }
+    }
+
+    // -----------------------
+    // Respawn（GameManagerから呼ばれる）
+    // -----------------------
     public void Respawn()
     {
         IsDead = false;
         isVisible = false;
 
         currentHP = maxHP;
-        displayedHP = 1f;
+        hpSlider.value = 1f;
+        hpSlider?.gameObject.SetActive(false);
 
         transform.position = startPosition;
         transform.rotation = startRotation;
 
-        agent.enabled = true;
         agent.Warp(startPosition);
-        agent.isStopped = true;
         agent.ResetPath();
-
-        bodyCollider.enabled = true;
-        if (headCollider != null) headCollider.enabled = true;
+        agent.isStopped = true;
 
         currentState = State.Idle;
 
-        gameObject.SetActive(false);
+        StopSpawnVFXImmediate();
+        StopDeathVFXImmediate();
+
+        SetVisible(false, immediate: true);
+    }
+
+    // -----------------------
+    // NavMesh安全呼び出し
+    // -----------------------
+    void SafeSetDestination(Vector3 dest)
+    {
+        if (!agent) return;
+#if UNITY_2022_1_OR_NEWER
+        if (!agent.isOnNavMesh) return;
+#endif
+        try { agent.SetDestination(dest); }
+        catch { }
+    }
+
+    // -----------------------
+    // VFX管理
+    // -----------------------
+    void PlaySpawnVFX()
+    {
+        if (!spawnVFX) return;
+        spawnVFX.gameObject.SetActive(true);
+        spawnVFX.Reinit();
+        spawnVFX.Play();
+        if (spawnVFXCoroutine != null) StopCoroutine(spawnVFXCoroutine);
+        spawnVFXCoroutine = StartCoroutine(DisableAfter(spawnVFX.gameObject, 2f));
+    }
+
+    void PlayDeathVFX()
+    {
+        if (!deathVFX) return;
+        deathVFX.gameObject.SetActive(true);
+        deathVFX.Reinit();
+        deathVFX.Play();
+        if (deathVFXCoroutine != null) StopCoroutine(deathVFXCoroutine);
+        deathVFXCoroutine = StartCoroutine(DisableAfter(deathVFX.gameObject, 2f));
+    }
+
+    IEnumerator DisableAfter(GameObject go, float sec)
+    {
+        yield return new WaitForSeconds(sec);
+        go.SetActive(false);
+    }
+
+    void StopSpawnVFXImmediate()
+    {
+        if (spawnVFXCoroutine != null) StopCoroutine(spawnVFXCoroutine);
+        if (spawnVFX) spawnVFX.gameObject.SetActive(false);
+    }
+
+    void StopDeathVFXImmediate()
+    {
+        if (deathVFXCoroutine != null) StopCoroutine(deathVFXCoroutine);
+        if (deathVFX) deathVFX.gameObject.SetActive(false);
     }
 }
