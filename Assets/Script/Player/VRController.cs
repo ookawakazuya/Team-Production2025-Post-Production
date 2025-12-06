@@ -161,15 +161,27 @@ public class VRController : MonoBehaviour
         {
             fallSpeed = 0f;
             clingTimer -= Time.deltaTime;
-            float rate = clingTimer / clingDuration;
+
+            // float rate = clingTimer / clingDuration; // この行は削除（またはコメントアウト）
+
+            // 警告が開始される残り時間（秒）を計算
+            // warningStartRate が 3.0 で clingDuration が 5.0 なら、timeer = 1.66秒
             float timeer = clingDuration / warningStartRate;
 
             if (vignette != null)
             {
-                if (rate <= timeer)
+                // 残り時間 (clingTimer) が警告開始の閾値 (timeer) を下回ったかチェック（秒 vs 秒）
+                if (clingTimer <= timeer)
                 {
-                    float t = Mathf.InverseLerp(timeer, 0f, rate);
+                    // clingTimer を timeer (0%の暗さ) から 0f (100%の暗さ) の間で逆補間して t を求める
+                    // t は clingTimer が少なくなるにつれて 0 から 1 に変化します
+                    float t = Mathf.InverseLerp(timeer, 0f, clingTimer);
+
+                    // t を使ってビネットの強度を 0f から maxVignetteIntensity へ変化させる
                     vignette.intensity.value = Mathf.Lerp(0f, maxVignetteIntensity, t);
+
+                    // 【デバッグ用】値が変化しているか確認
+                    Debug.Log($"[Vignette] Timer: {clingTimer:F2}, t: {t:F2}, Intensity: {vignette.intensity.value:F2}");
                 }
                 else
                 {
