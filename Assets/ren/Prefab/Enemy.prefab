@@ -284,7 +284,7 @@ MonoBehaviour:
   headCollider: {fileID: 4024105690353232636}
   spawnVFX: {fileID: 6963262875064866058}
   deathVFX: {fileID: 6446016491960052167}
-  hpSlider: {fileID: 0}
+  hpFillImage: {fileID: 2812304968734622959}
 --- !u!195 &4439455230574368196
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -394,7 +394,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 4.6}
   m_SizeDelta: {x: 800, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2902212129675496557

@@ -33,7 +33,7 @@ public class EnemyController : MonoBehaviour
     public VisualEffect deathVFX;
 
     [Header("HP UI")]
-    public Slider hpSlider; // CanvasのSliderをアタッチ
+    public Image hpFillImage; // 緑の体力 Image
 
     // -----------------------
     // 内部キャッシュ
@@ -71,7 +71,7 @@ public class EnemyController : MonoBehaviour
     void Start()
     {
         currentHP = maxHP;
-        hpSlider?.gameObject.SetActive(false);
+        
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         shotgun = FindFirstObjectByType<Shotgun>();
@@ -137,7 +137,7 @@ public class EnemyController : MonoBehaviour
         if (IsDead) return;
 
         currentHP -= damage;
-        hpSlider.value = currentHP / maxHP;
+        hpFillImage.fillAmount = currentHP / maxHP; // ← Sliderの代わり
 
         if (currentHP <= 0f) Die();
     }
@@ -161,14 +161,14 @@ public class EnemyController : MonoBehaviour
         if (IsDead) return;
         SetVisible(true);
         PlaySpawnVFX();
-        hpSlider?.gameObject.SetActive(true);
+        hpFillImage.transform.parent.gameObject.SetActive(true);  // ← HPバー表示
     }
 
     void HideEnemy()
     {
         if (IsDead) return;
         SetVisible(false);
-        hpSlider?.gameObject.SetActive(false);
+        hpFillImage.transform.parent.gameObject.SetActive(false); // ← HPバー非表示
         PlayDeathVFX();
     }
 
@@ -202,8 +202,8 @@ public class EnemyController : MonoBehaviour
         isVisible = false;
 
         currentHP = maxHP;
-        hpSlider.value = 1f;
-        hpSlider?.gameObject.SetActive(false);
+        hpFillImage.fillAmount = 1f; // ← HPリセット
+        hpFillImage.transform.parent.gameObject.SetActive(false);
 
         transform.position = startPosition;
         transform.rotation = startRotation;
