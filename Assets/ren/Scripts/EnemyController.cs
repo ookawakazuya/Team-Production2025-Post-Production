@@ -9,9 +9,6 @@ public class EnemyController : MonoBehaviour
 {
     public enum State { Idle, Chase, Return }
 
-    // -----------------------
-    // Inspector
-    // -----------------------
     [Header("基本設定")]
     public float maxHP = 100f;
     public float moveSpeed = 3f;
@@ -32,12 +29,12 @@ public class EnemyController : MonoBehaviour
     public VisualEffect spawnVFX;
     public VisualEffect deathVFX;
 
-    [Header("HP UI")]
-    public Image hpFillImage; // 緑の体力 Image
+    [Header("HP UI (親オブジェクトの下に3枚を並べる)")]
+    public GameObject hpUIRoot;       // ← 枠全体の親
+    public Image hpGreen;             // ← メインHP（滑らかに減る）
+    public Image hpRed;               // ← 遅れてついてくるHP（ディレイ）
+    public Image hpFrame;             // ← 枠（変更なし）
 
-    // -----------------------
-    // 内部キャッシュ
-    // -----------------------
     Transform player;
     NavMeshAgent agent;
     Shotgun shotgun;
@@ -50,12 +47,12 @@ public class EnemyController : MonoBehaviour
     Vector3 startPosition;
     Quaternion startRotation;
 
+    Coroutine greenRoutine;
+    Coroutine redRoutine;
+
     Coroutine spawnVFXCoroutine;
     Coroutine deathVFXCoroutine;
 
-    // -----------------------
-    // 初期設定
-    // -----------------------
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -71,7 +68,6 @@ public class EnemyController : MonoBehaviour
     void Start()
     {
         currentHP = maxHP;
-        
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
         shotgun = FindFirstObjectByType<Shotgun>();
@@ -79,17 +75,15 @@ public class EnemyController : MonoBehaviour
         GameManager.Instance?.RegisterEnemy(this);
 
         SetVisible(false, immediate: true);
+        hpUIRoot.SetActive(false);
     }
 
-    // -----------------------
-    // 更新処理
-    // -----------------------
     void Update()
     {
-        if (player == null)
+        if (!player)
         {
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
-            if (player == null) return;
+            if (!player) return;
         }
 
         float dist = Vector3.Distance(player.position, transform.position);
@@ -127,48 +121,61 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // -----------------------
-    // ダメージ処理
-    // -----------------------
+    // ------------------------------------
+    // ダメージ処理（HPアニメーション付き）
+    // ------------------------------------
     public void ApplyDamage(float damage) => TakeDamage(damage);
 
     public void TakeDamage(float damage)
     {
         if (IsDead) return;
 
-        currentHP -= damage;
-        hpFillImage.fillAmount = currentHP / maxHP; // ← Sliderの代わり
+        currentHP = Mathf.Max(0, currentHP - damage);
+        float targetValue = currentHP / maxHP;
+
+        if (greenRoutine != null) StopCoroutine(greenRoutine);
+        greenRoutine = StartCoroutine(AnimateHP(hpGreen, targetValue, 0f));
+
+        if (redRoutine != null) StopCoroutine(redRoutine);
+        redRoutine = StartCoroutine(AnimateHP(hpRed, targetValue, 0.5f));
 
         if (currentHP <= 0f) Die();
     }
 
-    void Die()
+    IEnumerator AnimateHP(Image img, float target, float delay)
     {
-        if (IsDead) return;
-        IsDead = true;
+        if (delay > 0) yield return new WaitForSeconds(delay);
 
-        SetVisible(false, immediate: true);
-        PlayDeathVFX();
+        float start = img.fillAmount;
+        float t = 0;
 
-        shotgun?.plusAmmo();
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 2f; // アニメ速度
+            float eased = 1f - Mathf.Pow(1f - t, 3f); // イージング（減速）
+            img.fillAmount = Mathf.Lerp(start, target, eased);
+            yield return null;
+        }
+
+        img.fillAmount = target;
     }
 
-    // -----------------------
+    // ------------------------------------
     // 出現・消失
-    // -----------------------
+    // ------------------------------------
     void ShowEnemy()
     {
         if (IsDead) return;
         SetVisible(true);
         PlaySpawnVFX();
-        hpFillImage.transform.parent.gameObject.SetActive(true);  // ← HPバー表示
+        hpUIRoot.SetActive(true);
     }
 
     void HideEnemy()
     {
         if (IsDead) return;
         SetVisible(false);
-        hpFillImage.transform.parent.gameObject.SetActive(false); // ← HPバー非表示
+        hpUIRoot.SetActive(false);
         PlayDeathVFX();
     }
 
@@ -193,17 +200,30 @@ public class EnemyController : MonoBehaviour
         }
     }
 
-    // -----------------------
-    // Respawn（GameManagerから呼ばれる）
-    // -----------------------
+    // ------------------------------------
+    // 死亡 & リスポーン
+    // ------------------------------------
+    void Die()
+    {
+        if (IsDead) return;
+        IsDead = true;
+
+        SetVisible(false, immediate: true);
+        hpUIRoot.SetActive(false);
+        PlayDeathVFX();
+        shotgun?.plusAmmo();
+    }
+
     public void Respawn()
     {
         IsDead = false;
         isVisible = false;
 
         currentHP = maxHP;
-        hpFillImage.fillAmount = 1f; // ← HPリセット
-        hpFillImage.transform.parent.gameObject.SetActive(false);
+
+        hpGreen.fillAmount = 1f;
+        hpRed.fillAmount = 1f;
+        hpUIRoot.SetActive(false);
 
         transform.position = startPosition;
         transform.rotation = startRotation;
@@ -211,18 +231,16 @@ public class EnemyController : MonoBehaviour
         agent.Warp(startPosition);
         agent.ResetPath();
         agent.isStopped = true;
-
         currentState = State.Idle;
 
         StopSpawnVFXImmediate();
         StopDeathVFXImmediate();
-
         SetVisible(false, immediate: true);
     }
 
-    // -----------------------
+    // ------------------------------------
     // NavMesh安全呼び出し
-    // -----------------------
+    // ------------------------------------
     void SafeSetDestination(Vector3 dest)
     {
         if (!agent) return;
@@ -233,9 +251,9 @@ public class EnemyController : MonoBehaviour
         catch { }
     }
 
-    // -----------------------
+    // ------------------------------------
     // VFX管理
-    // -----------------------
+    // ------------------------------------
     void PlaySpawnVFX()
     {
         if (!spawnVFX) return;
