@@ -37,6 +37,9 @@ public class VRController : MonoBehaviour
     [Header("フック解除条件")]
     [SerializeField] float hookBreakDistance = 2.0f;   // プレイヤーがこの距離以上離れたら自動で解除                        
 
+    [Header("フック無効化タグ")]
+    [SerializeField] string[] hookInvalidTags;  //無効化するタグ
+
     [SerializeField] XRInteractorLineVisual lineVisual;
     [SerializeField] HapticController haptic;
     [SerializeField] bool isRightHand = true;   //左右の判断
@@ -123,11 +126,13 @@ public class VRController : MonoBehaviour
         if (volume != null)
             volume.profile.TryGet(out vignette);
 
-        // --- 【追加】パーティクルシステムの初期設定 ---
+        //パーティクルシステムの初期設定 
         if (hookHitParticle == null)
         {
             Debug.LogWarning("[VRController] hookHitParticle が Inspector に割り当てられていません。");
         }
+
+        aimDistance = maxWireLength;
     }
 
     void OnEnable() => HookMap?.Enable();
@@ -395,6 +400,13 @@ public class VRController : MonoBehaviour
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
+            //フックショットが刺さらなくする条件
+            if (IsTagInvalidForHook(hit.collider.tag))
+            {
+                Debug.Log($"[VRController] ShootHook: Tag '{hit.collider.tag}' is in the hook invalid list. Treating as miss.");
+                return; // ヒットを無視し、フックが刺さらない
+            }
+
             SoundManager.Instance.PlaySE("SE_Hook_02");
             grapplePoint = hit.point;
             aimHitPoint = hit.point;     // Aim 先端をセット（先端固定用）
@@ -428,6 +440,13 @@ public class VRController : MonoBehaviour
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
+            //フックショットの無効化
+            if (IsTagInvalidForHook(hit.collider.tag))
+            {
+                Debug.Log($"[VRController] ShootHook_FromCling: Tag '{hit.collider.tag}' is in the hook invalid list. Treating as miss.");
+                return; // ヒットを無視し、フックが刺さらない
+            }
+
             SoundManager.Instance.PlaySE("SE_Hook_02");
             grapplePoint = hit.point;
             aimHitPoint = hit.point;
@@ -743,6 +762,23 @@ public class VRController : MonoBehaviour
         hookHitParticle.Stop(false, ParticleSystemStopBehavior.StopEmitting);
     }
 
+    /// <summary>
+    /// ヒットしたオブジェクトのタグがフック無効リストに含まれているかチェックする
+    /// </summary>
+    bool IsTagInvalidForHook(string tag)
+    {
+        if (hookInvalidTags == null) return false;
+
+        foreach (string invalidTag in hookInvalidTags)
+        {
+            // ヒットしたタグが除外リスト内のタグと一致するかチェック
+            if (tag.Equals(invalidTag, System.StringComparison.Ordinal))
+            {
+                return true; // 除外タグに含まれる
+            }
+        }
+        return false; // 除外タグに含まれない
+    }
 
     // 外部強制解除
     public void ForceReleaseHook()
