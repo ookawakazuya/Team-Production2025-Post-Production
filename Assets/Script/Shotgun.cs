@@ -6,6 +6,13 @@ using UnityEngine.XR;
 using System.Collections;
 using static UnityEditorInternal.ReorderableList;
 
+public enum AimMode
+{
+    Beginner,   // 常に線を表示（オレンジ → 敵ヒット時に赤）
+    Normal,     // 現在の仕様
+    Expert      // 線を非表示
+}
+
 public class Shotgun : MonoBehaviour
 {
     [Header("XR 設定")]
@@ -18,6 +25,7 @@ public class Shotgun : MonoBehaviour
     [Header("Ray 設定")]
     [SerializeField] private Transform rayOriginObject;
     [SerializeField] private LineRenderer lineRenderer;
+    [SerializeField] private AimMode aimMode = AimMode.Normal;
     [SerializeField] private float rayDistance = 50f;
 
     [Header("弾の設定")]
@@ -45,6 +53,7 @@ public class Shotgun : MonoBehaviour
     private int currentAmmo = 1;  // 現在装填されている弾
     private int reserveAmmo; // ストック弾
 
+    private float triggerValue = 0f;
     private float spreadAngle = 0.2f; // 拡散角度
     private float reloadThresholdY = 0.9f; // リロードを検出する高さ（Y位置）
 
@@ -140,7 +149,7 @@ public class Shotgun : MonoBehaviour
         }
 
         // --- トリガー入力を取得 ---
-        float triggerValue = 0f;
+        triggerValue = 0f;
         leftHandDevice.TryGetFeatureValue(UnityEngine.XR.CommonUsages.trigger, out triggerValue);
 
         // --- 照準処理 ---
@@ -148,31 +157,18 @@ public class Shotgun : MonoBehaviour
         rayDirection = rayOrigin.forward;
         bulletDirection = bulletrObject.transform;
 
-        // --- LineRenderer を常に描画更新 ---
-        RaycastHit hit;
-
-        if (triggerValue > 0f)
+        // --- LineRenderer のモード設定 ---
+        switch (aimMode)
         {
-            // --- Raycast 判定 ---
-            if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
-            {
-                hitPoint = hit.point;
-                hasHit = true;
-                shouldDraw = true;
-
-                // hit.collider で当たったオブジェクトの Collider にアクセスできる
-                // Debug.Log("Ray hit: " + hit.collider.name);
-
-                // 当たったオブジェクトのタグも確認できる
-                // Debug.Log("Hit tag: " + hit.collider.tag);
-
-                Debug.DrawRay(rayOrigin.position, rayDirection * rayDistance, Color.red);
-            }
-            else { hasHit = false; }
-        }
-        else if (triggerValue < 0.1f)
-        {
-            shouldDraw = false;
+            case AimMode.Beginner:
+                UpdateBeginnerMode();
+                break;
+            case AimMode.Normal:
+                UpdateNormalMode();
+                break;
+            case AimMode.Expert:
+                UpdateExpertMode();
+                break;
         }
 
         // --- トリガーが押されたら --- 
@@ -226,6 +222,63 @@ public class Shotgun : MonoBehaviour
         {
             lineRenderer.enabled = false;
         }
+    }
+
+    void UpdateBeginnerMode()
+    {
+        RaycastHit hit;
+
+        if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
+        {
+            hitPoint = hit.point;
+            hasHit = true;
+            shouldDraw = true;
+
+            if (hit.collider.CompareTag("Enemy")) { lineRenderer.startColor = lineRenderer.endColor = Color.red; }
+            else { lineRenderer.startColor = lineRenderer.endColor = new Color(1f, 0.5f, 0f); } // オレンジ
+        }
+        else
+        {
+            hasHit = false;
+            shouldDraw = true; // 常に描画
+            lineRenderer.startColor = lineRenderer.endColor = new Color(1f, 0.5f, 0f);
+        }
+    }
+
+    void UpdateNormalMode()
+    {
+        RaycastHit hit;
+
+        if (triggerValue > 0f)
+        {
+            // --- Raycast 判定 ---
+            if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
+            {
+                hitPoint = hit.point;
+                hasHit = true;
+                shouldDraw = true;
+
+                lineRenderer.startColor = lineRenderer.endColor = Color.red;
+
+                // hit.collider で当たったオブジェクトの Collider にアクセスできる
+                // Debug.Log("Ray hit: " + hit.collider.name);
+
+                // 当たったオブジェクトのタグも確認できる
+                // Debug.Log("Hit tag: " + hit.collider.tag);
+            }
+            else { hasHit = false; }
+        }
+        else if (triggerValue < 0.1f)
+        {
+            shouldDraw = false;
+        }
+    }
+
+    void UpdateExpertMode()
+    {
+        hasHit = false;
+        shouldDraw = false;
+        Debug.DrawRay(rayOrigin.position, rayDirection * rayDistance, Color.red);
     }
 
     /// <summary>
@@ -412,5 +465,6 @@ public class Shotgun : MonoBehaviour
     public void plusAmmo()
     {
         reserveAmmo++;
+        UpdateReserveText();
     }
 }
