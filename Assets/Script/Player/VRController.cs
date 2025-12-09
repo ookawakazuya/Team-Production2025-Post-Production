@@ -16,8 +16,7 @@ public class VRController : MonoBehaviour
 
     [Header("フック / レイ設定")]
     [SerializeField] float maxWireLength = 50f;        // レイの最大長
-    [SerializeField] float aimDistance = 30f;          // Aim時の見た目距離（ヒット無し時）
-    [SerializeField] float acceleration = 20f;         // 引き寄せ加速度
+     [SerializeField] float acceleration = 20f;         // 引き寄せ加速度
     [SerializeField] float maxMoveSpeed = 30f;         // 移動時の最大速度
     [SerializeField] float stopDistance = 1f;          // 到達判定距離
 
@@ -131,8 +130,6 @@ public class VRController : MonoBehaviour
         {
             Debug.LogWarning("[VRController] hookHitParticle が Inspector に割り当てられていません。");
         }
-
-        aimDistance = maxWireLength;
     }
 
     void OnEnable() => HookMap?.Enable();
@@ -698,7 +695,7 @@ public class VRController : MonoBehaviour
             aimHitPoint = Vector3.zero;
         }
 
-        Vector3 endPoint = rayOrigin.position + rayOrigin.forward * aimDistance;
+        Vector3 endPoint = rayOrigin.position + rayOrigin.forward * maxWireLength;
         commonLine.material = aimMaterial;
         commonLine.SetPosition(0, endPoint); // no hit -> start at fixed forward point
         commonLine.SetPosition(1, rayOrigin.position);
@@ -786,3 +783,4 @@ public class VRController : MonoBehaviour
         ReleaseHook();
     }
 }
+
