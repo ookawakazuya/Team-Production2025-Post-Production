@@ -16428,8 +16428,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startPoint: {fileID: 1030546994}
-  enemies:
-  - {fileID: 3088626657872769479}
 --- !u!4 &1275806668
 Transform:
   m_ObjectHideFlags: 0
@@ -26612,17 +26610,6 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4e906f545040fec42adccf1abc440491, type: 3}
   - {fileID: 8300000, guid: 42800bf2165c16342b69f45ae404d371, type: 3}
   - {fileID: 8300000, guid: c8e17171885b7ed4ab03c254d6e90568, type: 3}
---- !u!114 &3088626657872769479 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4444784543771344455, guid: 698854da8c4e65c429d983365a26e2ec, type: 3}
-  m_PrefabInstance: {fileID: 4192452532877688118}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90e875a9a886ecc4a8b9cb4c83080ceb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &4192452532877688118
 PrefabInstance:
   m_ObjectHideFlags: 0
