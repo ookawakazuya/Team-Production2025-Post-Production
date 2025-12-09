@@ -6,6 +6,9 @@ using UnityEngine.XR;
 using System.Collections;
 using static UnityEditorInternal.ReorderableList;
 
+/// <summary>
+/// Line 用にモードの選択
+/// </summary>
 public enum AimMode
 {
     Beginner,   // 常に線を表示（オレンジ → 敵ヒット時に赤）
@@ -157,7 +160,7 @@ public class Shotgun : MonoBehaviour
         rayDirection = rayOrigin.forward;
         bulletDirection = bulletrObject.transform;
 
-        // --- LineRenderer のモード設定 ---
+        // --- LineRenderer のモードに対応した Update() の呼び出し ---
         switch (aimMode)
         {
             case AimMode.Beginner:
@@ -224,6 +227,9 @@ public class Shotgun : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 初心者モード
+    /// </summary>
     void UpdateBeginnerMode()
     {
         RaycastHit hit;
@@ -234,17 +240,20 @@ public class Shotgun : MonoBehaviour
             hasHit = true;
             shouldDraw = true;
 
-            if (hit.collider.CompareTag("Enemy")) { lineRenderer.startColor = lineRenderer.endColor = Color.red; }
-            else { lineRenderer.startColor = lineRenderer.endColor = new Color(1f, 0.5f, 0f); } // オレンジ
+            if (hit.collider.CompareTag("Enemy")) { lineRenderer.startColor = lineRenderer.endColor = new Color(1f, 0.5f, 0f); } // オレンジ
+            else { lineRenderer.startColor = lineRenderer.endColor = Color.red; }
         }
         else
         {
             hasHit = false;
             shouldDraw = true; // 常に描画
-            lineRenderer.startColor = lineRenderer.endColor = new Color(1f, 0.5f, 0f);
+            lineRenderer.startColor = lineRenderer.endColor = Color.red;
         }
     }
 
+    /// <summary>
+    /// 中級者モード
+    /// </summary>
     void UpdateNormalMode()
     {
         RaycastHit hit;
@@ -274,6 +283,9 @@ public class Shotgun : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 上級者モード
+    /// </summary>
     void UpdateExpertMode()
     {
         hasHit = false;
