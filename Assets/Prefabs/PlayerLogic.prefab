@@ -389,6 +389,7 @@ GameObject:
   - component: {fileID: 394032527538443551}
   - component: {fileID: 444323012563247122}
   - component: {fileID: 4288375022584343582}
+  - component: {fileID: 8523970374896273280}
   m_Layer: 5
   m_Name: GameRay
   m_TagString: Untagged
@@ -545,7 +546,7 @@ MonoBehaviour:
   m_AllowHoverHapticsWhileSelecting: 1
   m_LineType: 0
   m_BlendVisualLinePoints: 1
-  m_MaxRaycastDistance: 30
+  m_MaxRaycastDistance: 5
   m_RayOriginTransform: {fileID: 6871086566491265173}
   m_ReferenceFrame: {fileID: 0}
   m_Velocity: 16
@@ -1000,6 +1001,24 @@ MonoBehaviour:
   m_OverrideInteractorLineOrigin: 1
   m_LineOriginTransform: {fileID: 6871086566491265173}
   m_LineOriginOffset: 0
+--- !u!114 &8523970374896273280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2646777163183879274}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a699111e18fbb0f4c88fba978f3e90e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rayOrigin: {fileID: 6871086566491265173}
+  commonLine: {fileID: 444323012563247122}
+  aimMaterial: {fileID: 2100000, guid: 5ac02d893cd033f429457eb659507ad8, type: 2}
+  hookMaterial: {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
+  maxWireLength: 15
+  hookInvalidTags: []
 --- !u!1 &3230874831884026829
 GameObject:
   m_ObjectHideFlags: 0
@@ -1805,8 +1824,7 @@ MonoBehaviour:
   hookMaterial: {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
   characterController: {fileID: 2830542531504712864}
   playerRoot: {fileID: 1186589372743627706}
-  maxWireLength: 15
-  aimDistance: 30
+  maxWireLength: 30
   acceleration: 50
   maxMoveSpeed: 100
   stopDistance: 1
@@ -1818,10 +1836,11 @@ MonoBehaviour:
   hookBreakDistance: 50
   hookInvalidTags:
   - Enemy
+  - Untagget
   lineVisual: {fileID: 4288375022584343582}
   haptic: {fileID: 262828655666202814}
   isRightHand: 1
-  rotationSpeed: 90
+  rotationSpeed: 180
   volume: {fileID: 0}
   warningStartRate: 3
   maxVignetteIntensity: 0.45
