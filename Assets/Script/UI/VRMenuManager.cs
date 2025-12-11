@@ -21,7 +21,9 @@ public class VRMenuManager : MonoBehaviour
     [SerializeField]  XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
     [SerializeField]  XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
     [SerializeField]  XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
-    
+
+    [SerializeField] VRMenuNavigator vrMenuNavigator; // メニュー階層管理スクリプト
+
 
     [Header("照準用レイ")]
     [SerializeField] XRRayInteractor gameRayinteractor;
@@ -80,7 +82,13 @@ public class VRMenuManager : MonoBehaviour
 
         // メニューキャンバスを表示 / 非表示
         if (menuCanvas != null)
-            menuCanvas.SetActive(isMenuOpen);
+            menuCanvas.SetActive(isMenuOpen);// 【ここを追加】メニューを開く際に、必ず最初のパネルに戻す
+        if (isMenuOpen && vrMenuNavigator != null)
+        {
+            vrMenuNavigator.GoBackToMain();
+            Debug.Log("[VRMenuManager] メニューを開く際に最初のパネルにリセットしました。");
+        }
+
 
         // VRControllerに通知（内部操作を止める or 再開）
         //    Debug.Log("コントローラーの停止");
