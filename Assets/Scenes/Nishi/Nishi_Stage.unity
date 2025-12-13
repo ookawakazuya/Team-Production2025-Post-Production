@@ -2155,11 +2155,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8998601538347762443, guid: 698854da8c4e65c429d983365a26e2ec, type: 3}
   m_PrefabInstance: {fileID: 523844182}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &525397450 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2463184631027508255, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
-  m_PrefabInstance: {fileID: 1080168833}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &555068343
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3830,7 +3825,7 @@ PrefabInstance:
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: bulletrObject
       value: 
-      objectReference: {fileID: 525397450}
+      objectReference: {fileID: -8679921383154817045, guid: c9372056498387b499eafddafd059f5b, type: 3}
     - target: {fileID: 5330999966235203431, guid: feb31e8de5ac034408cbe6abd7c0637d, type: 3}
       propertyPath: rayOriginObject
       value: 
