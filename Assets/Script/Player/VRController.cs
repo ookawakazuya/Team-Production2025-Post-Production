@@ -70,6 +70,19 @@ public class VRController : MonoBehaviour
     [Header("視点移動")]
     [SerializeField] float rotationSpeed = 45f; // 右スティック横倒しの回転速度
 
+    [Header("メニュー連携 / 衝突回避")]
+    [SerializeField] VRMenuManager menuManager;         // VRMenuManagerを参照
+                                                        // [SerializeField] GameObject menuCanvasObject;     // 必要であればキャンバス自体の参照
+    [SerializeField] LayerMask wallLayer;             // 壁や障害物のレイヤーを設定
+
+    // 【重要】safetyDistance を「メニューキャンバスを配置したいプレイヤーからの距離」として設定
+    [SerializeField] float menuCanvasDistance = 0.5f;
+    [SerializeField] float forcedRotationAngle = 180f; // 強制回転させる角度
+
+    // 状態フラグ
+    private bool isMenuRotationLocked = false;
+
+
     // 入力保持
     Vector2 rightStickInput = Vector2.zero;
     bool rightStickPressed = false;
@@ -322,6 +335,28 @@ public class VRController : MonoBehaviour
         if (playerRoot == null) return;
 
         float x = rightStickInput.x;
+        
+        //メニュー回転ロック中の処理
+        if (isMenuRotationLocked)
+        {
+            // 回転操作がある場合
+            if (Mathf.Abs(x) > 0.2f)
+            {
+                // 次のフレームで到達する目標角度を計算
+                float currentY = playerRoot.eulerAngles.y;
+                float deltaAngle = x * rotationSpeed * Time.deltaTime;
+                float futureYRotation = currentY + deltaAngle;
+
+                // その角度に回転したら衝突するかを予測チェック
+                if (IsFutureRotationColliding(futureYRotation))
+                {
+                    // 衝突するため、回転を阻止 (何もしない)
+                    Debug.Log("[VRController] 回転を阻止: 壁にめり込む角度です。");
+                    return;
+                }
+            }
+            // 回転ロック中は、軸リセット以外の回転操作は上記でチェック済みのため、以降の処理へ進む
+        }
         if (Mathf.Abs(x) > 0.2f)
         {
             playerRoot.Rotate(Vector3.up * x * rotationSpeed * Time.deltaTime);
@@ -775,6 +810,80 @@ public class VRController : MonoBehaviour
             }
         }
         return false; // 除外タグに含まれない
+    }
+
+    /// <summary>
+    /// 現在の視点位置にメニューを表示した際に壁と衝突するかをチェックする
+    /// </summary>
+    private bool IsMenuCollidingWithWall()
+    {
+        if (playerRoot == null) return false;
+
+        Ray ray = new Ray(playerRoot.position, playerRoot.forward);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, menuCanvasDistance, wallLayer))
+        {
+            // 壁がキャンバスの配置距離よりも手前にあるため、レイを遮断します。
+            Debug.Log($"[VRController] Collision Check: Wall hit at {hit.distance:F2}m. Menu is blocked by the wall.");
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// 壁にめり込む場合、安全な方向に視点（リグ）を強制的に回転させる
+    /// </summary>
+    private void ForciblyRotateToSafeDirection()
+    {
+        if (playerRoot == null) return;
+
+        // 現在のY軸回転から指定角度分（例: 180度）回転
+        Quaternion safeRotation = Quaternion.Euler(
+            0,
+            playerRoot.rotation.eulerAngles.y + forcedRotationAngle,
+            0
+        );
+
+        playerRoot.rotation = safeRotation;
+        Debug.Log("[VRController] 壁を避けるため、視点を強制的に回転させました。");
+    }
+
+    /// <summary>
+    /// 仮想的に回転させた場合に壁に衝突するかを予測チェックする
+    /// </summary>
+    private bool IsFutureRotationColliding(float futureYRotation)
+    {
+        if (playerRoot == null) return false;
+
+        // 一時的にリグの回転を保存
+        Quaternion originalRotation = playerRoot.rotation;
+
+        // 一時的に回転を適用
+        playerRoot.rotation = Quaternion.Euler(0, futureYRotation, 0);
+
+        bool collision = IsMenuCollidingWithWall();
+
+        // 回転を元に戻す
+        playerRoot.rotation = originalRotation;
+
+        return collision;
+    }
+
+    /// <summary>
+    /// メニューが開いた時、壁に衝突してないかの確認
+    /// </summary>
+    /// <param name="isOpen"></param>
+    public void SetMenuRotationState(bool isOpen)
+    {
+        isMenuRotationLocked = isOpen;
+
+        if (isOpen)
+        {
+            if (IsMenuCollidingWithWall())
+            {
+                ForciblyRotateToSafeDirection();
+            }
+        }
     }
 
     // 外部強制解除

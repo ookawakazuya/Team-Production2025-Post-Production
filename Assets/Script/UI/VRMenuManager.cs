@@ -18,9 +18,9 @@ public class VRMenuManager : MonoBehaviour
     [Header("依存コンポーネント")]
 
     [SerializeField] LineRenderer uiRay;                    //操作レイ
-    [SerializeField]  XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
-    [SerializeField]  XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
-    [SerializeField]  XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
+    [SerializeField] XRRayInteractor uiRayInteractor;    // メニュー操作専用のレイ
+    [SerializeField] XRInteractorLineVisual uiLineVisual; // UIレイの可視化用
+    [SerializeField] XRRayInteractor gameRayInteractor;   // ゲーム用レイ（通常照準）
 
     [SerializeField] VRMenuNavigator vrMenuNavigator; // メニュー階層管理スクリプト
 
@@ -28,15 +28,25 @@ public class VRMenuManager : MonoBehaviour
     [Header("照準用レイ")]
     [SerializeField] XRRayInteractor gameRayinteractor;
     [SerializeField] XRInteractorLineVisual gameLineVisual; // ゲーム用レイの可視化用
-    [SerializeField]  VRController vrController; // VRController参照（視点制御を維持するため）
+    [SerializeField] VRController vrController; // VRController参照（視点制御を維持するため）
 
     [Header("その他の設定")]
     [SerializeField] float uiRayLength = 5.0f;                  //UIレイの長さ
 
+    // 【削除】: 衝突回避設定 (VRControllerに一任するため削除)
+    /*
+    [Header("メニュー表示時の衝突回避設定")]
+    [SerializeField] LayerMask wallLayer;
+    [SerializeField] float menuCanvasDistance = 0.5f; 
+    [SerializeField] float rotationSpeed = 5f;
+    [SerializeField] Transform vrCameraTransform;
+    private bool rotationLockEngaged = false;
+    */
+
     VRHookActions inputActions;
     XRUIInputModule uiInputModule;
 
-     bool isMenuOpen = false;
+    bool isMenuOpen = false;
     public bool IsMenuOpen => isMenuOpen; // 外部から参照可能
 
     private void Awake()
@@ -82,11 +92,17 @@ public class VRMenuManager : MonoBehaviour
 
         // メニューキャンバスを表示 / 非表示
         if (menuCanvas != null)
-            menuCanvas.SetActive(isMenuOpen);// 【ここを追加】メニューを開く際に、必ず最初のパネルに戻す
+            menuCanvas.SetActive(isMenuOpen);
         if (isMenuOpen && vrMenuNavigator != null)
         {
             vrMenuNavigator.GoBackToMain();
             Debug.Log("[VRMenuManager] メニューを開く際に最初のパネルにリセットしました。");
+        }
+
+        // 【修正なし】VRControllerに通知（衝突チェックと回転制限の指示）
+        if (vrController != null)
+        {
+            vrController.SetMenuRotationState(isMenuOpen);
         }
 
 
@@ -111,7 +127,7 @@ public class VRMenuManager : MonoBehaviour
         Time.timeScale = isMenuOpen ? 0f : 1f;
 
         Debug.Log(isMenuOpen ? "メニュー表示中：操作停止" : "メニュー終了：操作再開");
-    } 
+    }
 
     void UpdateUIRay()
     {
@@ -145,4 +161,6 @@ public class VRMenuManager : MonoBehaviour
         }
     }
 
+    // 【削除】: IsMenuCollidingWithWall(), ForciblyRotateToSafeDirection(), ApplyRotationLock() の各メソッドを削除
+    // これらのメソッドは VRController.cs に移管されました。
 }
