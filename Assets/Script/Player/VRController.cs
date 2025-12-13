@@ -72,10 +72,8 @@ public class VRController : MonoBehaviour
 
     [Header("メニュー連携 / 衝突回避")]
     [SerializeField] VRMenuManager menuManager;         // VRMenuManagerを参照
-                                                        // [SerializeField] GameObject menuCanvasObject;     // 必要であればキャンバス自体の参照
+    [SerializeField] GameObject menuCanvasObject;     // 必要であればキャンバス自体の参照
     [SerializeField] LayerMask wallLayer;             // 壁や障害物のレイヤーを設定
-
-    // 【重要】safetyDistance を「メニューキャンバスを配置したいプレイヤーからの距離」として設定
     [SerializeField] float menuCanvasDistance = 0.5f;
     [SerializeField] float forcedRotationAngle = 180f; // 強制回転させる角度
 
@@ -846,6 +844,20 @@ public class VRController : MonoBehaviour
 
         playerRoot.rotation = safeRotation;
         Debug.Log("[VRController] 壁を避けるため、視点を強制的に回転させました。");
+        if (menuCanvasObject != null)
+        {
+            // キャンバスの位置を、リグから前方に設定距離分移動した場所に設定
+            Vector3 newCanvasPosition = playerRoot.position + playerRoot.forward * menuCanvasDistance;
+
+            // キャンバスのZ軸はプレイヤーの視線方向（forward）に向ける
+            Quaternion newCanvasRotation = Quaternion.LookRotation(playerRoot.forward);
+
+            // Canvasの位置と回転を適用
+            menuCanvasObject.transform.position = newCanvasPosition;
+            menuCanvasObject.transform.rotation = newCanvasRotation;
+
+            Debug.Log("[VRController] メニューキャンバスを新しい視点位置に移動しました。");
+        }
     }
 
     /// <summary>
