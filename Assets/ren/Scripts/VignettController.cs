@@ -1,25 +1,30 @@
-using UnityEngine.Rendering.Universal;
+﻿using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine;
-using UnityEngine.InputSystem;
+
 
 public class VignettController : MonoBehaviour
 {
     [Header("Volume")]
     [SerializeField] private Volume volume;
 
-    [Header("Vignette �ݒ�")]
-    [SerializeField, Range(0f, 1f)] private float startValue = 0f;    // �����l
-    [SerializeField, Range(0f, 1f)] private float endValue = 0.35f;   // �ŏI�l
-    [SerializeField] private float duration = 5f;   // 0���ő�܂łɂ�����b��
+    [Header("Vignette 設定")]
+    [SerializeField, Range(0f, 1f)] private float startValue = 0f;   // 開始時の強度
+    [SerializeField, Range(0f, 1f)] private float endValue = 0.35f;  // 最大強度
+    [SerializeField] private float duration = 5f;                   // start→end までの時間（秒）
 
-    private Vignette vignette;
-    private float timer = 0f;
-    private bool isPlaying = false;
+    [Header("参照")]
+    [SerializeField] private VRController vrController; // 壁張り付き状態を参照する対象
+
+    // 内部管理用
+    private Vignette vignette;   // Volume から取得した Vignette
+    private float timer = 0f;    // 再生時間カウンタ
+    private bool isPlaying = false; // 現在再生中かどうか
 
     void Start()
     {
-        if (volume.profile.TryGet(out vignette))
+        // Volume から Vignette を取得し、初期状態を設定
+        if (volume != null && volume.profile.TryGet(out vignette))
         {
             vignette.intensity.value = startValue;
         }
@@ -27,37 +32,60 @@ public class VignettController : MonoBehaviour
 
     void Update()
     {
-        // �� �f�o�b�O�p�F�X�y�[�X�L�[�ŊJ�n
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        // 参照切れ防止
+        if (vignette == null || vrController == null)
+            return;
+
+        // VRController の張り付き状態で分岐
+        if (vrController.IsClinging)
         {
-            Play();
+            // 張り付き中 → 再生（まだなら開始）
+            PlayIfNeeded();
+            UpdateVignette();
         }
-
-        if (!isPlaying || vignette == null) return;
-
-        timer += Time.deltaTime;
-        float t = Mathf.Clamp01(timer / duration);
-
-        vignette.intensity.value = Mathf.Lerp(startValue, endValue, t);
-
-        if (t >= 1f)
+        else
         {
-            isPlaying = false;
+            // 張り付き解除 → 停止＆即リセット
+            StopAndReset();
         }
     }
 
-    public void Play()
+    /// <summary>
+    /// 再生中でなければ Vignette の再生を開始する
+    /// </summary>
+    void PlayIfNeeded()
     {
+        if (isPlaying) return;
+
         timer = 0f;
         isPlaying = true;
     }
 
-    // �� Wall �ڐG���ɊJ�n
-    private void OnTriggerEnter(Collider other)
+    /// <summary>
+    /// Vignette の強度を時間経過で補間する
+    /// </summary>
+    void UpdateVignette()
     {
-        if (other.CompareTag("Wall"))
-        {
-            Play();
-        }
+        if (!isPlaying) return;
+
+        timer += Time.deltaTime;
+
+        // 0～1 に正規化
+        float t = Mathf.Clamp01(timer / duration);
+
+        // startValue → endValue へ補間
+        vignette.intensity.value = Mathf.Lerp(startValue, endValue, t);
+    }
+
+    /// <summary>
+    /// 再生を停止し、Vignette を初期状態へ戻す
+    /// </summary>
+    void StopAndReset()
+    {
+        if (!isPlaying) return;
+
+        isPlaying = false;
+        timer = 0f;
+        vignette.intensity.value = startValue;
     }
 }
