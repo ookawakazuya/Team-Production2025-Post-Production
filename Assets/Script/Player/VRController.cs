@@ -49,7 +49,7 @@ public class VRController : MonoBehaviour
     // 状態フラグ
     bool isGrappling = false;      // フックが刺さっている（命中している）状態（見た目用）
     bool isRetracting = false;     // ワイヤー移動中（引き寄せ中）
-    bool isClinging = false;       // 壁に張り付いている
+   public bool isClinging = false;       // 壁に張り付いている
     bool isGameRayEnabled = true;  // ゲーム用レイ有効フラグ（UI切替用）
 
     // 張り付き中にトリガーで出した「一時フック」フラグ
