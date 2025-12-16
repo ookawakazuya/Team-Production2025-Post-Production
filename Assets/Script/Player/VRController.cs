@@ -90,13 +90,6 @@ public class VRController : MonoBehaviour
     bool prevGripPressed = false;    // 前フレームのグリップ状態
     bool cancelPressed = false;
 
-    [Header("視覚警告（ビネット）")]
-    [SerializeField] Volume volume;
-    Vignette vignette;
-    [SerializeField] float warningStartRate = 3.0f;
-    // clingDuration の何割以下になったら暗くするか
-    [SerializeField] float maxVignetteIntensity = 0.45f;
-
 
     [Header("サウンド関係")]
     [SerializeField] float minLandingSpeed = -1.0f;
@@ -129,12 +122,6 @@ public class VRController : MonoBehaviour
         }
 
         hookBreakDistance = Mathf.Max(hookBreakDistance, 0.1f);
-
-        if (volume != null)
-            volume.profile.TryGet(out vignette);
-
-        if (volume != null)
-            volume.profile.TryGet(out vignette);
 
         //パーティクルシステムの初期設定 
         if (hookHitParticle == null)
@@ -174,41 +161,10 @@ public class VRController : MonoBehaviour
         {
             fallSpeed = 0f;
             clingTimer -= Time.deltaTime;
-
-            // float rate = clingTimer / clingDuration; // この行は削除（またはコメントアウト）
-
-            // 警告が開始される残り時間（秒）を計算
-            // warningStartRate が 3.0 で clingDuration が 5.0 なら、timeer = 1.66秒
-            float timeer = clingDuration / warningStartRate;
-
-            if (vignette != null)
-            {
-                // 残り時間 (clingTimer) が警告開始の閾値 (timeer) を下回ったかチェック（秒 vs 秒）
-                if (clingTimer <= timeer)
-                {
-                    // clingTimer を timeer (0%の暗さ) から 0f (100%の暗さ) の間で逆補間して t を求める
-                    // t は clingTimer が少なくなるにつれて 0 から 1 に変化します
-                    float t = Mathf.InverseLerp(timeer, 0f, clingTimer);
-
-                    // t を使ってビネットの強度を 0f から maxVignetteIntensity へ変化させる
-                    vignette.intensity.value = Mathf.Lerp(0f, maxVignetteIntensity, t);
-
-                    // 【デバッグ用】値が変化しているか確認
-                    Debug.Log($"[Vignette] Timer: {clingTimer:F2}, t: {t:F2}, Intensity: {vignette.intensity.value:F2}");
-                }
-                else
-                {
-                    // まだ余裕あるなら暗さリセット
-                    vignette.intensity.value = 0f;
-                }
-            }
             if (clingTimer <= 0f)
             {
                 Debug.Log("[VRController] 張り付き時間終了 -> 落下開始");
                 EndClingAndFall();
-
-                if (vignette != null)
-                    vignette.intensity.value = 0f; // リセット
             }
         }
         else
@@ -434,6 +390,7 @@ public class VRController : MonoBehaviour
             if (IsTagInvalidForHook(hit.collider.tag))
             {
                 Debug.Log($"[VRController] ShootHook: Tag '{hit.collider.tag}' is in the hook invalid list. Treating as miss.");
+                ResetHookStateOnMiss();
                 return; // ヒットを無視し、フックが刺さらない
             }
 
@@ -458,8 +415,23 @@ public class VRController : MonoBehaviour
         }
         else
         {
+            ResetHookStateOnMiss();
             Debug.Log("[VRController] ShootHook: Raycast miss");
         }
+    }
+
+    void ResetHookStateOnMiss()
+    {
+        isGrappling = false;
+        isRetracting = false;
+        hasAimHitPoint = false;
+
+        if (commonLine != null)
+        {
+            commonLine.enabled = false;
+            if (aimMaterial != null) commonLine.material = aimMaterial;
+        }
+        StopHookHitParticle();
     }
 
     // Cling中の「一時フック」を発射（トリガーDown 時）
