@@ -1674,7 +1674,6 @@ RectTransform:
   m_LocalScale: {x: 0.0021383343, y: 0.0021383343, z: 0.0021383343}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2843879062333750477}
   - {fileID: 5683167352089856462}
   - {fileID: 3003918609106386956}
   m_Father: {fileID: 8899078344833399525}
@@ -1781,7 +1780,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 407, y: 260}
+  m_AnchoredPosition: {x: 334, y: 390}
   m_SizeDelta: {x: 300, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4686112983119095560
@@ -1906,6 +1905,7 @@ MonoBehaviour:
   acceleration: 50
   maxMoveSpeed: 100
   stopDistance: 1
+  targetInteractor: {fileID: 394032527538443551}
   clingDuration: 5
   gravity: -9.81
   maxFallSpeed: -50
@@ -2005,7 +2005,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -554, y: 260}
+  m_AnchoredPosition: {x: -288, y: 390.00006}
   m_SizeDelta: {x: 300, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8247775037449609477
@@ -2306,85 +2306,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab97779687b66a54d97d9e81bd1b1e9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &5517210928453844009
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2843879062333750477}
-  - component: {fileID: 5392821746226171401}
-  - component: {fileID: 6078851379226575309}
-  m_Layer: 3
-  m_Name: Text (Legacy)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &2843879062333750477
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5517210928453844009}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3322418583031023251}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 596.5, y: -82.5}
-  m_SizeDelta: {x: -1193, y: 165}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &5392821746226171401
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5517210928453844009}
-  m_CullTransparentMesh: 1
---- !u!114 &6078851379226575309
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5517210928453844009}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 22
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 0
-    m_MaxSize: 300
-    m_Alignment: 0
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: "\u53F3\u624B\u30B3\u30F3\u30C8\u30ED\u30FC\u30E9\u30FC\u306E\u30C8\u30EA\u30AC\u30FC\u3092\u62BC\u3057\u3066\u30EF\u30A4\u30E4\u30FC\u3092\u767A\u5C04\n\u53F3\u624B\u30B3\u30F3\u30C8\u30ED\u30FC\u30E9\u30FC\u306E\u30B0\u30EA\u30C3\u30D7\u3092\u30EF\u30A4\u30E4\u30FC\u767A\u5C04\u4E2D\u306B\u62BC\u3059\u3068\u305D\u306E\u5730\u70B9\u306B\u79FB\u52D5\n"
 --- !u!1 &6649934149567407719
 GameObject:
   m_ObjectHideFlags: 0
