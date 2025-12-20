@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor.TerrainTools;
+using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -262,30 +263,27 @@ public class VRController : MonoBehaviour
     // トリガー解放（Up）の処理
     void OnTriggerUp()
     {
-        lineVisual.enabled = true;
-        // Cling 中に出した一時フックがあるならそれだけ解除して Cling 維持
-        if (tempGrappleFromCling)
+        if (isClinging && isHookActive)
         {
-              tempGrappleFromCling = false;
+            isHookActive = false;
             isGrappling = false;
-            isRetracting = false;
-            if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
+            tempGrappleFromCling = false;
+            // isClinging は true のままなので、UpdateRayVisuals が自動で AimMaterial に戻します
             return;
         }
+
+        if (isClinging) return;
 
         // 通常時：刺さっているが巻取り中でなければトリガー放しでフック解除
-        if (isGrappling && !isRetracting && !isClinging)
+        if (!isRetracting )
         {
             ReleaseHook();
-            return;
         }
-
         // 巻取り中にトリガーを放したらキャンセル（仕様）
-        if (isRetracting && !triggerPressed)
+        else
         {
             Debug.Log("[VRController] 巻取り中にトリガー放し -> ReleaseHook (巻取りキャンセル)");
             ReleaseHook();
-            return;
         }
     }
 
@@ -403,11 +401,11 @@ public class VRController : MonoBehaviour
             }
 
             SoundManager.Instance.PlaySE("SE_Hook_02");
+            isHookActive = true;
+            isGrappling = true;
             grapplePoint = hit.point;
             aimHitPoint = hit.point;     // Aim 先端をセット（先端固定用）
             hasAimHitPoint = true;
-
-            isGrappling = true;
             isRetracting = false;
             isClinging = false;
             tempGrappleFromCling = false;
@@ -465,6 +463,7 @@ public class VRController : MonoBehaviour
             isGrappling = true;
             isRetracting = false;
             // Cling 維持
+            isHookActive = true;
             tempGrappleFromCling = true;
 
             //  Cling中にワイヤー発射した時の弱振動追加
@@ -559,12 +558,13 @@ public class VRController : MonoBehaviour
     void StartCling(Vector3 hitPoint, GameObject hitObject = null)
     {
         isRetracting = false;
-        isClinging = true;
         isGrappling = false;
+        isHookActive = false;
+        isClinging = true;
+
         clingTimer = clingDuration;
         grapplePoint = hitPoint;
         tempGrappleFromCling = false;
-        isHookActive = true;
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
 
         if (haptic != null)
@@ -588,13 +588,14 @@ public class VRController : MonoBehaviour
     // フック解除
     void ReleaseHook()
     {
+        isHookActive = false;
         isGrappling = false;
         isRetracting = false;
         isClinging = false;
         tempGrappleFromCling = false;
-        currentSpeed = 0f;
         hasAimHitPoint = false;
-        isHookActive = false; // フラグを下ろす
+
+        currentSpeed = 0f;
         // スクリプトを確実に有効に戻す
         if (gameLineVisual != null) gameLineVisual.enabled = true;
 
@@ -645,35 +646,26 @@ public class VRController : MonoBehaviour
             // UIメニュー中でなければLineRendererを表示
             commonLine.enabled = isGameRayEnabled;
 
-            // エラー防止：頂点数を2に固定
+            // 頂点数を2に固定
             if (commonLine.positionCount != 2) commonLine.positionCount = 2;
 
             // ワイヤー発射中（isGrappling）または 移動中（isRetracting）
             // ※トリガーを押して命中した瞬間からここに入ります
-            if (isHookActive)
+            if (isHookActive || isRetracting)
             {
-                // 1. XRIT標準ビジュアルスクリプトを「無効」にする
                 if (gameLineVisual != null) gameLineVisual.enabled = false;
-
-                // 2. マテリアルをフック（ワイヤー）用に変更
                 if (hookMaterial != null) commonLine.material = hookMaterial;
 
-                // 3. 頂点を「手元」と「命中点」に強制固定（プログラムによる直接制御）
                 Vector3 startPoint = hasAimHitPoint ? aimHitPoint : grapplePoint;
-                commonLine.SetPosition(0, startPoint);      // 先端：命中地点
-                commonLine.SetPosition(1, rayOrigin.position); // 根元：コントローラー
+                commonLine.SetPosition(0, startPoint);
+                commonLine.SetPosition(1, rayOrigin.position);
             }
             else
             {
-                // 通常時、または張り付き中（エイム可能状態）
-                // 1. XRIT標準ビジュアルスクリプトを「有効」にする
-                if (gameLineVisual != null) gameLineVisual.enabled = true;
-                if (gameLineVisual != null) gameLineVisual.lineLength = length;
-
-                // 2. マテリアルをAim（照準）用に変更
+                // それ以外（通常待機、または張り付き中の照準状態）は AimMaterial
+                if (gameLineVisual != null && !gameLineVisual.enabled) gameLineVisual.enabled = true;
                 if (aimMaterial != null) commonLine.material = aimMaterial;
 
-                // 3. 通常の照準挙動（前方にレイを伸ばす）
                 Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, length))
                 {
@@ -691,41 +683,7 @@ public class VRController : MonoBehaviour
     // Aim 更新（ヒット点を保持する）
     void UpdateAimRayFixed(float dynamicLength)
     {
-        /*
-        if (commonLine == null || rayOrigin == null) return;
 
-        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
-        {
-            aimHitPoint = hit.point;
-            hasAimHitPoint = true;
-
-            commonLine.material = aimMaterial;
-            commonLine.SetPosition(0, aimHitPoint);            // ここも先端を 0 に揃える
-            commonLine.SetPosition(1, rayOrigin.position);
-            return;
-        }
-
-        if (hasAimHitPoint)
-        {
-            float dist = Vector3.Distance(rayOrigin.position, aimHitPoint);
-            if (dist <= maxWireLength)
-            {
-                commonLine.material = aimMaterial;
-                commonLine.SetPosition(0, aimHitPoint);
-                commonLine.SetPosition(1, rayOrigin.position);
-                return;
-            }
-            hasAimHitPoint = false;
-            aimHitPoint = Vector3.zero;
-        }
-
-        Vector3 endPoint = rayOrigin.position + rayOrigin.forward * maxWireLength;
-        commonLine.material = aimMaterial;
-        commonLine.SetPosition(0, endPoint); // no hit -> start at fixed forward point
-        commonLine.SetPosition(1, rayOrigin.position);
-    */
         currentRayLength = dynamicLength;
         UpdateRayVisuals(currentRayLength);
     }
