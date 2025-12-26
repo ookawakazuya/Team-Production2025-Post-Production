@@ -163,22 +163,22 @@ public class VRController : MonoBehaviour
         ReadInputs();
         HandleCameraRotation();
 
-        //CheckForChest();
+        CheckForChest();
 
-        //if(currentChestLid != null && triggerPressed)
-        //{
-        //    HandleChestInteraction();
-        //    return;
-        //}
+        if (currentChestLid != null && triggerPressed)
+        {
+            HandleChestInteraction();
+            return;
+        }
 
 
-        //if (!isGameRayEnabled)
-        //{
-        //    SetCommonLineEnabled(false);
-        //    prevTriggerPressed = triggerPressed;
-        //    prevGripPressed = gripPressed;
-        //    return;
-        //}
+        if (!isGameRayEnabled)
+        {
+            SetCommonLineEnabled(false);
+            prevTriggerPressed = triggerPressed;
+            prevGripPressed = gripPressed;
+            return;
+        }
 
         HandleTriggerPriority();
         UpdateStateMachine();
@@ -348,40 +348,52 @@ public class VRController : MonoBehaviour
 
 
     //宝箱がレイ上にあるかのチェック
-    //void CheckForChest()
-    //{
-    //    Ray ray = new Ray(rayOrigin.position,rayOrigin.forward);
-    //    if(Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
-    //    {
-    //        if (hit.collider.CompareTag(chestTag))
-    //        {
-    //            currentChestLid = hit.collider.GetComponent<ChestLid>();
-    //            return;
-    //        }
-    //    }
-    //    if(!triggerPressed) currentChestLid = null;
-    //}
+    void CheckForChest()
+    {
+        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        {
+            if (hit.collider.CompareTag(chestTag))
+            {
+                currentChestLid = hit.collider.GetComponent<ChestLid>();
+                return;
+            }
+        }
+        if (!triggerPressed) currentChestLid = null;
+
+        // 何もヒットしていないときは、保持していた蓋のフラグを折る
+        if (currentChestLid != null && !triggerPressed)
+        {
+            currentChestLid.isBeingInteracted = false;
+            currentChestLid = null;
+        }
+    }
 
 
-    //void HandleChestInteraction()
-    //{
-    //    //前フレームからの高さ差分を計算
-    //    float currentY = rayOrigin.position.y;
-    //    if (prevTriggerPressed)
-    //    {
-    //        float deltaY = currentY - lastControllerY;
+    void HandleChestInteraction()
+    {
+        //前フレームからの高さ差分を計算
+        float currentY = rayOrigin.position.y;
+        if (prevTriggerPressed)
+        {
+            float deltaY = currentY - lastControllerY;
 
-    //        //蓋のスクリプトを回転
-    //        if(currentChestLid != null)
-    //        {
-    //            currentChestLid.UpdateRotation(deltaY);
-    //        }
-    //    }
-    //    //現在の高さを保存
-    //    lastControllerY = currentY;
+            //蓋のスクリプトを回転
+            if (currentChestLid != null)
+            {
+                currentChestLid.isBeingInteracted = true;
+                currentChestLid.UpdateRotation(deltaY);
+            }
+        }
+        else
+        {
+            if(currentChestLid != null) currentChestLid.isBeingInteracted = false;
+        }
+            //現在の高さを保存
+            lastControllerY = currentY;
 
-    //    if(commonLine != null) commonLine.enabled = false;
-    //}
+        if (commonLine != null) commonLine.enabled = false;
+    }
 
     // -----------------------------
     // トリガー優先通過後の状態処理（グリップ系など）
