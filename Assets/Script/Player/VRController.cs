@@ -351,20 +351,25 @@ public class VRController : MonoBehaviour
     void CheckForChest()
     {
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out  hit, maxWireLength))
         {
             if (hit.collider.CompareTag(chestTag))
             {
-                currentChestLid = hit.collider.GetComponent<ChestLid>();
-                return;
+                ChestLid foundLid = hit.collider.GetComponentInParent<ChestLid>();
+
+                if (foundLid != null)
+                {
+                    currentChestLid = foundLid;
+                    return;
+                }
             }
         }
-        if (!triggerPressed) currentChestLid = null;
-
         // 何もヒットしていないときは、保持していた蓋のフラグを折る
         if (currentChestLid != null && !triggerPressed)
         {
-            currentChestLid.isBeingInteracted = false;
+            currentChestLid.StopInteracting();
             currentChestLid = null;
         }
     }
@@ -374,26 +379,39 @@ public class VRController : MonoBehaviour
     {
         //前フレームからの高さ差分を計算
         float currentY = rayOrigin.position.y;
-        if (prevTriggerPressed)
+        if (currentChestLid != null)
         {
-            float deltaY = currentY - lastControllerY;
-
-            //蓋のスクリプトを回転
-            if (currentChestLid != null)
+            if(currentChestLid.RayAnchorpoint != null)
             {
-                currentChestLid.isBeingInteracted = true;
-                currentChestLid.UpdateRotation(deltaY);
+                UpdateRayToChestAnchor(currentChestLid.RayAnchorpoint.position);
             }
-        }
-        else
-        {
-            if(currentChestLid != null) currentChestLid.isBeingInteracted = false;
+
+            if (triggerPressed)
+            {
+                float deltaY = currentY - lastControllerY;
+                    currentChestLid.UpdateRotation(deltaY);
+            }
+            else if (prevTriggerPressed && !triggerPressed)
+            {
+                currentChestLid.StopInteracting();
+            }
         }
             //現在の高さを保存
             lastControllerY = currentY;
-
-        if (commonLine != null) commonLine.enabled = false;
     }
+
+    void UpdateRayToChestAnchor(Vector3 anchorPos)
+    {
+        if (commonLine != null)
+        {
+            commonLine.enabled = true;
+            commonLine.positionCount = 2;
+
+            commonLine.SetPosition(0, anchorPos);
+            commonLine.SetPosition(1,rayOrigin.position);
+        }
+    }
+
 
     // -----------------------------
     // トリガー優先通過後の状態処理（グリップ系など）

@@ -8,6 +8,10 @@ public class ChestLid : MonoBehaviour
     public bool isBeingInteracted = false;
 
     [SerializeField] float Min = 0f;
+    [SerializeField] float stayOpen = -110f;
+
+    [SerializeField] Transform rayAnchorPoint;
+    public Transform RayAnchorpoint => rayAnchorPoint;
 
      void Start()
     {
@@ -20,12 +24,21 @@ public class ChestLid : MonoBehaviour
         {
             JointSpring spring = joint.spring;
 
-            //最小値に向かって戻る。
-            if (spring.targetPosition != Min)
+            if (joint.angle > stayOpen)
             {
-                spring.targetPosition = Min;
+
+                //最小値に向かって戻る。
+                if (spring.targetPosition != Min)
+                {
+                    spring.targetPosition = Min;
+                    joint.spring = spring;
+                    joint.useSpring = true;
+                }
+            }
+            else
+            {
+                spring.targetPosition = joint.angle;
                 joint.spring = spring;
-                joint.useSpring = true;
             }
 
         }
@@ -34,6 +47,7 @@ public class ChestLid : MonoBehaviour
     //コントローラの上下移動量による蓋の回転
     public void UpdateRotation(float deltaY)
     {
+        isBeingInteracted = true;
         //感度調整
         float sensitivity = 150f;
 
@@ -48,5 +62,11 @@ public class ChestLid : MonoBehaviour
 
         joint.spring = spring;
         joint.useSpring = true;
+    }
+
+
+    public void StopInteracting()
+    {
+        isBeingInteracted = false;
     }
 }
