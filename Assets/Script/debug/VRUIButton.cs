@@ -7,17 +7,6 @@ public class VRUIButton : MonoBehaviour
     [SerializeField] GameObject menuPanel;
     void Start()
     {
-        if(closebutton != null)
-        {
-            closebutton.onClick.AddListener(CloseMenu);
-        }
-    }
-   public void CloseMenu()
-    {
-        if(menuPanel != null)
-        {
-            menuPanel.SetActive(false);
-        }
     }
 
 
