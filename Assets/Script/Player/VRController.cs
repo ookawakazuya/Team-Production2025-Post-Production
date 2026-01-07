@@ -49,6 +49,11 @@ public class VRController : MonoBehaviour
     [SerializeField] HapticController haptic;
     [SerializeField] bool isRightHand = true;   //左右の判断
 
+    [Header("3Dモデルの実装部分")]
+    [SerializeField] Transform hookObject;
+    [SerializeField] bool showHookOnly = false;
+
+
     [Header("宝箱操作設定")]
     [SerializeField] string chestTag = "Chest";
     ChestLid currentChestLid;
@@ -731,6 +736,8 @@ public class VRController : MonoBehaviour
             // 頂点数を2に固定
             if (commonLine.positionCount != 2) commonLine.positionCount = 2;
 
+            Vector3 currentTipPosition;
+
             // ワイヤー発射中（isGrappling）または 移動中（isRetracting）
             // ※トリガーを押して命中した瞬間からここに入ります
             if (isHookActive || isRetracting)
@@ -738,9 +745,17 @@ public class VRController : MonoBehaviour
                 if (gameLineVisual != null) gameLineVisual.enabled = false;
                 if (hookMaterial != null) commonLine.material = hookMaterial;
 
-                Vector3 startPoint = hasAimHitPoint ? aimHitPoint : grapplePoint;
-                commonLine.SetPosition(0, startPoint);
+                currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
+                commonLine.SetPosition(0, currentTipPosition);
                 commonLine.SetPosition(1, rayOrigin.position);
+
+                if(hookObject != null)
+                {
+                    hookObject.position = currentTipPosition;
+                    // フックの向きを手元に向ける（必要に応じて調整）
+                    hookObject.LookAt(rayOrigin.position);
+                }
+
             }
             else
             {
@@ -751,13 +766,22 @@ public class VRController : MonoBehaviour
                 Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, length))
                 {
-                    commonLine.SetPosition(0, hit.point);
+                    currentTipPosition = hit.point;
                 }
                 else
                 {
-                    commonLine.SetPosition(0, rayOrigin.position + rayOrigin.forward * length);
+                    currentTipPosition = rayOrigin.position + rayOrigin.forward * length;
                 }
+                commonLine.SetPosition(0, rayOrigin.position + rayOrigin.forward * length);
                 commonLine.SetPosition(1, rayOrigin.position);
+
+                if (hookObject != null)
+                {
+                    // 通常時は RayOrigin（コントローラー）の位置に配置
+                    hookObject.position = rayOrigin.position;
+                    // 向きはレイの進行方向（前方）を向かせる
+                    hookObject.forward = rayOrigin.forward;
+                }
             }
         }
     }
