@@ -6,6 +6,7 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.UIElements;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
+using System.Collections;
 public class VRController : MonoBehaviour
 {
     [Header("参照設定")]
@@ -18,7 +19,7 @@ public class VRController : MonoBehaviour
 
     [Header("フック / レイ設定")]
     [SerializeField] float maxWireLength = 50f;        // レイの最大長
-     [SerializeField] float acceleration = 20f;         // 引き寄せ加速度
+    [SerializeField] float acceleration = 20f;         // 引き寄せ加速度
     [SerializeField] float maxMoveSpeed = 30f;         // 移動時の最大速度
     [SerializeField] float stopDistance = 1f;          // 到達判定距離
 
@@ -68,7 +69,7 @@ public class VRController : MonoBehaviour
     // 状態フラグ
     bool isGrappling = false;      // フックが刺さっている（命中している）状態（見た目用）
     bool isRetracting = false;     // ワイヤー移動中（引き寄せ中）
-   public bool isClinging = false;       // 壁に張り付いている
+    public bool isClinging = false;       // 壁に張り付いている
     bool isGameRayEnabled = true;  // ゲーム用レイ有効フラグ（UI切替用）
     private bool isHookActive = false;
 
@@ -162,7 +163,55 @@ public class VRController : MonoBehaviour
 
     private void Start()
     {
+
+        //ResetRotationOnStart();
+        StartCoroutine(RecenterAtStart());
+        // XRDevice（旧式）や最新の XRInputSubsystem を使ったリセンター処理
+        UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.CenterEye).subsystem.TryRecenter();
         UpdateRayVisuals(maxWireLength);
+    }
+
+    /// <summary>
+    /// ゲーム開始時にプレイヤーの向きを正面にする
+    /// </summary>
+    void ResetRotationOnStart()
+    {
+        if (playerRoot != null)
+        {
+            Vector3 currentEuler = playerRoot.eulerAngles;
+
+            //Y軸の固定
+            currentEuler.y = 0f;
+
+            playerRoot.eulerAngles = currentEuler;
+            Debug.Log("[VRController] ゲーム開始に伴い、プレイヤーのY軸回転を0にリセットしました。");
+        }
+
+        {
+            Debug.LogWarning("[VRController] playerRootが割り当てられていないため、回転のリセットに失敗しました。");
+        }
+    }
+
+    private IEnumerator RecenterAtStart()
+    {
+        yield return null;
+
+        if (playerRoot != null)
+        {
+            Vector3 euler = playerRoot.eulerAngles;
+            euler.y = 0f;
+            playerRoot.eulerAngles = euler;
+        }
+
+        var centerEye = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.CenterEye);
+
+        if (centerEye.isValid && centerEye.subsystem != null)
+        {
+            centerEye.subsystem.TryRecenter();
+            Debug.Log("[VRController] HMDのリセンターに成功しました。");
+
+        }
+
     }
 
     void Update()

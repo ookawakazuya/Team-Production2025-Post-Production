@@ -57,13 +57,19 @@ public class VRMove : MonoBehaviour
         }
 
         Vector3 forward = headTransform.forward;
-        Vector3 right = headTransform.right;
         forward.y = 0;
-        right.y = 0;
         forward.Normalize();
+
+        Vector3 right = headTransform.right;
+        right.y = 0;
         right.Normalize();
 
         Vector3 moveDirection = (forward * leftStickInput.y + right * leftStickInput.x).normalized;
+        if(moveDirection.magnitude > 1f)
+        {
+            moveDirection.Normalize();
+        }
+
         controller.Move(moveDirection * speed * Time.deltaTime);
     }
 }
