@@ -52,6 +52,8 @@ public class VRController : MonoBehaviour
     [Header("3Dモデルの実装部分")]
     [SerializeField] Transform hookObject;
     [SerializeField] bool showHookOnly = false;
+    [SerializeField] float HookScaleOrigin = 0.5f;
+    [SerializeField] float HookScale = 5.0f;
 
 
     [Header("宝箱操作設定")]
@@ -754,6 +756,10 @@ public class VRController : MonoBehaviour
                     hookObject.position = currentTipPosition;
                     // フックの向きを手元に向ける（必要に応じて調整）
                     hookObject.LookAt(rayOrigin.position);
+                    hookObject.Rotate(90f, 0f, 0f);
+
+                    // スケールを5に変更
+                    hookObject.localScale = new Vector3(HookScale, HookScale, HookScale);
                 }
 
             }
@@ -781,6 +787,10 @@ public class VRController : MonoBehaviour
                     hookObject.position = rayOrigin.position;
                     // 向きはレイの進行方向（前方）を向かせる
                     hookObject.forward = rayOrigin.forward;
+
+                    hookObject.Rotate(90f, 0f, 0f); // X軸に90度回転を追加
+
+                    hookObject.localScale = new Vector3(HookScaleOrigin, HookScaleOrigin, HookScaleOrigin);
                 }
             }
         }

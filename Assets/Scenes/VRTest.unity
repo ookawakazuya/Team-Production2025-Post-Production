@@ -1599,7 +1599,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 5252060137410032291}
+    m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: c61ef55c9fb2116438b9103bb7c04263, type: 3}
       propertyPath: m_LocalScale.x
@@ -4159,6 +4159,8 @@ MonoBehaviour:
   lineVisual: {fileID: 3289393871921576950}
   haptic: {fileID: 6006094260986775860}
   isRightHand: 1
+  hookObject: {fileID: 1761613832}
+  showHookOnly: 0
   chestTag: Chest
   isClinging: 0
   rotationSpeed: 90
@@ -4280,7 +4282,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1015086536453887959}
-  - {fileID: 1761613832}
   - {fileID: 7036043267747688674}
   m_Father: {fileID: 455572402598077522}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -5603,6 +5604,7 @@ SceneRoots:
   - {fileID: 299639869}
   - {fileID: 387256991}
   - {fileID: 455572402598077522}
+  - {fileID: 1761613831}
   - {fileID: 1663585469}
   - {fileID: 727663782}
   - {fileID: 1249617921}
