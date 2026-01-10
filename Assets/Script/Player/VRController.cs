@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using System.Collections;
+using UnityEngine.EventSystems;
 public class VRController : MonoBehaviour
 {
     [Header("参照設定")]
@@ -55,6 +56,14 @@ public class VRController : MonoBehaviour
     [SerializeField] bool showHookOnly = false;
     [SerializeField] float HookScaleOrigin = 0.5f;
     [SerializeField] float HookScale = 5.0f;
+
+
+    [Header("フック解除時のモデル切り替え")]
+    [SerializeField] GameObject normalHook;         //通常モデル
+    [SerializeField] GameObject detachedHook;       //解除モデル
+    [SerializeField] float modelSwitchDuration = 3f;//切り替える時間
+
+    private bool isSwitchingModel = false;
 
 
     [Header("宝箱操作設定")]
@@ -167,7 +176,7 @@ public class VRController : MonoBehaviour
         //ResetRotationOnStart();
         StartCoroutine(RecenterAtStart());
         // XRDevice（旧式）や最新の XRInputSubsystem を使ったリセンター処理
-        UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.CenterEye).subsystem.TryRecenter();
+        //UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.CenterEye).subsystem.TryRecenter();
         UpdateRayVisuals(maxWireLength);
     }
 
@@ -734,6 +743,12 @@ public class VRController : MonoBehaviour
         hasAimHitPoint = false;
 
         currentSpeed = 0f;
+
+        if (this.gameObject.activeInHierarchy)
+        {
+            StartCoroutine(SwitchHookModelRoutine())
+;        }
+
         // スクリプトを確実に有効に戻す
         if (gameLineVisual != null) gameLineVisual.enabled = true;
 
@@ -805,7 +820,7 @@ public class VRController : MonoBehaviour
                     hookObject.position = currentTipPosition;
                     // フックの向きを手元に向ける（必要に応じて調整）
                     hookObject.LookAt(rayOrigin.position);
-                    hookObject.Rotate(90f, 0f, 0f);
+                    hookObject.Rotate(-90f, 0f, 0f);
 
                     // スケールを5に変更
                     hookObject.localScale = new Vector3(HookScale, HookScale, HookScale);
@@ -864,6 +879,24 @@ public class VRController : MonoBehaviour
     {
         isGameRayEnabled = !enable;
         SetCommonLineEnabled(!enable);
+    }
+
+    private IEnumerator SwitchHookModelRoutine()
+    {
+        if(isSwitchingModel) yield break;
+        isSwitchingModel = true;
+
+        if (normalHook != null) normalHook.SetActive(false);
+        if(detachedHook != null) detachedHook.SetActive(true);
+
+        //指定の秒数だけ待機
+        yield return new WaitForSeconds(modelSwitchDuration);
+
+        if(normalHook != null) normalHook.SetActive(true);
+        if (detachedHook != null) detachedHook.SetActive(false);
+
+        isSwitchingModel =false;
+
     }
 
     void SetCommonLineEnabled(bool enabled)
