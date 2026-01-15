@@ -835,7 +835,7 @@ public class VRController : MonoBehaviour
                 {
                     hookObject.position = currentTipPosition;
                     // フックの向きを手元に向ける（必要に応じて調整）
-                    hookObject.LookAt(rayOrigin.position);
+                   // hookObject.rotation = Quaternion.LookRotation(hasAimHitPoint, Vector3.up);
                     hookObject.Rotate(-90f, 0f, 0f);
 
                     // スケールを5に変更
@@ -976,6 +976,21 @@ public class VRController : MonoBehaviour
             }
         }
         return false; // 除外タグに含まれない
+    }
+
+    void SetHookRotationCorrectly(Vector3 hitPoint, Vector3 hitNormal)
+    {
+        if (hookObject == null) return;
+
+        //壁の法線を正面とする方向を作成
+        Quaternion targetRotation = Quaternion.LookRotation(hitNormal, Vector3.up);
+
+        hookObject.rotation = targetRotation;
+
+        //
+        hookObject.position = hitPoint;
+
+
     }
 
     /// <summary>
