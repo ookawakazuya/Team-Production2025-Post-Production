@@ -1,35 +1,50 @@
 ﻿using System.Collections.Generic;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
 /// ゲーム全体を管理するクラス
-/// - 全シーン共通のシングルトン
-/// - 敵の登録・復活管理
-/// - プレイヤーのリスポーン地点管理
+/// ・全シーン共通シングルトン
+/// ・敵管理（登録 / 全リスポーン）
+/// ・プレイヤー参照管理
+/// ・リスポーン地点管理
+/// ・ステージごとの宝箱取得管理
 /// </summary>
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [Header("初期スタート地点")]
+    // =========================
+    // リスポーン管理
+    // =========================
+    [Header("ステージ開始地点")]
     [SerializeField] private Transform startPoint;
 
-    /// <summary> 現在のリスポーン地点 </summary>
     private Transform currentRespawnPoint;
 
-    /// <summary> 現在ロードされているシーンの全敵リスト </summary>
-    private readonly List<EnemyController> enemies = new List<EnemyController>();
-
-    /// <summary> プレイヤーの参照 </summary>
+    // =========================
+    // プレイヤー / 敵管理
+    // =========================
     private Transform player;
+    private readonly List<EnemyController> enemies = new();
 
+    // =========================
+    // 宝箱管理
+    // =========================
+    private Dictionary<StageID, bool[]> stageTreasureData;
+
+    // =========================
+    // 初期化
+    // =========================
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+
+            InitializeTreasureData();
         }
         else
         {
@@ -37,55 +52,67 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // シーン切り替えのたびに敵・プレイヤーを再検出
         SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void Start()
-    {
-        currentRespawnPoint = startPoint;
-        FindPlayerAndEnemies();
     }
 
     private void Update()
     {
-        // 途中生成にも対応（フェイルセーフ）
+        // フェイルセーフ（途中生成・破棄対策）
         if (player == null)
             player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
-    /// <summary> シーンロード時に呼ばれる </summary>
+    // =========================
+    // シーンロード時
+    // =========================
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        // ステージ開始地点をシーンから再取得
+        GameObject start = GameObject.FindGameObjectWithTag("StageStart");
+        if (start != null)
+        {
+            startPoint = start.transform;
+            currentRespawnPoint = startPoint;
+        }
+        else
+        {
+            Debug.LogWarning("StageStart が見つかりません");
+        }
+
         FindPlayerAndEnemies();
     }
 
-    /// <summary> 現在のシーンにいるプレイヤーと敵を検出し登録し直す </summary>
     private void FindPlayerAndEnemies()
     {
         enemies.Clear();
         enemies.AddRange(FindObjectsOfType<EnemyController>());
+
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
-    /// <summary> リスポーン地点を取得 </summary>
-    public Transform GetRespawnPoint() => currentRespawnPoint;
+    // =========================
+    // リスポーン地点管理
+    // =========================
+    public Transform GetRespawnPoint()
+    {
+        return currentRespawnPoint;
+    }
 
-    /// <summary> チェックポイント通過でリスポーン地点を更新 </summary>
     public void UpdateRespawnPoint(Transform newPoint)
     {
         currentRespawnPoint = newPoint;
         Debug.Log($"チェックポイント更新：{newPoint.name}");
     }
 
-    /// <summary> 動的生成された敵を登録 </summary>
+    // =========================
+    // 敵管理
+    // =========================
     public void RegisterEnemy(EnemyController enemy)
     {
         if (!enemies.Contains(enemy))
             enemies.Add(enemy);
     }
 
-    /// <summary> プレイヤー死亡 → リスポーン時に敵を全再生・再アクティブ化 </summary>
     public void RespawnAllEnemies()
     {
         foreach (var enemy in enemies)
@@ -93,5 +120,56 @@ public class GameManager : MonoBehaviour
             if (enemy == null) continue;
             enemy.Respawn();
         }
+    }
+
+    // =========================
+    // プレイヤー死亡時処理
+    // =========================
+    public void OnPlayerDead()
+    {
+        Debug.Log("GameManager : プレイヤー死亡検知");
+
+        // 敵を全リスポーン
+        RespawnAllEnemies();
+
+        // 将来拡張用
+        // ・ギミック初期化
+        // ・タイマーリセット
+    }
+
+    // =========================
+    // 宝箱管理
+    // =========================
+    private void InitializeTreasureData()
+    {
+        stageTreasureData = new Dictionary<StageID, bool[]>();
+
+        foreach (StageID stage in System.Enum.GetValues(typeof(StageID)))
+        {
+            stageTreasureData[stage] = new bool[3]; // 宝箱3つ
+        }
+    }
+
+    public void CollectTreasure(StageID stage, int index)
+    {
+        if (!stageTreasureData[stage][index])
+        {
+            stageTreasureData[stage][index] = true;
+            Debug.Log($"{stage} 宝箱 {index} 取得");
+        }
+    }
+
+    public bool[] GetTreasureState(StageID stage)
+    {
+        return stageTreasureData[stage];
+    }
+
+    // =========================
+    // タイトル戻り用
+    // =========================
+    public void ResetAllTreasure()
+    {
+        InitializeTreasureData();
+        Debug.Log("宝箱取得数をリセットしました");
     }
 }
