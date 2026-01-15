@@ -1017,17 +1017,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f530c9e1d439a7a4cb6b4970fe1ad8b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerHead: {fileID: 0}
   leftHandInteractor: {fileID: 0}
-  crosshairImage: {fileID: 0}
   rayOriginObject: {fileID: 0}
   lineRenderer: {fileID: 0}
+  aimMode: 1
   rayDistance: 50
+  bulletrObject: {fileID: 0}
   bulletPrefab: {fileID: 0}
-  bulletSpeed: 50
-  bulletLifeTime: 0.2
   maxReserve: 5
-  gunPrefab: {fileID: 0}
-  gunOffset: {x: 0, y: 0, z: 0.1}
+  autoAmmoDelay: 5
+  infiniteAmmo: 0
 --- !u!120 &3934557886830264792
 LineRenderer:
   serializedVersion: 2

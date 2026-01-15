@@ -23,6 +23,8 @@ public class VRController : MonoBehaviour
     [SerializeField] float acceleration = 20f;         // 引き寄せ加速度
     [SerializeField] float maxMoveSpeed = 30f;         // 移動時の最大速度
     [SerializeField] float stopDistance = 1f;          // 到達判定距離
+    [Header("レイのオブジェクト")]
+    [SerializeField] private GameObject rayVisualObject;//フックレイのオブジェクト
 
     [Header("XR Interaction Toolkit 連携")]
     [SerializeField] XRRayInteractor targetInteractor;  //インスペクターでレイを表示しているデフォルトのスクリプトを参照する
@@ -809,12 +811,26 @@ public class VRController : MonoBehaviour
             if (isHookActive || isRetracting)
             {
                 if (gameLineVisual != null) gameLineVisual.enabled = false;
-                if (hookMaterial != null) commonLine.material = hookMaterial;
+                if (rayVisualObject != null) rayVisualObject.SetActive(true);
+
 
                 currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
-                commonLine.SetPosition(0, currentTipPosition);
-                commonLine.SetPosition(1, rayOrigin.position);
+                //オブジェクトをヒット視点と始点の中心に配置する
+                Vector3 midPoint = (rayOrigin.position + currentTipPosition) / 2;
 
+                if (rayVisualObject != null)
+                {
+                    rayVisualObject.transform.position = midPoint;
+                    //オブジェクトを中心点の方向に向ける
+                    rayVisualObject.transform.LookAt(currentTipPosition);
+
+                    //距離に合わせてスケールの変更
+                    float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
+                    Vector3 newScale = rayVisualObject.transform.localScale;
+
+                    newScale.z = distance;
+                    rayVisualObject.transform.localScale = newScale;
+                }
                 if(hookObject != null)
                 {
                     hookObject.position = currentTipPosition;
@@ -830,6 +846,7 @@ public class VRController : MonoBehaviour
             else
             {
                 // それ以外（通常待機、または張り付き中の照準状態）は AimMaterial
+                if (rayVisualObject != null) rayVisualObject.SetActive(false);
                 if (gameLineVisual != null && !gameLineVisual.enabled) gameLineVisual.enabled = true;
                 if (aimMaterial != null) commonLine.material = aimMaterial;
 
