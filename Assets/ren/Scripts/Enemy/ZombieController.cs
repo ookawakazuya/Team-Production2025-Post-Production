@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ZombieControllerr : MonoBehaviour
+public class ZombieController : MonoBehaviour
 {
     public enum State { Idle, Chase, Return }
 
@@ -23,6 +23,10 @@ public class ZombieControllerr : MonoBehaviour
     public float attackDistance = 1.5f;
     public float attackCooldown = 1f;
     public float attackAnimTime = 0.6f;
+
+    // ★ 追加：攻撃判定
+    [Header("攻撃判定")]
+    public Collider attackCollider;
 
     [Header("モデル / コライダー")]
     public Renderer[] modelRenderers;
@@ -75,6 +79,10 @@ public class ZombieControllerr : MonoBehaviour
 
         if (modelRenderers.Length == 0)
             modelRenderers = GetComponentsInChildren<Renderer>(true);
+
+        // ★ 追加：攻撃判定は最初OFF
+        if (attackCollider)
+            attackCollider.enabled = false;
     }
 
     void Start()
@@ -174,6 +182,19 @@ public class ZombieControllerr : MonoBehaviour
             currentState = State.Chase;
         else
             currentState = State.Idle;
+    }
+
+    // ★ 追加：AnimationEvent 用
+    public void EnableAttackCollider()
+    {
+        if (attackCollider)
+            attackCollider.enabled = true;
+    }
+
+    public void DisableAttackCollider()
+    {
+        if (attackCollider)
+            attackCollider.enabled = false;
     }
 
     // =============================
