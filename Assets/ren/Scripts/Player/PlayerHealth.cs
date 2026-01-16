@@ -7,7 +7,7 @@ public class PlayerHealth : MonoBehaviour
     public int currentLife;
 
     [Header("被弾無敵時間")]
-    public float invincibleTime = 0.5f;
+    public float invincibleTime = 1f;   // ★ 1秒
 
     [Header("バリアエフェクト")]
     [SerializeField] private ParticleSystem barrierParticle;
@@ -27,7 +27,7 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        // ★ 無敵中 or 既に死亡中は無視
+        // 無敵中 or 既に死亡中は無視
         if (isInvincible || playerDeath.IsDead) return;
 
         currentLife -= damage;
@@ -37,12 +37,10 @@ public class PlayerHealth : MonoBehaviour
 
         if (currentLife <= 0)
         {
-            // ★ 死亡時はバリアを出さない
             playerDeath.Die();
         }
         else
         {
-            // ★ 生存時のみ無敵＆バリア
             StartCoroutine(InvincibleCoroutine());
         }
     }
@@ -51,7 +49,6 @@ public class PlayerHealth : MonoBehaviour
     {
         isInvincible = true;
 
-        // ★ バリア表示
         if (barrierParticle)
         {
             barrierParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -62,7 +59,6 @@ public class PlayerHealth : MonoBehaviour
 
         isInvincible = false;
 
-        // ★ バリア終了
         if (barrierParticle)
         {
             barrierParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
