@@ -435,6 +435,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1535507683636261312, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6728476930163279500, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: menuManager
       value: 
@@ -1684,8 +1688,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: VRUIButton, Assembly-CSharp
+      - m_Target: {fileID: 1980258235}
+        m_TargetAssemblyTypeName: TitleToselect, Assembly-CSharp
         m_MethodName: OnClickButton
         m_Mode: 1
         m_Arguments:

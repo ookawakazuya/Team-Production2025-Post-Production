@@ -61,9 +61,8 @@ public class VRController : MonoBehaviour
 
 
     [Header("フック解除時のモデル切り替え")]
-    [SerializeField] GameObject normalHook;         //通常モデル
-    [SerializeField] GameObject detachedHook;       //解除モデル
-    [SerializeField] float modelSwitchDuration = 3f;//切り替える時間
+    [SerializeField] GameObject normalHookModel;         //通常モデル
+    [SerializeField] GameObject flyingHookModel;       //解除モデル
 
     private bool isSwitchingModel = false;
 
@@ -181,6 +180,13 @@ public class VRController : MonoBehaviour
         //UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.CenterEye).subsystem.TryRecenter();
         UpdateRayVisuals(maxWireLength);
     }
+
+    private void SetHookModelStatus(bool isIdle)
+    {
+        if(normalHookModel != null) normalHookModel.SetActive(isIdle);
+        if(flyingHookModel != null) flyingHookModel.SetActive(!isIdle);
+    }
+
 
     /// <summary>
     /// ゲーム開始時にプレイヤーの向きを正面にする
@@ -550,6 +556,18 @@ public class VRController : MonoBehaviour
             }
 
             SoundManager.Instance.PlaySE("SE_Hook_02");
+
+            //ヒット時モデルを切り替え
+            SetHookModelStatus(isIdle: false);
+            //回転の修正
+            if (flyingHookModel != null) 
+            {
+                flyingHookModel.transform.position = hit.point;
+                flyingHookModel.transform.rotation = Quaternion.LookRotation(hit.point, Vector3.up);
+                flyingHookModel.transform.Rotate(90f, 0f, 0f);
+            }
+
+
             isHookActive = true;
             isGrappling = true;
             grapplePoint = hit.point;
@@ -746,10 +764,7 @@ public class VRController : MonoBehaviour
 
         currentSpeed = 0f;
 
-        if (this.gameObject.activeInHierarchy)
-        {
-            StartCoroutine(SwitchHookModelRoutine())
-;        }
+        SetHookModelStatus(isIdle: true);
 
         // スクリプトを確実に有効に戻す
         if (gameLineVisual != null) gameLineVisual.enabled = true;
@@ -835,7 +850,7 @@ public class VRController : MonoBehaviour
                 {
                     hookObject.position = currentTipPosition;
                     // フックの向きを手元に向ける（必要に応じて調整）
-                    hookObject.LookAt(rayOrigin.position);
+                   // hookObject.rotation = Quaternion.LookRotation(hasAimHitPoint, Vector3.up);
                     hookObject.Rotate(-90f, 0f, 0f);
 
                     // スケールを5に変更
@@ -898,23 +913,20 @@ public class VRController : MonoBehaviour
         SetCommonLineEnabled(!enable);
     }
 
-    private IEnumerator SwitchHookModelRoutine()
-    {
-        if(isSwitchingModel) yield break;
-        isSwitchingModel = true;
+    //private IEnumerator SwitchHookModelRoutine()
+    //{
+    //    if(isSwitchingModel) yield break;
+    //    isSwitchingModel = true;
 
-        if (normalHook != null) normalHook.SetActive(false);
-        if(detachedHook != null) detachedHook.SetActive(true);
+    //    if (normalHookModel != null) normalHookModel.SetActive(false);
+    //    if(flyingHookModel != null) flyingHookModel.SetActive(true);
 
-        //指定の秒数だけ待機
-        yield return new WaitForSeconds(modelSwitchDuration);
+    //    if(normalHookModel != null) normalHookModel.SetActive(true);
+    //    if (flyingHookModel != null) flyingHookModel.SetActive(false);
 
-        if(normalHook != null) normalHook.SetActive(true);
-        if (detachedHook != null) detachedHook.SetActive(false);
+    //    isSwitchingModel =false;
 
-        isSwitchingModel =false;
-
-    }
+    //}
 
     void SetCommonLineEnabled(bool enabled)
     {
@@ -976,6 +988,21 @@ public class VRController : MonoBehaviour
             }
         }
         return false; // 除外タグに含まれない
+    }
+
+    void SetHookRotationCorrectly(Vector3 hitPoint, Vector3 hitNormal)
+    {
+        if (hookObject == null) return;
+
+        //壁の法線を正面とする方向を作成
+        Quaternion targetRotation = Quaternion.LookRotation(hitNormal, Vector3.up);
+
+        hookObject.rotation = targetRotation;
+
+        //
+        hookObject.position = hitPoint;
+
+
     }
 
     /// <summary>
