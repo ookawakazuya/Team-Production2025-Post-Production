@@ -2,28 +2,31 @@
 using UnityEngine.Rendering;
 using UnityEngine;
 
-
 public class VignettController : MonoBehaviour
 {
     [Header("Volume")]
     [SerializeField] private Volume volume;
 
-    [Header("Vignette 設定")]
-    [SerializeField, Range(0f, 1f)] private float startValue = 0f;   // 開始時の強度
-    [SerializeField, Range(0f, 1f)] private float endValue = 0.35f;  // 最大強度
-    [SerializeField] private float duration = 5f;                   // start→end までの時間（秒）
+    [Header("Vignette 設定（張り付き）")]
+    [SerializeField, Range(0f, 1f)] private float startValue = 0f;
+    [SerializeField, Range(0f, 1f)] private float endValue = 0.35f;
+    [SerializeField] private float duration = 5f;
+
+    [Header("奈落 Vignette 設定")]
+    [SerializeField] private Transform player;
+    [SerializeField] private float fallStartY = -15f;
+    [SerializeField] private float fallEndY = -30f;
+    [SerializeField, Range(0f, 1f)] private float fallMaxValue = 1f;
 
     [Header("参照")]
-    [SerializeField] private VRController vrController; // 壁張り付き状態を参照する対象
+    [SerializeField] private VRController vrController;
 
-    // 内部管理用
-    private Vignette vignette;   // Volume から取得した Vignette
-    private float timer = 0f;    // 再生時間カウンタ
-    private bool isPlaying = false; // 現在再生中かどうか
+    private Vignette vignette;
+    private float timer = 0f;
+    private bool isPlaying = false;
 
     void Start()
     {
-        // Volume から Vignette を取得し、初期状態を設定
         if (volume != null && volume.profile.TryGet(out vignette))
         {
             vignette.intensity.value = startValue;
@@ -32,60 +35,55 @@ public class VignettController : MonoBehaviour
 
     void Update()
     {
-        // 参照切れ防止
-        if (vignette == null || vrController == null)
+        if (vignette == null || vrController == null || player == null)
             return;
 
-        // VRController の張り付き状態で分岐
-        if (vrController.IsClinging)
+        float clingValue = GetClingVignetteValue();
+        float fallValue = GetFallVignetteValue();
+
+        // より暗い方を採用
+        float finalValue = Mathf.Max(clingValue, fallValue);
+
+        vignette.intensity.value = finalValue;
+
+        // どちらも効いていなければリセット
+        if (finalValue <= startValue)
         {
-            // 張り付き中 → 再生（まだなら開始）
-            PlayIfNeeded();
-            UpdateVignette();
-        }
-        else
-        {
-            // 張り付き解除 → 停止＆即リセット
-            StopAndReset();
+            isPlaying = false;
+            timer = 0f;
         }
     }
 
-    /// <summary>
-    /// 再生中でなければ Vignette の再生を開始する
-    /// </summary>
-    void PlayIfNeeded()
+    // =====================
+    // 張り付き Vignette
+    // =====================
+    float GetClingVignetteValue()
     {
-        if (isPlaying) return;
+        if (!vrController.IsClinging)
+            return startValue;
 
-        timer = 0f;
-        isPlaying = true;
-    }
-
-    /// <summary>
-    /// Vignette の強度を時間経過で補間する
-    /// </summary>
-    void UpdateVignette()
-    {
-        if (!isPlaying) return;
+        if (!isPlaying)
+        {
+            timer = 0f;
+            isPlaying = true;
+        }
 
         timer += Time.deltaTime;
-
-        // 0～1 に正規化
         float t = Mathf.Clamp01(timer / duration);
-
-        // startValue → endValue へ補間
-        vignette.intensity.value = Mathf.Lerp(startValue, endValue, t);
+        return Mathf.Lerp(startValue, endValue, t);
     }
 
-    /// <summary>
-    /// 再生を停止し、Vignette を初期状態へ戻す
-    /// </summary>
-    void StopAndReset()
+    // =====================
+    // 奈落 Vignette
+    // =====================
+    float GetFallVignetteValue()
     {
-        if (!isPlaying) return;
+        float y = player.position.y;
 
-        isPlaying = false;
-        timer = 0f;
-        vignette.intensity.value = startValue;
+        if (y > fallStartY)
+            return startValue;
+
+        float t = Mathf.InverseLerp(fallStartY, fallEndY, y);
+        return Mathf.Lerp(startValue, fallMaxValue, t);
     }
 }

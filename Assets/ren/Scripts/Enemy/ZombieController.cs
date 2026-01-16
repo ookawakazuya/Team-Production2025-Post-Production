@@ -33,6 +33,10 @@ public class ZombieController : MonoBehaviour
     public Collider bodyCollider;
     public Collider headCollider;
 
+    [Header("ƒ‚ƒfƒ‹ƒ‹[ƒg")]
+    [SerializeField] GameObject modelRoot;
+
+
     [Header("Animator")]
     [SerializeField] Animator animator;
 
@@ -256,20 +260,24 @@ public class ZombieController : MonoBehaviour
     {
         isVisible = visible;
 
-        foreach (var r in modelRenderers)
-            if (r) r.enabled = visible;
+        if (modelRoot)
+            modelRoot.SetActive(visible);   // š Renderer‚ÍˆêØG‚ç‚È‚¢
 
         if (bodyCollider) bodyCollider.enabled = visible;
         if (headCollider) headCollider.enabled = visible;
 
-        agent.isStopped = !visible;
-
-        if (immediate)
+        if (agent && agent.isOnNavMesh)
         {
-            agent.Warp(transform.position);
-            agent.ResetPath();
+            agent.isStopped = !visible;
+
+            if (immediate)
+            {
+                agent.Warp(transform.position);
+                agent.ResetPath();
+            }
         }
     }
+
 
     // =============================
     // €–S
