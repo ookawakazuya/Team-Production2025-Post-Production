@@ -131,6 +131,10 @@ public class VRController : MonoBehaviour
     [SerializeField] ParticleSystem hookHitParticle;
 
 
+    [Header("シーンの初期設定")]
+    [SerializeField] bool startInUIMode = false;
+
+
 
 
     // プロパティ
@@ -176,9 +180,15 @@ public class VRController : MonoBehaviour
 
         //ResetRotationOnStart();
         StartCoroutine(RecenterAtStart());
-        // XRDevice（旧式）や最新の XRInputSubsystem を使ったリセンター処理
-        //UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.CenterEye).subsystem.TryRecenter();
-        UpdateRayVisuals(maxWireLength);
+        if (startInUIMode)
+        {
+            SwitchToUIMode();
+        }
+        else
+        {
+            UpdateRayVisuals(maxWireLength);
+            SetHookModelStatus(isIdle: true);
+        }
     }
 
     private void SetHookModelStatus(bool isIdle)
@@ -1101,6 +1111,44 @@ public class VRController : MonoBehaviour
     public void ForceReleaseHook()
     {
         ReleaseHook();
+    }
+
+    /// <summary>
+    /// UI操作モードの切り替え
+    /// </summary>
+    public void SwitchToUIMode()
+    {
+        isGameRayEnabled = false;   //ゲーム用レイフラグ
+        EnableGameRay(false);       //LineRendererの描写を停止
+
+        if (targetInteractor != null) 
+        {
+            targetInteractor.enabled = true;
+            targetInteractor.maxRaycastDistance = 10f;
+        }
+
+        SetHookModelStatus(isIdle: true);
+    }
+
+    /// <summary>
+    /// ゲームモードの切り替え
+    /// </summary>
+    public void SwitchToGameMode()
+    {
+        if (startInUIMode)
+        {
+            //UI限定モードの時は切り替えが発生しない
+            return;
+        }
+
+
+        isGameRayEnabled = true;
+        EnableGameRay(true);
+
+        if (targetInteractor != null)
+        {
+            targetInteractor.maxRaycastDistance = maxWireLength;
+        }
     }
 }
 
