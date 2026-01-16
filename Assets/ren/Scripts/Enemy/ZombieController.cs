@@ -21,10 +21,9 @@ public class ZombieController : MonoBehaviour
 
     [Header("攻撃設定")]
     public float attackDistance = 1.5f;
-    public float attackCooldown = 1f;
+    public float attackCooldown = 1f;   // ★ 1秒（元からOK）
     public float attackAnimTime = 0.6f;
 
-    // ★ 追加：攻撃判定
     [Header("攻撃判定")]
     public Collider attackCollider;
 
@@ -35,7 +34,6 @@ public class ZombieController : MonoBehaviour
 
     [Header("モデルルート")]
     [SerializeField] GameObject modelRoot;
-
 
     [Header("Animator")]
     [SerializeField] Animator animator;
@@ -68,9 +66,9 @@ public class ZombieController : MonoBehaviour
     Coroutine greenRoutine;
     Coroutine redRoutine;
 
-    // =============================
-    // 初期化
-    // =============================
+    // ★ 追加：多段ヒット防止
+    bool hasHitThisAttack = false;
+
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -84,7 +82,6 @@ public class ZombieController : MonoBehaviour
         if (modelRenderers.Length == 0)
             modelRenderers = GetComponentsInChildren<Renderer>(true);
 
-        // ★ 追加：攻撃判定は最初OFF
         if (attackCollider)
             attackCollider.enabled = false;
     }
@@ -100,9 +97,6 @@ public class ZombieController : MonoBehaviour
         hpUIRoot.SetActive(false);
     }
 
-    // =============================
-    // Update
-    // =============================
     void Update()
     {
         if (!player)
@@ -158,9 +152,6 @@ public class ZombieController : MonoBehaviour
         }
     }
 
-    // =============================
-    // 攻撃処理
-    // =============================
     void TryAttack(float dist)
     {
         if (isAttacking) return;
@@ -188,9 +179,10 @@ public class ZombieController : MonoBehaviour
             currentState = State.Idle;
     }
 
-    // ★ 追加：AnimationEvent 用
+    // ★ AnimationEvent
     public void EnableAttackCollider()
     {
+        hasHitThisAttack = false;   // ★ 攻撃開始時リセット
         if (attackCollider)
             attackCollider.enabled = true;
     }
@@ -201,9 +193,25 @@ public class ZombieController : MonoBehaviour
             attackCollider.enabled = false;
     }
 
-    // =============================
-    // ダメージ処理
-    // =============================
+    // ★ 追加：攻撃ヒット処理
+    void OnTriggerEnter(Collider other)
+    {
+        if (!attackCollider || !attackCollider.enabled) return;
+        if (hasHitThisAttack) return;
+
+        if (other.CompareTag("Player"))
+        {
+            PlayerHealth health = other.GetComponent<PlayerHealth>();
+            if (health != null)
+            {
+                health.TakeDamage(1);
+                hasHitThisAttack = true;
+            }
+        }
+    }
+
+    // ===== 以下は既存処理そのまま =====
+
     public void ApplyDamage(float damage)
     {
         if (IsDead) return;
@@ -238,9 +246,6 @@ public class ZombieController : MonoBehaviour
         img.fillAmount = target;
     }
 
-    // =============================
-    // 出現・消失
-    // =============================
     void ShowEnemy()
     {
         if (IsDead) return;
@@ -261,7 +266,7 @@ public class ZombieController : MonoBehaviour
         isVisible = visible;
 
         if (modelRoot)
-            modelRoot.SetActive(visible);   // ★ Rendererは一切触らない
+            modelRoot.SetActive(visible);
 
         if (bodyCollider) bodyCollider.enabled = visible;
         if (headCollider) headCollider.enabled = visible;
@@ -278,10 +283,6 @@ public class ZombieController : MonoBehaviour
         }
     }
 
-
-    // =============================
-    // 死亡
-    // =============================
     void Die()
     {
         if (IsDead) return;
@@ -296,9 +297,6 @@ public class ZombieController : MonoBehaviour
         shotgun?.plusAmmo();
     }
 
-    // =============================
-    // NavMesh安全呼び出し
-    // =============================
     void SafeSetDestination(Vector3 dest)
     {
 #if UNITY_2022_1_OR_NEWER
@@ -307,9 +305,6 @@ public class ZombieController : MonoBehaviour
         agent.SetDestination(dest);
     }
 
-    // =============================
-    // VFX
-    // =============================
     void PlaySpawnVFX()
     {
         if (!spawnVFX) return;
