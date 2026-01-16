@@ -923,19 +923,6 @@ public class VRController : MonoBehaviour
         SetCommonLineEnabled(!enable);
     }
 
-    //private IEnumerator SwitchHookModelRoutine()
-    //{
-    //    if(isSwitchingModel) yield break;
-    //    isSwitchingModel = true;
-
-    //    if (normalHookModel != null) normalHookModel.SetActive(false);
-    //    if(flyingHookModel != null) flyingHookModel.SetActive(true);
-
-    //    if(normalHookModel != null) normalHookModel.SetActive(true);
-    //    if (flyingHookModel != null) flyingHookModel.SetActive(false);
-
-    //    isSwitchingModel =false;
-
     //}
 
     void SetCommonLineEnabled(bool enabled)
