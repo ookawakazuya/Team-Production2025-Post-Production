@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.XR;
 using System.Collections;
-using static UnityEditorInternal.ReorderableList;
+using System.Linq;
 
 /// <summary>
 /// Line 用にモードの選択
@@ -22,9 +22,6 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private Transform playerHead;
     [SerializeField] private Transform leftHandInteractor;
 
-    // [Header("照準用 UI")]
-    // [SerializeField] private Image crosshairImage;
-
     [Header("Ray 設定")]
     [SerializeField] private Transform rayOriginObject;
     [SerializeField] private LineRenderer lineRenderer;
@@ -37,6 +34,11 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private int maxReserve = 1000;  // 最大ストック弾数
     [SerializeField] private float autoAmmoDelay = 5f; // ストック生成間隔（秒）
     [SerializeField] private bool infiniteAmmo = false; // デバッグ用トグル
+
+    [Header("UI設定")]
+    [SerializeField] private Slider ammoSlider;
+    [SerializeField] private Image loadedImage;
+    [SerializeField] private Image[] digitImages;    // 各桁のImage
 
     // [Header("銃モデルの設定")]
     // [SerializeField] private GameObject gunPrefab;
@@ -66,6 +68,8 @@ public class Shotgun : MonoBehaviour
     private bool shouldDraw = false; // LateUpdateで描画すべきかs
     private bool hideCoroutineRunning = false;
     private bool isLeftHand = true; //左右の判断
+
+    private Sprite[] numberSprites;  // 自動読み込み用
 
     private void Awake()
     {
@@ -113,31 +117,34 @@ public class Shotgun : MonoBehaviour
             lineRenderer.endColor = Color.red;
         }
 
-        // --- ストック初期化 ---
-        reserveAmmo = 0;
+        // --- 数字画像を自動読み込み ---
+        numberSprites = Resources.LoadAll<Sprite>("AmmoNumberFont").OrderBy(s => s.name).ToArray();  // ファイル名順に並べる（number_0, number_1...)
+
+        // --- 数字Imageを一旦非表示 ---
+        foreach (var img in digitImages)
+        {
+            if (img != null) { img.enabled = false; }
+        }
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // ゲージ初期化
+        ammoSlider.value = 0f;
+        ammoSlider.maxValue = 1f;
+        ammoSlider.gameObject.SetActive(false);
+
         // --- 自動生成を監視開始 ---
+        // --- ストック初期化 ---
+        reserveAmmo = 5;
         StartCoroutine(AutoAmmoReserve());
+        UpdateLoadedDisplay();
+        UpdateReserveText();
 
         // --- シーン内から取得 ---
         hapticC = FindFirstObjectByType<HapticController>();
         if (hapticC == null) { Debug.Log("HapticController がシーンに存在しません！"); }
-
-        // --- 名前で探す ---
-        GameObject textObj = GameObject.Find("ReserveText");
-        if (textObj != null)
-        {
-            reserveText = textObj.GetComponent<Text>();
-            UpdateReserveText();
-        }
-        else
-        {
-            Debug.LogWarning("ReserveText が見つかりません。名前を確認してください。");
-        }
     }
 
     // Update is called once per frame
@@ -333,6 +340,8 @@ public class Shotgun : MonoBehaviour
         // --- 発砲音 ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
 
+        UpdateLoadedDisplay();
+
         // if (hapticC != null) { hapticC.VibrateLingeringSound(isLeftHand); }
     }
 
@@ -368,6 +377,8 @@ public class Shotgun : MonoBehaviour
 
         // --- 発砲SE ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
+
+        UpdateLoadedDisplay();
     }
 
     /// <summary>
@@ -410,6 +421,7 @@ public class Shotgun : MonoBehaviour
         // --- 短い待機で再リロード防止 ---
         Invoke(nameof(ResetReload), 0.5f);
 
+        UpdateLoadedDisplay();
         UpdateReserveText();
     }
 
@@ -426,6 +438,10 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     IEnumerator AutoAmmoReserve()
     {
+        float timer = 0f;
+
+        // スライダーの常時表示
+        ammoSlider.gameObject.SetActive(true);
 
         while (true)
         {
@@ -439,23 +455,88 @@ public class Shotgun : MonoBehaviour
             // --- ストックが3以下なら生成開始 ---
             if (reserveAmmo < 3)
             {
-                reserveAmmo++;
-                UpdateReserveText();
-                Debug.Log("ストックを補充！ 現在：" + reserveAmmo);
+                timer += Time.deltaTime;
+                ammoSlider.value = timer / autoAmmoDelay; // 進行に応じてゲージ更新
+
+                if (timer >= autoAmmoDelay)
+                {
+                    timer = 0f;
+                    reserveAmmo++;
+                    UpdateReserveText();
+                    Debug.Log("ストックを補充！ 現在：" + reserveAmmo);
+
+                    // 満タン→リセット
+                    ammoSlider.value = 0f;
+                }
+            }
+            else
+            {
+                // --- 弾が十分ならゲージ非表示＆リセット ---
+                ammoSlider.value = 0f;
+                timer = 0f;
             }
 
             // --- 一定時間待機（例：5秒ごと）---
-            yield return new WaitForSeconds(autoAmmoDelay);
+            yield return null;
         }
     }
 
     /// <summary>
-    /// ストックをtextで表示
+    /// 装填済みをImageで表示
+    /// </summary>
+    void UpdateLoadedDisplay()
+    {
+        if (loadedImage == null || numberSprites == null) return;
+
+        // --- スプライト設定（0 or 1）---
+        int digit = Mathf.Clamp(currentAmmo, 0, 1);
+        loadedImage.sprite = numberSprites[digit];
+        loadedImage.enabled = true;
+
+        // --- 色変更（0の時だけ赤）---
+        if (digit == 0)
+            loadedImage.color = new Color(1f, 0.345f, 0f, 1f); // オレンジ寄り赤
+        else
+            loadedImage.color = new Color(0.263f, 1f, 0f, 1f);
+    }
+
+    /// <summary>
+    /// ストックをImageで表示
     /// </summary>
     void UpdateReserveText()
     {
-        if (reserveText == null) return;
+        if (numberSprites == null || numberSprites.Length < 10) return;
 
+        string numStr = reserveAmmo.ToString();
+
+        // --- 数字Imageを一旦非表示 ---
+        foreach (var img in digitImages)
+        {
+            if (img != null) { img.enabled = false; }
+        }
+
+        // --- 右詰めで数字セット ---
+        for (int i = 0; i < numStr.Length && i < digitImages.Length; i++)
+        {
+            int digit = numStr[numStr.Length - 1 - i] - '0';
+            int index = digitImages.Length - 1 - i;
+
+            if (digitImages[index] != null)
+            {
+                digitImages[index].sprite = numberSprites[digit];
+                digitImages[index].enabled = true;
+
+                // --- 🔸色変更処理をここに追加 ---
+                if (reserveAmmo == 0) {
+                    digitImages[index].color = new Color(1f, 0.345f, 0f, 1f); // 弾切れ → 赤
+                }
+                else {
+                    digitImages[index].color = Color.white; // 通常 → 白
+                }
+            }
+        }
+
+#if false
         // --- テキスト内容の更新 ---
         if (infiniteAmmo) { reserveText.text = "×∞"; }  // 無限モード表示
         else { reserveText.text = $"×{reserveAmmo}"; }
@@ -468,6 +549,7 @@ public class Shotgun : MonoBehaviour
         else { pos.x = -16; }
 
         reserveText.rectTransform.anchoredPosition = pos;
+#endif
     }
 
     /// <summary>
