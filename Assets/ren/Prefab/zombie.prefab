@@ -2828,7 +2828,6 @@ GameObject:
   - component: {fileID: 8395534878269144025}
   - component: {fileID: 2663417013527707303}
   - component: {fileID: 8619356824731634372}
-  - component: {fileID: 6274170413799634750}
   m_Layer: 0
   m_Name: zombie
   m_TagString: Enemy
@@ -2916,6 +2915,7 @@ MonoBehaviour:
   hpUIRoot: {fileID: 263561948082411944}
   hpGreen: {fileID: 8483773096084161393}
   hpRed: {fileID: 2964209338145114836}
+  hpVisibleDistance: 20
   player: {fileID: 0}
   chaseDistance: 10
   attackDistance: 1.5
@@ -2923,22 +2923,10 @@ MonoBehaviour:
   damageStartTime: 0.3
   damageEndTime: 0.6
   attackTotalTime: 1
-  bodyCollider: {fileID: 0}
-  headCollider: {fileID: 0}
+  bodyCollider: {fileID: 2553196588086059789}
+  headCollider: {fileID: 8461698841645246537}
   headShotMultiplier: 2
   deathVFX: {fileID: 7342249086892632404}
---- !u!114 &6274170413799634750
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8590138742914805056}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa1a23d1b2864904b98acca9cfb059c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8702854231512120132
 GameObject:
   m_ObjectHideFlags: 0
