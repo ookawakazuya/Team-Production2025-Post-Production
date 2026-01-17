@@ -194,8 +194,8 @@ public class VRController : MonoBehaviour
 
     private void SetHookModelStatus(bool isIdle)
     {
-        if(normalHookModel != null) normalHookModel.SetActive(isIdle);
-        if(flyingHookModel != null) flyingHookModel.SetActive(!isIdle);
+        if (normalHookModel != null) normalHookModel.SetActive(isIdle);
+        if (flyingHookModel != null) flyingHookModel.SetActive(!isIdle);
     }
 
 
@@ -349,14 +349,14 @@ public class VRController : MonoBehaviour
         // Cling 中かつトリガーDownなら「一時フック」を狙う（Cling 維持）
         if (isClinging)
         {
-              ShootHook_FromCling();
+            ShootHook_FromCling();
             return;
         }
 
         // 通常時はトリガーでフック射出（まだ刺さっておらず巻取り中でない場合）
         if (!isGrappling && !isRetracting)
         {
-              ShootHook();
+            ShootHook();
             return;
         }
     }
@@ -376,7 +376,7 @@ public class VRController : MonoBehaviour
         if (isClinging) return;
 
         // 通常時：刺さっているが巻取り中でなければトリガー放しでフック解除
-        if (!isRetracting )
+        if (!isRetracting)
         {
             ReleaseHook();
         }
@@ -396,7 +396,7 @@ public class VRController : MonoBehaviour
         if (playerRoot == null) return;
 
         float x = rightStickInput.x;
-        
+
         //メニュー回転ロック中の処理
         if (isMenuRotationLocked)
         {
@@ -439,7 +439,7 @@ public class VRController : MonoBehaviour
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out  hit, maxWireLength))
+        if (Physics.Raycast(ray, out hit, maxWireLength))
         {
             if (hit.collider.CompareTag(chestTag))
             {
@@ -467,7 +467,7 @@ public class VRController : MonoBehaviour
         float currentY = rayOrigin.position.y;
         if (currentChestLid != null)
         {
-            if(currentChestLid.RayAnchorpoint != null)
+            if (currentChestLid.RayAnchorpoint != null)
             {
                 UpdateRayToChestAnchor(currentChestLid.RayAnchorpoint.position);
             }
@@ -475,15 +475,15 @@ public class VRController : MonoBehaviour
             if (triggerPressed)
             {
                 float deltaY = currentY - lastControllerY;
-                    currentChestLid.UpdateRotation(deltaY);
+                currentChestLid.UpdateRotation(deltaY);
             }
             else if (prevTriggerPressed && !triggerPressed)
             {
                 currentChestLid.StopInteracting();
             }
         }
-            //現在の高さを保存
-            lastControllerY = currentY;
+        //現在の高さを保存
+        lastControllerY = currentY;
     }
 
     void UpdateRayToChestAnchor(Vector3 anchorPos)
@@ -494,7 +494,7 @@ public class VRController : MonoBehaviour
             commonLine.positionCount = 2;
 
             commonLine.SetPosition(0, anchorPos);
-            commonLine.SetPosition(1,rayOrigin.position);
+            commonLine.SetPosition(1, rayOrigin.position);
         }
     }
 
@@ -573,7 +573,7 @@ public class VRController : MonoBehaviour
             //ヒット時モデルを切り替え
             SetHookModelStatus(isIdle: false);
             //回転の修正
-            if (flyingHookModel != null) 
+            if (flyingHookModel != null)
             {
                 flyingHookModel.transform.position = hit.point;
                 flyingHookModel.transform.rotation = Quaternion.LookRotation(hit.point, Vector3.up);
@@ -749,7 +749,7 @@ public class VRController : MonoBehaviour
 
         if (haptic != null)
         {
-            haptic.VibrateArrivedWall(isRightHand);   
+            haptic.VibrateArrivedWall(isRightHand);
         }
         SoundManager.Instance.PlaySE("SE_Harituki");
         Debug.Log("[VRController] StartCling: 壁に張り付き開始");
@@ -795,7 +795,7 @@ public class VRController : MonoBehaviour
         if (characterController == null) return;
         bool isCurrentlyGrounded = characterController.isGrounded;
 
-        if(isCurrentlyGrounded)
+        if (isCurrentlyGrounded)
         {
             if (!wasGrounded && fallSpeed < minLandingSpeed)
             {
@@ -832,44 +832,42 @@ public class VRController : MonoBehaviour
             // 頂点数を2に固定
             if (commonLine.positionCount != 2) commonLine.positionCount = 2;
 
-            Vector3 currentTipPosition;
+            Vector3 currentTipPosition = Vector3.zero;
 
             // ワイヤー発射中（isGrappling）または 移動中（isRetracting）
             // ※トリガーを押して命中した瞬間からここに入ります
             if (isHookActive || isRetracting)
             {
-                if (gameLineVisual != null) gameLineVisual.enabled = false;
-                if (rayVisualObject != null) rayVisualObject.SetActive(true);
-
-
-                currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
-                //オブジェクトをヒット視点と始点の中心に配置する
-                Vector3 midPoint = (rayOrigin.position + currentTipPosition) / 2;
+                commonLine.enabled = false;
 
                 if (rayVisualObject != null)
                 {
-                    rayVisualObject.transform.position = midPoint;
-                    //オブジェクトを中心点の方向に向ける
-                    rayVisualObject.transform.LookAt(currentTipPosition);
+                    rayVisualObject.SetActive(true);
 
-                    //距離に合わせてスケールの変更
+                    currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
+
+                    //オブジェクトの端に開始位置を合わせる
+                    rayVisualObject.transform.position = rayOrigin.position; rayVisualObject.transform.LookAt(currentTipPosition);
+
+                    // 3. スケールを調整して、開始点から終了点までピッタリ伸ばす
                     float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
                     Vector3 newScale = rayVisualObject.transform.localScale;
 
+                    // モデルのZ軸方向を長さとして使用します
+                    // 元のモデルの1ユニットが1mであれば、distanceをそのまま代入するだけでOK
                     newScale.z = distance;
                     rayVisualObject.transform.localScale = newScale;
                 }
-                if(hookObject != null)
+
+                // フック先端（針の部分）の処理
+                if (hookObject != null)
                 {
                     hookObject.position = currentTipPosition;
-                    // フックの向きを手元に向ける（必要に応じて調整）
-                   // hookObject.rotation = Quaternion.LookRotation(hasAimHitPoint, Vector3.up);
+                    hookObject.LookAt(rayOrigin.position);
                     hookObject.Rotate(-90f, 0f, 0f);
-
-                    // スケールを5に変更
                     hookObject.localScale = new Vector3(HookScale, HookScale, HookScale);
-                }
 
+                }
             }
             else
             {
@@ -916,6 +914,7 @@ public class VRController : MonoBehaviour
             }
         }
     }
+
 
     // Aim 更新（ヒット点を保持する）
     void UpdateAimRayFixed(float dynamicLength)
@@ -1022,18 +1021,6 @@ public class VRController : MonoBehaviour
     /// </summary>
     private bool IsMenuCollidingWithWall()
     {
-        /*
-        if (playerRoot == null) return false;
-
-        Ray ray = new Ray(playerRoot.position, playerRoot.forward);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, menuCanvasDistance, wallLayer))
-        {
-            // 壁がキャンバスの配置距離よりも手前にあるため、レイを遮断します。
-            Debug.Log($"[VRController] Collision Check: Wall hit at {hit.distance:F2}m. Menu is blocked by the wall.");
-            return true;
-        }
-        return false;*/
         if (playerRoot == null) return false;
         Ray ray = new Ray(playerRoot.position, playerRoot.forward);
         return Physics.Raycast(ray, menuCanvasDistance, wallLayer);
@@ -1123,7 +1110,7 @@ public class VRController : MonoBehaviour
         isGameRayEnabled = false;   //ゲーム用レイフラグ
         EnableGameRay(false);       //LineRendererの描写を停止
 
-        if (targetInteractor != null) 
+        if (targetInteractor != null)
         {
             targetInteractor.enabled = true;
             targetInteractor.maxRaycastDistance = 10f;
