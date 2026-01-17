@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ZombieController : MonoBehaviour
+public class ZombieController : MonoBehaviour, IDamageable
 {
     public enum State { Idle, Chase, Return }
 
@@ -211,6 +211,11 @@ public class ZombieController : MonoBehaviour
     }
 
     // ===== ˆÈ‰º‚ÍŠù‘¶ˆ—‚»‚Ì‚Ü‚Ü =====
+
+    public void ApplyDamage(int damage)
+    {
+        ApplyDamage((float)damage);
+    }
 
     public void ApplyDamage(float damage)
     {

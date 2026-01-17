@@ -334,7 +334,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1074706220154686890}
   - component: {fileID: 15629286002399335}
-  - component: {fileID: 4587992823186622374}
+  - component: {fileID: 8461698841645246537}
   m_Layer: 0
   m_Name: hed
   m_TagString: Untagged
@@ -416,8 +416,8 @@ SkinnedMeshRenderer:
     m_Center: {x: -15.338838, y: 4.444822, z: 0.0000019073486}
     m_Extent: {x: 15.587146, y: 15.162924, z: 10.726194}
   m_DirtyAABB: 0
---- !u!64 &4587992823186622374
-MeshCollider:
+--- !u!135 &8461698841645246537
+SphereCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -434,10 +434,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  serializedVersion: 3
+  m_Radius: 14.7
+  m_Center: {x: -2.1327088, y: 117.54697, z: 15.721493}
 --- !u!1 &1153278105776645432
 GameObject:
   m_ObjectHideFlags: 0
@@ -2571,7 +2570,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3755122922780123129}
   - component: {fileID: 6406190895086701392}
-  - component: {fileID: 3181552035806947308}
+  - component: {fileID: 2553196588086059789}
   m_Layer: 0
   m_Name: bdy
   m_TagString: Untagged
@@ -2706,8 +2705,8 @@ SkinnedMeshRenderer:
     m_Center: {x: -2.7143345, y: 50.155216, z: 24.391869}
     m_Extent: {x: 35.27858, y: 62.18527, z: 43.367638}
   m_DirtyAABB: 0
---- !u!64 &3181552035806947308
-MeshCollider:
+--- !u!136 &2553196588086059789
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2724,10 +2723,11 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 0}
+  serializedVersion: 2
+  m_Radius: 37.2
+  m_Height: 110
+  m_Direction: 1
+  m_Center: {x: -2.7143345, y: 50.155216, z: 24.391869}
 --- !u!1 &8519647396022987233
 GameObject:
   m_ObjectHideFlags: 0
@@ -2815,6 +2815,7 @@ GameObject:
   - component: {fileID: 8395534878269144025}
   - component: {fileID: 2663417013527707303}
   - component: {fileID: 8619356824731634372}
+  - component: {fileID: 6274170413799634750}
   m_Layer: 0
   m_Name: zombie
   m_TagString: Enemy
@@ -2909,8 +2910,8 @@ MonoBehaviour:
   attackAnimTime: 0.6
   attackCollider: {fileID: 8875238142007994981}
   modelRenderers: []
-  bodyCollider: {fileID: 3181552035806947308}
-  headCollider: {fileID: 4587992823186622374}
+  bodyCollider: {fileID: 0}
+  headCollider: {fileID: 0}
   modelRoot: {fileID: 6400278525006911827}
   animator: {fileID: 8395534878269144025}
   spawnVFX: {fileID: 1218966098184566850}
@@ -2919,6 +2920,18 @@ MonoBehaviour:
   hpGreen: {fileID: 8483773096084161393}
   hpRed: {fileID: 2964209338145114836}
   hpFrame: {fileID: 2225603940807308889}
+--- !u!114 &6274170413799634750
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590138742914805056}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa1a23d1b2864904b98acca9cfb059c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8702854231512120132
 GameObject:
   m_ObjectHideFlags: 0
