@@ -1,336 +1,212 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.VFX;
-using UnityEngine.UI;
-using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ZombieController : MonoBehaviour, IDamageable
+public class ZombieController : EnemyBase
 {
-    public enum State { Idle, Chase, Return }
+    public enum State
+    {
+        Idle,
+        Chase,
+        Attack
+    }
 
-    [Header("基本設定")]
-    public float maxHP = 100f;
-    public float moveSpeed = 3f;
-    public float chaseDistance = 10f;
-    public float returnDistance = 15f;
+    [Header("Target")]
+    [SerializeField] private Transform player;
 
-    [Header("出現・消失距離")]
-    public float spawnDistance = 15f;
-    public float hideDistance = 16f;
+    [Header("Movement")]
+    [SerializeField] private float chaseDistance = 15f;
+    [SerializeField] private float attackDistance = 5f;
 
-    [Header("攻撃設定")]
-    public float attackDistance = 1.5f;
-    public float attackCooldown = 1f;   // ★ 1秒（元からOK）
-    public float attackAnimTime = 0.6f;
+    [Header("Attack Timing")]
+    [SerializeField] private float attackCooldown = 1f;
+    [SerializeField] private float damageStartTime = 0.3f;
+    [SerializeField] private float damageEndTime = 0.6f;
+    [SerializeField] private float attackTotalTime = 1.0f;
 
-    [Header("攻撃判定")]
-    public Collider attackCollider;
-
-    [Header("モデル / コライダー")]
-    public Renderer[] modelRenderers;
+    [Header("Hit Colliders")]
     public Collider bodyCollider;
     public Collider headCollider;
 
-    [Header("モデルルート")]
-    [SerializeField] GameObject modelRoot;
-
-    [Header("Animator")]
-    [SerializeField] Animator animator;
+    [Header("Damage")]
+    [SerializeField] private float headShotMultiplier = 2f;
 
     [Header("VFX")]
-    public VisualEffect spawnVFX;
     public VisualEffect deathVFX;
 
-    [Header("HP UI")]
-    public GameObject hpUIRoot;
-    public Image hpGreen;
-    public Image hpRed;
-    public Image hpFrame;
-
-    Transform player;
     NavMeshAgent agent;
-    Shotgun shotgun;
+    Animator animator;
 
-    float currentHP;
     State currentState = State.Idle;
-    bool isVisible = false;
-    bool isAttacking = false;
-    float lastAttackTime = -999f;
 
-    public bool IsDead { get; private set; } = false;
+    float lastAttackTime;
+    float attackTimer;
 
-    Vector3 startPosition;
-    Quaternion startRotation;
+    bool hasHitThisAttack;
 
-    Coroutine greenRoutine;
-    Coroutine redRoutine;
+    // ★ HandHit 用
+    public bool CanDealDamage =>
+        currentState == State.Attack &&
+        attackTimer >= damageStartTime &&
+        attackTimer <= damageEndTime &&
+        !hasHitThisAttack;
 
-    // ★ 追加：多段ヒット防止
-    bool hasHitThisAttack = false;
-
-    void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         agent = GetComponent<NavMeshAgent>();
-        agent.speed = moveSpeed;
-
         animator = GetComponentInChildren<Animator>();
-
-        startPosition = transform.position;
-        startRotation = transform.rotation;
-
-        if (modelRenderers.Length == 0)
-            modelRenderers = GetComponentsInChildren<Renderer>(true);
-
-        if (attackCollider)
-            attackCollider.enabled = false;
     }
 
-    void Start()
+    protected override void Start()
     {
-        currentHP = maxHP;
-
+        base.Start();
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
-        shotgun = FindFirstObjectByType<Shotgun>();
-
-        SetVisible(false, true);
-        hpUIRoot.SetActive(false);
     }
 
     void Update()
     {
-        if (!player)
-        {
-            player = GameObject.FindGameObjectWithTag("Player")?.transform;
-            if (!player) return;
-        }
+        if (isDead || !player) return;
 
-        float dist = Vector3.Distance(player.position, transform.position);
-
-        if (!IsDead)
-        {
-            if (!isVisible && dist < spawnDistance) ShowEnemy();
-            else if (isVisible && dist > hideDistance) HideEnemy();
-        }
-
-        if (!isVisible || IsDead) return;
+        float dist = Vector3.Distance(transform.position, player.position);
 
         switch (currentState)
         {
             case State.Idle:
-                agent.isStopped = true;
-                animator.SetBool("isChase", false);
+                animator.SetBool("Chase", false);
 
                 if (dist <= chaseDistance)
                     currentState = State.Chase;
                 break;
 
             case State.Chase:
-                if (isAttacking) return;
-
-                agent.isStopped = false;
-                animator.SetBool("isChase", true);
-                SafeSetDestination(player.position);
+                animator.SetBool("Chase", true);
 
                 if (dist <= attackDistance)
-                    TryAttack(dist);
-                else if (dist > returnDistance)
-                    currentState = State.Return;
+                    TryEnterAttack();
+                else
+                    agent.SetDestination(player.position);
                 break;
 
-            case State.Return:
-                agent.isStopped = false;
-                animator.SetBool("isChase", true);
-                SafeSetDestination(startPosition);
-
-                if (Vector3.Distance(transform.position, startPosition) < 1f)
-                {
-                    agent.isStopped = true;
-                    currentState = State.Idle;
-                }
+            case State.Attack:
+                UpdateAttack();
+                FaceTarget();
                 break;
         }
     }
 
-    void TryAttack(float dist)
+    // =====================
+    void TryEnterAttack()
     {
-        if (isAttacking) return;
         if (Time.time < lastAttackTime + attackCooldown) return;
 
-        lastAttackTime = Time.time;
-        isAttacking = true;
-
+        currentState = State.Attack;
         agent.isStopped = true;
-        animator.SetBool("isAttack", true);
 
-        StartCoroutine(EndAttack(dist));
+        animator.SetBool("Chase", false);
+        animator.SetTrigger("Attack");
+
+        attackTimer = 0f;
+        hasHitThisAttack = false;
+        lastAttackTime = Time.time;
     }
 
-    IEnumerator EndAttack(float distAtAttack)
+    void UpdateAttack()
     {
-        yield return new WaitForSeconds(attackAnimTime);
+        attackTimer += Time.deltaTime;
 
-        animator.SetBool("isAttack", false);
-        isAttacking = false;
-
-        if (distAtAttack <= chaseDistance)
-            currentState = State.Chase;
-        else
-            currentState = State.Idle;
-    }
-
-    // ★ AnimationEvent
-    public void EnableAttackCollider()
-    {
-        hasHitThisAttack = false;   // ★ 攻撃開始時リセット
-        if (attackCollider)
-            attackCollider.enabled = true;
-    }
-
-    public void DisableAttackCollider()
-    {
-        if (attackCollider)
-            attackCollider.enabled = false;
-    }
-
-    // ★ 追加：攻撃ヒット処理
-    void OnTriggerEnter(Collider other)
-    {
-        if (!attackCollider || !attackCollider.enabled) return;
-        if (hasHitThisAttack) return;
-
-        if (other.CompareTag("Player"))
+        if (attackTimer >= attackTotalTime)
         {
-            PlayerHealth health = other.GetComponent<PlayerHealth>();
-            if (health != null)
-            {
-                health.TakeDamage(1);
-                hasHitThisAttack = true;
-            }
+            ExitAttack();
+            return;
+        }
+
+        // プレイヤーが離れたら攻撃中断
+        float dist = Vector3.Distance(transform.position, player.position);
+        if (dist > attackDistance)
+        {
+            ExitAttack();
         }
     }
 
-    // ===== 以下は既存処理そのまま =====
-
-    public void ApplyDamage(int damage)
+    void ExitAttack()
     {
-        ApplyDamage((float)damage);
+        currentState = State.Chase;
+        agent.isStopped = false;
     }
 
-    public void ApplyDamage(float damage)
+    void FaceTarget()
     {
-        if (IsDead) return;
+        Vector3 dir = player.position - transform.position;
+        dir.y = 0f;
 
-        currentHP = Mathf.Max(0, currentHP - damage);
-        float target = currentHP / maxHP;
-
-        if (greenRoutine != null) StopCoroutine(greenRoutine);
-        greenRoutine = StartCoroutine(AnimateHP(hpGreen, target, 0f));
-
-        if (redRoutine != null) StopCoroutine(redRoutine);
-        redRoutine = StartCoroutine(AnimateHP(hpRed, target, 0.5f));
-
-        if (currentHP <= 0f)
-            Die();
-    }
-
-    IEnumerator AnimateHP(Image img, float target, float delay)
-    {
-        if (delay > 0) yield return new WaitForSeconds(delay);
-
-        float start = img.fillAmount;
-        float t = 0f;
-
-        while (t < 1f)
+        if (dir.sqrMagnitude > 0.01f)
         {
-            t += Time.deltaTime * 2f;
-            img.fillAmount = Mathf.Lerp(start, target, t);
-            yield return null;
-        }
-
-        img.fillAmount = target;
-    }
-
-    void ShowEnemy()
-    {
-        if (IsDead) return;
-        SetVisible(true);
-        hpUIRoot.SetActive(true);
-        PlaySpawnVFX();
-    }
-
-    void HideEnemy()
-    {
-        if (IsDead) return;
-        SetVisible(false);
-        hpUIRoot.SetActive(false);
-    }
-
-    void SetVisible(bool visible, bool immediate = false)
-    {
-        isVisible = visible;
-
-        if (modelRoot)
-            modelRoot.SetActive(visible);
-
-        if (bodyCollider) bodyCollider.enabled = visible;
-        if (headCollider) headCollider.enabled = visible;
-
-        if (agent && agent.isOnNavMesh)
-        {
-            agent.isStopped = !visible;
-
-            if (immediate)
-            {
-                agent.Warp(transform.position);
-                agent.ResetPath();
-            }
+            Quaternion rot = Quaternion.LookRotation(dir);
+            transform.rotation =
+                Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 10f);
         }
     }
 
-    void Die()
+    // =====================
+    protected override float CalculateDamage(float baseDamage, Collider hitPart)
     {
-        if (IsDead) return;
-        IsDead = true;
+        if (hitPart == headCollider)
+            return baseDamage * headShotMultiplier;
 
-        animator.SetBool("isAttack", false);
-        animator.SetBool("isChase", false);
-
-        SetVisible(false, true);
-        hpUIRoot.SetActive(false);
-        PlayDeathVFX();
-        shotgun?.plusAmmo();
+        return baseDamage;
     }
 
-    void SafeSetDestination(Vector3 dest)
+    protected override void Die()
     {
-#if UNITY_2022_1_OR_NEWER
-        if (!agent.isOnNavMesh) return;
-#endif
-        agent.SetDestination(dest);
+        if (isDead) return;
+        isDead = true;
+        StartCoroutine(DeathSequence());
     }
 
-    void PlaySpawnVFX()
+    System.Collections.IEnumerator DeathSequence()
     {
-        if (!spawnVFX) return;
-        spawnVFX.gameObject.SetActive(true);
-        spawnVFX.Reinit();
-        spawnVFX.Play();
-        StartCoroutine(DisableAfter(spawnVFX.gameObject, 2f));
+        agent.isStopped = true;
+
+        bodyCollider.enabled = false;
+        headCollider.enabled = false;
+
+        if (deathVFX)
+        {
+            deathVFX.gameObject.SetActive(true);
+            deathVFX.Reinit();
+            deathVFX.Play();
+        }
+
+        yield return new WaitForSeconds(1f);
+
+        gameObject.SetActive(false);
+        hpUIRoot?.SetActive(false);
     }
 
-    void PlayDeathVFX()
+    protected override void OnRespawn()
     {
-        if (!deathVFX) return;
-        deathVFX.gameObject.SetActive(true);
-        deathVFX.Reinit();
-        deathVFX.Play();
-        StartCoroutine(DisableAfter(deathVFX.gameObject, 2f));
+        currentState = State.Idle;
+        attackTimer = 0f;
+        hasHitThisAttack = false;
+
+        agent.isStopped = false;
+        agent.ResetPath();
+
+        animator.Rebind();
+        animator.Update(0f);
+
+        bodyCollider.enabled = true;
+        headCollider.enabled = true;
+
+        if (deathVFX)
+            deathVFX.gameObject.SetActive(false);
     }
 
-    IEnumerator DisableAfter(GameObject go, float sec)
+    // ★ HandHit 用
+    public void MarkAttackHit()
     {
-        yield return new WaitForSeconds(sec);
-        go.SetActive(false);
+        hasHitThisAttack = true;
     }
 }

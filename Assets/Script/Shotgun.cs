@@ -46,7 +46,6 @@ public class Shotgun : MonoBehaviour
 
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
-    private EnemyController enemyC;
     private GameObject gunInstance;
     private Text reserveText;
     private Transform rayOrigin;  // コントローラーの位置情報

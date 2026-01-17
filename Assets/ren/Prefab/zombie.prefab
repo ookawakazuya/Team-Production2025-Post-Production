@@ -2571,6 +2571,7 @@ GameObject:
   - component: {fileID: 3755122922780123129}
   - component: {fileID: 6406190895086701392}
   - component: {fileID: 2553196588086059789}
+  - component: {fileID: 5053163574798217282}
   m_Layer: 0
   m_Name: bdy
   m_TagString: Untagged
@@ -2728,6 +2729,18 @@ CapsuleCollider:
   m_Height: 110
   m_Direction: 1
   m_Center: {x: -2.7143345, y: 50.155216, z: 24.391869}
+--- !u!114 &5053163574798217282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8382055512723206854}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c8cf7e8638c406246b81be38daeb751b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8519647396022987233
 GameObject:
   m_ObjectHideFlags: 0
@@ -2900,26 +2913,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 100
-  moveSpeed: 3
-  chaseDistance: 10
-  returnDistance: 15
-  spawnDistance: 15
-  hideDistance: 16
-  attackDistance: 1.5
-  attackCooldown: 1
-  attackAnimTime: 0.6
-  attackCollider: {fileID: 8875238142007994981}
-  modelRenderers: []
-  bodyCollider: {fileID: 0}
-  headCollider: {fileID: 0}
-  modelRoot: {fileID: 6400278525006911827}
-  animator: {fileID: 8395534878269144025}
-  spawnVFX: {fileID: 1218966098184566850}
-  deathVFX: {fileID: 7342249086892632404}
   hpUIRoot: {fileID: 263561948082411944}
   hpGreen: {fileID: 8483773096084161393}
   hpRed: {fileID: 2964209338145114836}
-  hpFrame: {fileID: 2225603940807308889}
+  player: {fileID: 0}
+  chaseDistance: 10
+  attackDistance: 1.5
+  attackCooldown: 1
+  damageStartTime: 0.3
+  damageEndTime: 0.6
+  attackTotalTime: 1
+  bodyCollider: {fileID: 0}
+  headCollider: {fileID: 0}
+  headShotMultiplier: 2
+  deathVFX: {fileID: 7342249086892632404}
 --- !u!114 &6274170413799634750
 MonoBehaviour:
   m_ObjectHideFlags: 0

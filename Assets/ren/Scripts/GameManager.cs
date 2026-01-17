@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -27,7 +26,9 @@ public class GameManager : MonoBehaviour
     // プレイヤー / 敵管理
     // =========================
     private Transform player;
-    private readonly List<EnemyController> enemies = new();
+
+    // ★ EnemyController → EnemyBase
+    private readonly List<EnemyBase> enemies = new();
 
     // =========================
     // 宝箱管理
@@ -53,6 +54,11 @@ public class GameManager : MonoBehaviour
         }
 
         SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void Update()
@@ -85,7 +91,9 @@ public class GameManager : MonoBehaviour
     private void FindPlayerAndEnemies()
     {
         enemies.Clear();
-        enemies.AddRange(FindObjectsOfType<EnemyController>());
+
+        // ★ EnemyBase を取得（Zombie / Skeleton 共通）
+        enemies.AddRange(FindObjectsOfType<EnemyBase>(true));
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
@@ -107,8 +115,10 @@ public class GameManager : MonoBehaviour
     // =========================
     // 敵管理
     // =========================
-    public void RegisterEnemy(EnemyController enemy)
+    public void RegisterEnemy(EnemyBase enemy)
     {
+        if (enemy == null) return;
+
         if (!enemies.Contains(enemy))
             enemies.Add(enemy);
     }
