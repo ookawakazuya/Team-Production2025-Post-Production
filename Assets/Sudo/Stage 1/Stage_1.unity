@@ -3479,7 +3479,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!65 &1168601884
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7500,6 +7500,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 6685871448028665418, guid: 9457b98ef5cc6994b9e10f75c530391a, type: 3}
+      propertyPath: m_NavMeshData
+      value: 
+      objectReference: {fileID: 23800000, guid: b3761d1875ee15e4988fe43945d0506a, type: 2}
     - target: {fileID: 7123228768237232323, guid: 9457b98ef5cc6994b9e10f75c530391a, type: 3}
       propertyPath: m_Name
       value: NavMesh

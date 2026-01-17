@@ -1,53 +1,60 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Bullet : MonoBehaviour
 {
-    [Header("’e‚ÌŠî–{İ’è")]
-    [SerializeField] private float bulletSpeed = 50.0f; // ”ò‚Ô‘¬‚³
+    [Header("å¼¾ã®åŸºæœ¬è¨­å®š")]
+    [SerializeField] private float bulletSpeed = 50.0f;
 
-    public int damage = 20; // Šî–{ƒ_ƒ[ƒW
-    public float destroyTime = 3f;@// ’e‚Ìõ–½
+    public int damage = 20;
+    public float destroyTime = 3f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private Rigidbody rb;
+
+    void Awake()
     {
-        Destroy(gameObject, destroyTime);
+        rb = GetComponent<Rigidbody>();
     }
 
-    // Update is called once per frame
-    void Update()
+    void Start()
     {
-        // --- ‘O•û‚Éi‚Ş ---
-        float moveDistance = bulletSpeed * Time.deltaTime;
-        transform.position += transform.forward * moveDistance;
+        rb.useGravity = false;
+        rb.isKinematic = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+        // å‰æ–¹ã«ç™ºå°„
+        rb.linearVelocity = transform.forward * bulletSpeed;
+
+        Destroy(gameObject, destroyTime);
     }
 
     void OnCollisionEnter(Collision collision)
     {
-        // EnemyController ‚ğ‚Á‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg‚©?
-        EnemyController enemy = collision.collider.GetComponentInParent<EnemyController>();
+        Debug.Log("Hit: " + collision.collider.name);
 
-        if (enemy != null)
+        // ãƒ€ãƒ¡ãƒ¼ã‚¸ã‚’å—ã‘ã‚‰ã‚Œã‚‹ã‹ï¼Ÿ
+        IDamageable damageable =
+            collision.collider.GetComponentInParent<IDamageable>();
+
+        if (damageable != null)
         {
             int finalDamage = damage;
 
-            // ‚Ç‚ÌƒRƒ‰ƒCƒ_[‚É“–‚½‚Á‚½‚©”»’è
-            if (collision.collider == enemy.headCollider)
+            // ãƒ˜ãƒƒãƒ‰ or ãƒœãƒ‡ã‚£åˆ¤å®š
+            var hitRoot = collision.collider.GetComponentInParent<MonoBehaviour>();
+
+            if (hitRoot is ZombieController zombie)
             {
-                finalDamage = damage * 2; // ƒwƒbƒhƒVƒ‡ƒbƒg
-                Debug.Log("HeadShot! Damage: " + finalDamage);
+                if (collision.collider == zombie.headCollider)
+                    finalDamage *= 2;
             }
-            else if (collision.collider == enemy.bodyCollider)
+            else if (hitRoot is SkeletonController skeleton)
             {
-                finalDamage = damage; // ƒ{ƒfƒB
-                Debug.Log("BodyShot! Damage: " + finalDamage);
+                if (collision.collider == skeleton.headCollider)
+                    finalDamage *= 2;
             }
 
-            enemy.ApplyDamage(finalDamage);
-        }
-        else
-        {
-            Debug.Log("Hit something else: " + collision.collider.name);
+            damageable.ApplyDamage(finalDamage);
         }
 
         Destroy(gameObject);

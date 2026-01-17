@@ -990,6 +990,7 @@ GameObject:
   - component: {fileID: 4013348804563125212}
   - component: {fileID: 7271019868394768572}
   - component: {fileID: 6869767366912532112}
+  - component: {fileID: 5180423873687492916}
   m_Layer: 0
   m_Name: zombie (3)
   m_TagString: Enemy
@@ -1094,6 +1095,18 @@ MonoBehaviour:
   hpGreen: {fileID: 6087491725010057028}
   hpRed: {fileID: 4163992347465254261}
   hpFrame: {fileID: 1508910119985421535}
+--- !u!114 &5180423873687492916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3449470690995663154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa1a23d1b2864904b98acca9cfb059c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3671634052754585637
 GameObject:
   m_ObjectHideFlags: 0
