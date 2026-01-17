@@ -15,6 +15,7 @@ public class VRController : MonoBehaviour
     [SerializeField] LineRenderer commonLine;          // Aim/Hook共通のLineRenderer
     [SerializeField] Material aimMaterial;             // Aim用マテリアル
     [SerializeField] Material hookMaterial;            // Hook用マテリアル
+    [SerializeField] Material NullMaterial;
     [SerializeField] CharacterController characterController; // 移動用
     [SerializeField] Transform playerRoot;             // 視点回転の親（右スティックで回す対象）
 
@@ -282,6 +283,8 @@ public class VRController : MonoBehaviour
         // --- レイの表示更新 ---
         // 通常時は maxWireLength、フック中などは currentRayLength (またはヒット点までの距離)
         float lengthToDraw = (isGrappling || isRetracting) ? Vector3.Distance(rayOrigin.position, grapplePoint) : maxWireLength;
+
+
 
         // 外部（アニメーション等）から currentRayLength が指定されている場合はそちらを最優先
         if (currentRayLength > 0)
@@ -878,10 +881,22 @@ public class VRController : MonoBehaviour
                 Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, length))
                 {
+                    //何かに当たっている場合は通常のマテリアル
+                    if (aimMaterial != null) commonLine.material = aimMaterial;
                     currentTipPosition = hit.point;
                 }
                 else
                 {
+                    // 最大距離まで何も当たらなかった場合、NullMaterialに切り替え
+                    if (NullMaterial != null)
+                    {
+                        commonLine.material = NullMaterial;
+                    }
+                    else if (aimMaterial != null)
+                    {
+                        // NullMaterialが設定されていない場合のバックアップ
+                        commonLine.material = aimMaterial;
+                    }
                     currentTipPosition = rayOrigin.position + rayOrigin.forward * length;
                 }
                 commonLine.SetPosition(0, rayOrigin.position + rayOrigin.forward * length);
