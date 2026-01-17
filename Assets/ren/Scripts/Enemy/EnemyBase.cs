@@ -12,6 +12,11 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     public Image hpGreen;
     public Image hpRed;
 
+    [Header("HP UI Distance")]
+    [SerializeField] protected float hpVisibleDistance = 10f;
+
+    Transform player;
+
     protected float currentHP;
     protected bool isDead;
 
@@ -31,7 +36,29 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     {
         currentHP = maxHP;
         GameManager.Instance?.RegisterEnemy(this);
+
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
+    protected virtual void Update()
+    {
+        UpdateHPUIVisibility();
+    }
+
+    protected void UpdateHPUIVisibility()
+    {
+        if (!hpUIRoot || !player) return;
+
+        float dist = Vector3.Distance(transform.position, player.position);
+
+        bool shouldShow =
+            !isDead &&
+            currentHP < maxHP &&        // ダメージを受けた敵だけ
+            dist <= hpVisibleDistance;
+
+        if (hpUIRoot.activeSelf != shouldShow)
+            hpUIRoot.SetActive(shouldShow);
+    }
+
 
     // =====================
     // ダメージ受付
