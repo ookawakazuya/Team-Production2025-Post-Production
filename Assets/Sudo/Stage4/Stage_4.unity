@@ -6920,11 +6920,11 @@ PrefabInstance:
       objectReference: {fileID: 901203149}
     - target: {fileID: 4291553461617787889, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_RenderMode
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7402683282898045189, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_PresetInfoIsWorld
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14971,7 +14971,7 @@ PrefabInstance:
     - target: {fileID: 9105862115789461093, guid: 7bc7e8f8da12ba844810ad018179bf97, type: 3}
       propertyPath: menuCanvas
       value: 
-      objectReference: {fileID: 1677842550}
+      objectReference: {fileID: 806418886}
     - target: {fileID: 9105862115789461093, guid: 7bc7e8f8da12ba844810ad018179bf97, type: 3}
       propertyPath: uiLineVisual
       value: 
@@ -15024,11 +15024,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9828f9cc7d6362a4ab41dd1c65279801, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1677842550 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2819882012713917899, guid: 7bc7e8f8da12ba844810ad018179bf97, type: 3}
-  m_PrefabInstance: {fileID: 1677842548}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1697391379
 GameObject:
   m_ObjectHideFlags: 0
