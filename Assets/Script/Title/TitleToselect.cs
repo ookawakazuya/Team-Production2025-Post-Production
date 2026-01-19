@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class TitleToselect : MonoBehaviour
 {
     [SerializeField] Button button;
-    [SerializeField] char SceleName;
+    [SerializeField] string SceleName;
 
     public void OnClickButton()
     {
