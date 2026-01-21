@@ -25,8 +25,11 @@ public class VRSimpleUIClicker : MonoBehaviour
 
     void OnEnable()
     {
-        // 入力アクションを有効化
-        clickAction.action?.Enable();
+        // インスペクターで指定されたアクションを有効化する
+        if (clickAction.action != null)
+        {
+            clickAction.action.Enable();
+        }
     }
 
     void Update()
@@ -45,13 +48,13 @@ public class VRSimpleUIClicker : MonoBehaviour
     {
         if (_rayInteractor == null) return;
 
-        // 1. XRRayInteractor から現在UIに当たっているか情報を取得
+        // XRRayInteractor から現在UIに当たっているか情報を取得
         if (_rayInteractor.TryGetCurrentUIRaycastResult(out RaycastResult result))
         {
-            // 2. ヒットしたオブジェクト、またはその親階層に Button があるか確認
+            // ヒットしたオブジェクト、またはその親階層に Button があるか確認
             Button targetButton = result.gameObject.GetComponentInParent<Button>();
 
-            // 3. ボタンが存在し、かつクリック可能な状態（Interactable）であれば実行
+            // ボタンが存在し、かつクリック可能な状態（Interactable）であれば実行
             if (targetButton != null && targetButton.interactable)
             {
                 // Unity標準の onClick イベントを呼び出す
