@@ -10,7 +10,13 @@ public class ChestLid : MonoBehaviour
     [SerializeField] float Min = 0f;
     [SerializeField] float stayOpen = -110f;
 
-    [SerializeField] Transform rayAnchorPoint;
+    [SerializeField] Transform rayAnchorPoint;  //レイが吸着するポイント
+    [SerializeField] float openSpeed = 100f;
+    [SerializeField] float minAngle = 0f;
+    [SerializeField] float maxAngle = -110f;
+
+    private float currentAngle = 0f;
+    
     public Transform RayAnchorpoint => rayAnchorPoint;
 
      void Start()
@@ -47,6 +53,7 @@ public class ChestLid : MonoBehaviour
     //コントローラの上下移動量による蓋の回転
     public void UpdateRotation(float deltaY)
     {
+        /*
         isBeingInteracted = true;
         //感度調整
         float sensitivity = 150f;
@@ -60,6 +67,19 @@ public class ChestLid : MonoBehaviour
 
         spring.targetPosition = Mathf.Clamp(newTarget, joint.limits.min, joint.limits.max);
 
+        joint.spring = spring;
+        joint.useSpring = true;*/
+        isBeingInteracted = true;
+        float sensitivity = 450;
+        JointSpring spring = joint.spring;
+
+        float invertedDeltaY = deltaY * -1f;
+        float newTarget = spring.targetPosition + (invertedDeltaY * sensitivity);
+
+        // ログを追加して、数値が変化しているか確認
+        // Debug.Log($"DeltaY: {deltaY} | NewTarget: {newTarget}");
+
+        spring.targetPosition = Mathf.Clamp(newTarget, joint.limits.min, joint.limits.max);
         joint.spring = spring;
         joint.useSpring = true;
     }

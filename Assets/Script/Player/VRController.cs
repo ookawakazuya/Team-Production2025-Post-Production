@@ -449,14 +449,21 @@ public class VRController : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, maxWireLength))
         {
+            Debug.Log($"Hit object: {hit.collider.name} with tag: {hit.collider.tag}");
             if (hit.collider.CompareTag(chestTag))
             {
+                Debug.Log("Chest tag detected!");
                 ChestLid foundLid = hit.collider.GetComponentInParent<ChestLid>();
 
                 if (foundLid != null)
                 {
+                    Debug.Log("ChestLid component found!");
                     currentChestLid = foundLid;
                     return;
+                }
+                else
+                {
+                    Debug.LogWarning("ChestLid script is missing on this object or its parents.");
                 }
             }
         }
@@ -478,6 +485,12 @@ public class VRController : MonoBehaviour
             if (currentChestLid.RayAnchorpoint != null)
             {
                 UpdateRayToChestAnchor(currentChestLid.RayAnchorpoint.position);
+            }
+
+            // トリガーが押された瞬間だけ、現在の高さを保存して差分を0にする
+            if (triggerPressed && !prevTriggerPressed)
+            {
+                lastControllerY = currentY;
             }
 
             if (triggerPressed)
