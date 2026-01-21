@@ -67,6 +67,8 @@ public class VRController : MonoBehaviour
     [SerializeField] GameObject normalHookModel;         //通常モデル
     [SerializeField] GameObject flyingHookModel;       //解除モデル
 
+    Transform originalHookParent;
+
     private bool isSwitchingModel = false;
 
 
@@ -198,6 +200,13 @@ public class VRController : MonoBehaviour
         {
             initialWireScale = rayVisualObject.transform.localScale;
         }
+
+        // ゲーム開始時にフックの元の親（GameObjectなど）を記録
+        if (hookObject != null)
+        {
+            originalHookParent = hookObject.parent;
+        }
+
     }
 
     private void SetHookModelStatus(bool isIdle)
@@ -593,6 +602,18 @@ public class VRController : MonoBehaviour
 
             //ヒット時モデルを切り替え
             SetHookModelStatus(isIdle: false);
+
+            //フックを親から切り離し、ワールド座標で自由に動けるようにする
+            if (hookObject != null)
+            {
+                hookObject.SetParent(null);
+            }
+
+            // ヒット位置へ移動
+            isHookActive = true;
+            isGrappling = true;
+            grapplePoint = hit.point;
+
             //回転の修正
             if (flyingHookModel != null)
             {
@@ -797,9 +818,17 @@ public class VRController : MonoBehaviour
         hasAimHitPoint = false;
 
         currentSpeed = 0f;
+        //解除されたら、フックを元の親（プレイヤーの手元など）に戻す
+        if (hookObject != null && originalHookParent != null)
+        {
+            hookObject.SetParent(originalHookParent);
 
-        SetHookModelStatus(isIdle: true);
+            // 手元に戻した際の初期位置・回転をリセット（必要に応じて）
+            hookObject.localPosition = Vector3.zero;
+            hookObject.localRotation = Quaternion.identity;
+        }
 
+        SetHookModelStatus(isIdle: true); SetHookModelStatus(isIdle: true);
         // スクリプトを確実に有効に戻す
         if (gameLineVisual != null) gameLineVisual.enabled = true;
 
@@ -864,31 +893,26 @@ public class VRController : MonoBehaviour
                 if (rayVisualObject != null)
                 {
                     rayVisualObject.SetActive(true);
-
                     currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
 
                     float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
 
-                    // 2. 位置の更新: ピボットが中心にあるため、「始点と終点の中間」に配置する
-                    // これにより、中心から伸びても両端が手元と着弾点にピッタリ合います
-                    Vector3 midPoint = (rayOrigin.position + currentTipPosition) / 2f;
-                    rayVisualObject.transform.position = midPoint;
-
-                    // 3. 向きの更新: 先端（着弾点）を向く
+                    // ワイヤーモデルを「手元」と「着弾点」の中間に配置
+                    // 注意：モデルのPivotが中心にある前提です
+                    rayVisualObject.transform.position = (rayOrigin.position + currentTipPosition) / 2f;
                     rayVisualObject.transform.LookAt(currentTipPosition);
 
-                    // 4. スケールの更新
-                    // initialWireScale から太さ(X,Y)を取得し、Z(長さ)を距離×係数で設定
-                    // モデルが100m、係数が0.01なら、10mの距離に対して scale.z = 0.1 となり、
-                    // 中心から前後5mずつ伸びて合計10mのワイヤーになります
-                    Vector3 newScale = new Vector3(
+                    // Z軸方向にスケールを伸ばす
+                    rayVisualObject.transform.localScale = new Vector3(
                         initialWireScale.x,
                         initialWireScale.y,
                         distance * wireModelScaleFactor
                     );
-
-                    rayVisualObject.transform.localScale = newScale;
-            }
+                }
+                else
+                {
+                    currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
+                }
 
                 // フック先端（針の部分）の処理
                 if (hookObject != null)
