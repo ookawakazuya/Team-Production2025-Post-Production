@@ -25,6 +25,9 @@ public class VRController : MonoBehaviour
     [SerializeField] float stopDistance = 1f;          // 到達判定距離
     [Header("レイのオブジェクト")]
     [SerializeField] private GameObject rayVisualObject;//フックレイのオブジェクト
+    [SerializeField] float wireModelScaleFactor = 0.01f;   // 巨大なモデルを調整する係数 (1/100なら0.01)
+    private Vector3 initialWireScale;                    // インスペクターで設定した初期の太さを保持
+
 
     [Header("XR Interaction Toolkit 連携")]
     [SerializeField] XRRayInteractor targetInteractor;  //インスペクターでレイを表示しているデフォルトのスクリプトを参照する
@@ -188,6 +191,12 @@ public class VRController : MonoBehaviour
         {
             UpdateRayVisuals(maxWireLength);
             SetHookModelStatus(isIdle: true);
+        }
+
+        // ゲーム開始時のワイヤーの太さ（X, Y）を覚えておく
+        if (rayVisualObject != null)
+        {
+            initialWireScale = rayVisualObject.transform.localScale;
         }
     }
 
@@ -845,18 +854,28 @@ public class VRController : MonoBehaviour
 
                     currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
 
-                    //オブジェクトの端に開始位置を合わせる
-                    rayVisualObject.transform.position = rayOrigin.position; rayVisualObject.transform.LookAt(currentTipPosition);
-
-                    // 3. スケールを調整して、開始点から終了点までピッタリ伸ばす
                     float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
-                    Vector3 newScale = rayVisualObject.transform.localScale;
 
-                    // モデルのZ軸方向を長さとして使用します
-                    // 元のモデルの1ユニットが1mであれば、distanceをそのまま代入するだけでOK
-                    newScale.z = distance;
+                    // 2. 位置の更新: ピボットが中心にあるため、「始点と終点の中間」に配置する
+                    // これにより、中心から伸びても両端が手元と着弾点にピッタリ合います
+                    Vector3 midPoint = (rayOrigin.position + currentTipPosition) / 2f;
+                    rayVisualObject.transform.position = midPoint;
+
+                    // 3. 向きの更新: 先端（着弾点）を向く
+                    rayVisualObject.transform.LookAt(currentTipPosition);
+
+                    // 4. スケールの更新
+                    // initialWireScale から太さ(X,Y)を取得し、Z(長さ)を距離×係数で設定
+                    // モデルが100m、係数が0.01なら、10mの距離に対して scale.z = 0.1 となり、
+                    // 中心から前後5mずつ伸びて合計10mのワイヤーになります
+                    Vector3 newScale = new Vector3(
+                        initialWireScale.x,
+                        initialWireScale.y,
+                        distance * wireModelScaleFactor
+                    );
+
                     rayVisualObject.transform.localScale = newScale;
-                }
+            }
 
                 // フック先端（針の部分）の処理
                 if (hookObject != null)
@@ -878,9 +897,10 @@ public class VRController : MonoBehaviour
                 Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
                 if (Physics.Raycast(ray, out RaycastHit hit, length))
                 {
+                    currentTipPosition = hit.point;
                     //何かに当たっている場合は通常のマテリアル
                     if (aimMaterial != null) commonLine.material = aimMaterial;
-                    currentTipPosition = hit.point;
+
                 }
                 else
                 {
