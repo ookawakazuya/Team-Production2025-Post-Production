@@ -238,6 +238,15 @@ public class Shotgun : MonoBehaviour
     /// </summary>
     void UpdateBeginnerMode()
     {
+        // --- 🔸ストックが0なら描画しない ---
+        if (reserveAmmo <= 0)
+        {
+            hasHit = false;
+            shouldDraw = false;
+            lineRenderer.enabled = false; // 念のため強制OFF
+            return; // この関数をここで終了！
+        }
+
         RaycastHit hit;
 
         if (Physics.Raycast(rayOrigin.position, rayDirection, out hit, rayDistance))
