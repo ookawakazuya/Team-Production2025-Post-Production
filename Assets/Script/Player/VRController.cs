@@ -456,27 +456,28 @@ public class VRController : MonoBehaviour
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         RaycastHit hit;
 
+        // シーンビューにレイを可視化する（デバッグ用）
+        Debug.DrawRay(ray.origin, ray.direction * maxWireLength, Color.red);
+
         if (Physics.Raycast(ray, out hit, maxWireLength))
         {
             Debug.Log($"Hit object: {hit.collider.name} with tag: {hit.collider.tag}");
             if (hit.collider.CompareTag(chestTag))
             {
-                Debug.Log("Chest tag detected!");
+                Debug.Log("<color=green>Chest tag detected!</color>");
                 ChestLid foundLid = hit.collider.GetComponentInParent<ChestLid>();
 
-                if (foundLid != null)
+                if (foundLid != null && currentChestLid != foundLid)
                 {
-                    Debug.Log("ChestLid component found!");
+                    if (currentChestLid != null) currentChestLid.StopInteracting();
                     currentChestLid = foundLid;
                     return;
                 }
-                else
-                {
-                    Debug.LogWarning("ChestLid script is missing on this object or its parents.");
-                }
+
+                if (foundLid != null) return;
             }
         }
-        // 何もヒットしていないときは、保持していた蓋のフラグを折る
+        // 視点が外れた場合
         if (currentChestLid != null && !triggerPressed)
         {
             currentChestLid.StopInteracting();
@@ -639,12 +640,12 @@ public class VRController : MonoBehaviour
 
             PlayHookHitParticle(grapplePoint, hit.normal);
 
-            Debug.Log($"ShootHook Hit: {hit.collider.name} at {grapplePoint}");
+           // Debug.Log($"ShootHook Hit: {hit.collider.name} at {grapplePoint}");
         }
         else
         {
             ResetHookStateOnMiss();
-            Debug.Log("[VRController] ShootHook: Raycast miss");
+           // Debug.Log("[VRController] ShootHook: Raycast miss");
         }
     }
 
