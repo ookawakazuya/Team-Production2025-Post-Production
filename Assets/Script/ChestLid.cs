@@ -69,8 +69,17 @@ public class ChestLid : MonoBehaviour
 
         joint.spring = spring;
         joint.useSpring = true;*/
+
+        // 異常値ガード
+        if (float.IsNaN(deltaY) || float.IsInfinity(deltaY))
+        {
+            Debug.LogWarning("ChestLid: deltaY が異常値のため処理を中断");
+            return;
+        }
+
+
         isBeingInteracted = true;
-        float sensitivity = 450;
+        float sensitivity = 100;
         JointSpring spring = joint.spring;
 
         float invertedDeltaY = deltaY * -1f;
