@@ -3,16 +3,27 @@ using UnityEngine.SceneManagement;
 
 public class NextStageTrigger : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
+    [Header("設定")]
+    [SerializeField] GameObject resultCanvas;
+
+    private void Start()
     {
-        // Playerタグを持つオブジェクトが触れたときのみ反応
-        if (other.CompareTag("Player"))
+        //ゲーム開始時リザルト画面を隠す。
+        if(resultCanvas != null)
         {
-            LoadNextStage();
+            resultCanvas.SetActive(false);
         }
     }
 
-    private void LoadNextStage()
+    public void ShowClearResult()
+    {
+        if (resultCanvas != null)
+        {
+            resultCanvas.SetActive(true);
+        }
+    }
+
+    public void LoadNextStage()
     {
         int currentIndex = SceneManager.GetActiveScene().buildIndex;
         int nextIndex = currentIndex + 1;
