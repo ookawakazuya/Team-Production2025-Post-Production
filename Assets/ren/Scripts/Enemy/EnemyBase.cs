@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.AI;
 
 public abstract class EnemyBase : MonoBehaviour, IDamageable
 {
@@ -15,7 +16,14 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     [Header("HP UI Distance")]
     [SerializeField] protected float hpVisibleDistance = 10f;
 
+    [Header("AI Distance")]
+    [SerializeField] protected float chaseDistance = 15f;
+    [SerializeField] protected float attackDistance = 5f;
+    [SerializeField] protected float stopDistance = 2f; // Åö ãﬂÇ√Ç´Ç∑Ç¨ñhé~
+
     protected Transform player;
+    protected NavMeshAgent agent;
+    protected Animator animator;
 
     protected float currentHP;
     protected bool isDead;
@@ -30,6 +38,9 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     {
         startPosition = transform.position;
         startRotation = transform.rotation;
+
+        agent = GetComponent<NavMeshAgent>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     protected virtual void Start()
@@ -39,11 +50,15 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
+
     protected virtual void Update()
     {
         UpdateHPUIVisibility();
     }
 
+    // =====================
+    // HP UI ï\é¶êßå‰
+    // =====================
     protected void UpdateHPUIVisibility()
     {
         if (!hpUIRoot || !player) return;
@@ -52,13 +67,29 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
         bool shouldShow =
             !isDead &&
-            currentHP < maxHP &&        // É_ÉÅÅ[ÉWÇéÛÇØÇΩìGÇæÇØ
+            currentHP < maxHP &&
             dist <= hpVisibleDistance;
 
         if (hpUIRoot.activeSelf != shouldShow)
             hpUIRoot.SetActive(shouldShow);
     }
 
+    // =====================
+    // ã§í  Chase à⁄ìÆÅiÇﬂÇËçûÇ›ñhé~Åj
+    // =====================
+    protected void UpdateChaseMovement(float dist)
+    {
+        if (!agent) return;
+
+        if (dist <= stopDistance)
+        {
+            agent.isStopped = true;
+            return;
+        }
+
+        agent.isStopped = false;
+        agent.SetDestination(player.position);
+    }
 
     // =====================
     // É_ÉÅÅ[ÉWéÛït
@@ -131,12 +162,33 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         isDead = false;
         currentHP = maxHP;
 
-        transform.position = startPosition;
+        if (agent)
+            agent.Warp(startPosition);
+        else
+            transform.position = startPosition;
+
         transform.rotation = startRotation;
 
         gameObject.SetActive(true);
-        hpUIRoot?.SetActive(true);
+        hpUIRoot?.SetActive(false);
 
         OnRespawn();
     }
+
+    protected void DropAmmo(GameObject ammoPrefab)
+    {
+        if (!ammoPrefab) return;
+
+        Vector3 dropPos = transform.position + Vector3.up * 1.0f;
+
+        // â∫Ç…RayÇîÚÇŒÇµÇƒè∞ÇíTÇ∑
+        if (Physics.Raycast(dropPos, Vector3.down, out RaycastHit hit, 5f))
+        {
+            dropPos = hit.point + Vector3.up * 0.1f;
+        }
+
+        GameObject ammo = Instantiate(ammoPrefab, dropPos, Quaternion.identity);
+        ammo.tag = "Amo";
+    }
 }
+

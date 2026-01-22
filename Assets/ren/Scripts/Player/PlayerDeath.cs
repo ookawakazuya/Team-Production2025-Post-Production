@@ -15,7 +15,19 @@ public class PlayerDeath : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (isDead) return;
+
         if (other.CompareTag("FallZone"))
+        {
+            Die();
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (isDead) return;
+
+        if (collision.gameObject.CompareTag("Magma"))
         {
             Die();
         }
@@ -51,6 +63,13 @@ public class PlayerDeath : MonoBehaviour
 
         transform.position = respawnPoint.position;
         transform.rotation = respawnPoint.rotation;
+
+        // ★ 物理リセット（どちらか使ってる方）
+        if (TryGetComponent<Rigidbody>(out var rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
 
         GetComponent<PlayerHealth>()?.ResetLife();
 

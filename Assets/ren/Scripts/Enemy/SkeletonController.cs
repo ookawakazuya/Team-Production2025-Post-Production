@@ -11,13 +11,8 @@ public class SkeletonController : EnemyBase
         Idle,
         Chase,
         Attack,
-        Damage,
         Death
     }
-
-    [Header("Movement")]
-    [SerializeField] private float chaseDistance = 15f;
-    [SerializeField] private float attackDistance = 5f;
 
     [Header("Attack")]
     [SerializeField] private float attackCooldown = 1.5f;
@@ -29,11 +24,16 @@ public class SkeletonController : EnemyBase
     [Header("Damage")]
     [SerializeField] private float headShotMultiplier = 2f;
 
-    [Header("VFX")]
+    [Header("Death")]
+    [SerializeField] private float deathAnimTime = 2f;
+    [SerializeField] private float deathVfxTime = 0.5f;
     [SerializeField] private VisualEffect deathVFX;
 
-    NavMeshAgent agent;
-    Animator animator;
+    [Header("Drop")]
+    [SerializeField] private GameObject ammoPrefab;
+
+    //NavMeshAgent agent;
+    //Animator animator;
 
     State currentState = State.Idle;
     float lastAttackTime;
@@ -43,12 +43,6 @@ public class SkeletonController : EnemyBase
         base.Awake();
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
-    }
-
-    protected override void Start()
-    {
-        base.Start();
-        // EnemyBase の player を使用
     }
 
     void Update()
@@ -61,12 +55,11 @@ public class SkeletonController : EnemyBase
         {
             case State.Idle:
                 if (dist <= chaseDistance)
-                    EnterChase();
+                    currentState = State.Chase;
                 break;
 
             case State.Chase:
-                agent.SetDestination(player.position);
-
+                UpdateChaseMovement(dist);
                 if (dist <= attackDistance)
                     TryAttack();
                 break;
@@ -75,12 +68,6 @@ public class SkeletonController : EnemyBase
                 FaceTarget();
                 break;
         }
-    }
-
-    // =====================
-    void EnterChase()
-    {
-        currentState = State.Chase;
     }
 
     void TryAttack()
@@ -93,11 +80,13 @@ public class SkeletonController : EnemyBase
         animator.SetBool("isAttack", true);
 
         lastAttackTime = Time.time;
-        Invoke(nameof(ExitAttack), 1.0f); // 攻撃アニメ長
+        Invoke(nameof(ExitAttack), 1.0f);
     }
 
     void ExitAttack()
     {
+        if (isDead) return;
+
         animator.SetBool("isAttack", false);
         agent.isStopped = false;
         currentState = State.Chase;
@@ -116,7 +105,6 @@ public class SkeletonController : EnemyBase
         }
     }
 
-    // =====================
     protected override float CalculateDamage(float baseDamage, Collider hitPart)
     {
         animator.SetBool("isDamage", true);
@@ -141,6 +129,9 @@ public class SkeletonController : EnemyBase
         isDead = true;
         currentState = State.Death;
 
+        animator.SetBool("isAttack", false);
+        animator.SetBool("isDamage", false);
+
         StartCoroutine(DeathSequence());
     }
 
@@ -153,6 +144,8 @@ public class SkeletonController : EnemyBase
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
+        yield return new WaitForSeconds(deathAnimTime);
+
         if (deathVFX)
         {
             deathVFX.gameObject.SetActive(true);
@@ -160,7 +153,10 @@ public class SkeletonController : EnemyBase
             deathVFX.Play();
         }
 
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(deathVfxTime);
+
+        // 弾薬ドロップ
+        DropAmmo(ammoPrefab);
 
         gameObject.SetActive(false);
         hpUIRoot?.SetActive(false);
