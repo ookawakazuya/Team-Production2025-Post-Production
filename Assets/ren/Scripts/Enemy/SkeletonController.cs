@@ -1,27 +1,26 @@
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.VFX;
+using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class ZombieController : EnemyBase
+public class SkeletonController : EnemyBase
 {
     public enum State
     {
         Idle,
         Chase,
-        Attack
+        Attack,
+        Damage,
+        Death
     }
-
 
     [Header("Movement")]
     [SerializeField] private float chaseDistance = 15f;
     [SerializeField] private float attackDistance = 5f;
 
-    [Header("Attack Timing")]
-    [SerializeField] private float attackCooldown = 1f;
-    [SerializeField] private float damageStartTime = 0.3f;
-    [SerializeField] private float damageEndTime = 0.6f;
-    [SerializeField] private float attackTotalTime = 1.0f;
+    [Header("Attack")]
+    [SerializeField] private float attackCooldown = 1.5f;
 
     [Header("Hit Colliders")]
     public Collider bodyCollider;
@@ -31,24 +30,13 @@ public class ZombieController : EnemyBase
     [SerializeField] private float headShotMultiplier = 2f;
 
     [Header("VFX")]
-    public VisualEffect deathVFX;
+    [SerializeField] private VisualEffect deathVFX;
 
     NavMeshAgent agent;
     Animator animator;
 
     State currentState = State.Idle;
-
     float lastAttackTime;
-    float attackTimer;
-
-    bool hasHitThisAttack;
-
-    // ★ HandHit 用
-    public bool CanDealDamage =>
-        currentState == State.Attack &&
-        attackTimer >= damageStartTime &&
-        attackTimer <= damageEndTime &&
-        !hasHitThisAttack;
 
     protected override void Awake()
     {
@@ -60,7 +48,7 @@ public class ZombieController : EnemyBase
     protected override void Start()
     {
         base.Start();
-        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+        // EnemyBase の player を使用
     }
 
     void Update()
@@ -72,66 +60,47 @@ public class ZombieController : EnemyBase
         switch (currentState)
         {
             case State.Idle:
-                animator.SetBool("Chase", false);
-
                 if (dist <= chaseDistance)
-                    currentState = State.Chase;
+                    EnterChase();
                 break;
 
             case State.Chase:
-                animator.SetBool("Chase", true);
+                agent.SetDestination(player.position);
 
                 if (dist <= attackDistance)
-                    TryEnterAttack();
-                else
-                    agent.SetDestination(player.position);
+                    TryAttack();
                 break;
 
             case State.Attack:
-                UpdateAttack();
                 FaceTarget();
                 break;
         }
     }
 
     // =====================
-    void TryEnterAttack()
+    void EnterChase()
+    {
+        currentState = State.Chase;
+    }
+
+    void TryAttack()
     {
         if (Time.time < lastAttackTime + attackCooldown) return;
 
         currentState = State.Attack;
         agent.isStopped = true;
 
-        animator.SetBool("Chase", false);
-        animator.SetTrigger("Attack");
+        animator.SetBool("isAttack", true);
 
-        attackTimer = 0f;
-        hasHitThisAttack = false;
         lastAttackTime = Time.time;
-    }
-
-    void UpdateAttack()
-    {
-        attackTimer += Time.deltaTime;
-
-        if (attackTimer >= attackTotalTime)
-        {
-            ExitAttack();
-            return;
-        }
-
-        // プレイヤーが離れたら攻撃中断
-        float dist = Vector3.Distance(transform.position, player.position);
-        if (dist > attackDistance)
-        {
-            ExitAttack();
-        }
+        Invoke(nameof(ExitAttack), 1.0f); // 攻撃アニメ長
     }
 
     void ExitAttack()
     {
-        currentState = State.Chase;
+        animator.SetBool("isAttack", false);
         agent.isStopped = false;
+        currentState = State.Chase;
     }
 
     void FaceTarget()
@@ -150,22 +119,36 @@ public class ZombieController : EnemyBase
     // =====================
     protected override float CalculateDamage(float baseDamage, Collider hitPart)
     {
+        animator.SetBool("isDamage", true);
+        Invoke(nameof(ResetDamageFlag), 0.3f);
+
         if (hitPart == headCollider)
             return baseDamage * headShotMultiplier;
 
         return baseDamage;
     }
 
+    void ResetDamageFlag()
+    {
+        if (!isDead)
+            animator.SetBool("isDamage", false);
+    }
+
     protected override void Die()
     {
         if (isDead) return;
+
         isDead = true;
+        currentState = State.Death;
+
         StartCoroutine(DeathSequence());
     }
 
-    System.Collections.IEnumerator DeathSequence()
+    IEnumerator DeathSequence()
     {
         agent.isStopped = true;
+
+        animator.SetBool("isDeath", true);
 
         bodyCollider.enabled = false;
         headCollider.enabled = false;
@@ -186,25 +169,22 @@ public class ZombieController : EnemyBase
     protected override void OnRespawn()
     {
         currentState = State.Idle;
-        attackTimer = 0f;
-        hasHitThisAttack = false;
-
-        agent.isStopped = false;
-        agent.ResetPath();
+        isDead = false;
 
         animator.Rebind();
         animator.Update(0f);
 
+        animator.SetBool("isAttack", false);
+        animator.SetBool("isDamage", false);
+        animator.SetBool("isDeath", false);
+
         bodyCollider.enabled = true;
         headCollider.enabled = true;
 
+        agent.isStopped = false;
+        agent.ResetPath();
+
         if (deathVFX)
             deathVFX.gameObject.SetActive(false);
-    }
-
-    // ★ HandHit 用
-    public void MarkAttackHit()
-    {
-        hasHitThisAttack = true;
     }
 }

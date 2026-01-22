@@ -15,7 +15,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     [Header("HP UI Distance")]
     [SerializeField] protected float hpVisibleDistance = 10f;
 
-    Transform player;
+    protected Transform player;
 
     protected float currentHP;
     protected bool isDead;

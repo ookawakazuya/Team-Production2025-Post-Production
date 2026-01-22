@@ -3422,7 +3422,6 @@ GameObject:
   - component: {fileID: 6728476930163279500}
   - component: {fileID: 1381724565080583918}
   - component: {fileID: 603533731393877597}
-  - component: {fileID: 5794130222874110265}
   - component: {fileID: 5587064783611111289}
   - component: {fileID: 5064757681206025811}
   m_Layer: 0
@@ -3562,22 +3561,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5eeea9a15204dee439969f47795797a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &5794130222874110265
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7239209778096909273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18d21cf7ebed42d4b8e224dfed2a2639, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxLife: 3
-  currentLife: 0
-  invincibleTime: 1
-  barrierParticle: {fileID: 3291979212667877220}
 --- !u!114 &5587064783611111289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4287,11 +4270,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 71e9176be27e2184b8772d02f76a27cc, type: 3}
---- !u!198 &3291979212667877220 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1438322845882609245, guid: 71e9176be27e2184b8772d02f76a27cc, type: 3}
-  m_PrefabInstance: {fileID: 4493051630175951161}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6899576778099759991 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7033142817724236366, guid: 71e9176be27e2184b8772d02f76a27cc, type: 3}
