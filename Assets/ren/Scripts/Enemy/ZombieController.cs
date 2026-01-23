@@ -1,182 +1,85 @@
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.VFX;
-using System.Collections;
 
-[RequireComponent(typeof(NavMeshAgent))]
+/// <summary>
+/// Zombie 固有の挙動
+/// ・ヘッド倍率なし
+/// ・死亡演出（アニメ＋VFX＋ドロップ）
+/// ※ Skeleton との差分のみ実装
+/// </summary>
 public class ZombieController : EnemyBase
 {
-    public enum State
-    {
-        Idle,
-        Chase,
-        Attack,
-        Death
-    }
-
-    [Header("Attack")]
-    [SerializeField] float attackCooldown = 1.5f;
-
+    // =====================
+    // Hit Colliders
+    // =====================
     [Header("Hit Colliders")]
-    public Collider bodyCollider;
-    public Collider headCollider;
+    [SerializeField] private Collider bodyCollider;
+    [SerializeField] private Collider headCollider;
 
+    // =====================
+    // Death
+    // =====================
     [Header("Death")]
-    [SerializeField] float deathAnimTime = 2f;
-    [SerializeField] VisualEffect deathVFX;
+    [SerializeField] private float deathAnimTime = 2f;
+    [SerializeField] private VisualEffect deathVFX;
 
+    // =====================
+    // Drop
+    // =====================
     [Header("Drop")]
-    [SerializeField] GameObject ammoPrefab;
+    [SerializeField] private GameObject ammoPrefab;
 
-    State currentState = State.Idle;
-    float lastAttackTime;
-
-    protected override void Awake()
-    {
-        base.Awake();
-        agent = GetComponent<NavMeshAgent>();
-        animator = GetComponentInChildren<Animator>();
-    }
-
-    void Update()
-    {
-        if (isDead || !player) return;
-
-        float dist = Vector3.Distance(transform.position, player.position);
-
-        switch (currentState)
-        {
-            case State.Idle:
-                animator.SetBool("isChase", false);
-                animator.SetBool("isAttack", false);
-
-                if (dist <= chaseDistance)
-                {
-                    currentState = State.Chase;
-                    animator.SetBool("isChase", true);
-                }
-                break;
-
-            case State.Chase:
-                animator.SetBool("isChase", true);
-                UpdateChaseMovement(dist);
-
-                if (dist <= attackDistance)
-                    TryAttack();
-                else if (dist > chaseDistance)
-                {
-                    currentState = State.Idle;
-                    animator.SetBool("isChase", false);
-                }
-                break;
-
-            case State.Attack:
-                FaceTarget();
-                break;
-        }
-    }
-
-    void TryAttack()
-    {
-        if (Time.time < lastAttackTime + attackCooldown) return;
-
-        currentState = State.Attack;
-
-        if (agent.enabled && agent.isOnNavMesh)
-            agent.isStopped = true;
-
-        animator.SetBool("isAttack", true);
-
-        lastAttackTime = Time.time;
-        CancelInvoke(nameof(ExitAttack));
-        Invoke(nameof(ExitAttack), 1.0f); // 攻撃アニメ長
-    }
-
-    void ExitAttack()
-    {
-        if (isDead) return;
-
-        animator.SetBool("isAttack", false);
-
-        if (agent.enabled && agent.isOnNavMesh)
-            agent.isStopped = false;
-
-        float dist = Vector3.Distance(transform.position, player.position);
-
-        if (dist <= attackDistance)
-        {
-            TryAttack(); // 連続攻撃
-            return;
-        }
-
-        if (dist <= chaseDistance)
-        {
-            currentState = State.Chase;
-            animator.SetBool("isChase", true);
-        }
-        else
-        {
-            currentState = State.Idle;
-            animator.SetBool("isChase", false);
-        }
-    }
-
-    void FaceTarget()
-    {
-        Vector3 dir = player.position - transform.position;
-        dir.y = 0f;
-
-        if (dir.sqrMagnitude > 0.01f)
-        {
-            Quaternion rot = Quaternion.LookRotation(dir);
-            transform.rotation =
-                Quaternion.Slerp(transform.rotation, rot, Time.deltaTime * 10f);
-        }
-    }
-
+    // =====================
+    // Damage Calculation
+    // =====================
     protected override float CalculateDamage(float baseDamage, Collider hitPart)
     {
+        // 被弾アニメ（倍率なし）
         animator.SetBool("isDamage", true);
-        Invoke(nameof(ResetDamage), 0.3f);
+        Invoke(nameof(ResetDamageAnim), 0.3f);
+
         return baseDamage;
     }
 
-    void ResetDamage()
+    private void ResetDamageAnim()
     {
         if (!isDead)
             animator.SetBool("isDamage", false);
     }
 
+    // =====================
+    // Death
+    // =====================
     protected override void Die()
     {
         if (isDead) return;
 
         isDead = true;
-        currentState = State.Death;
-
-        animator.SetBool("isAttack", false);
-        animator.SetBool("isDamage", false);
-
         StartCoroutine(DeathSequence());
     }
 
-    IEnumerator DeathSequence()
+    private System.Collections.IEnumerator DeathSequence()
     {
-        if (agent.enabled && agent.isOnNavMesh)
+        // NavMesh 停止
+        if (agent && agent.enabled && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.ResetPath();
         }
 
+        // 死亡アニメ
         animator.SetBool("isDeath", true);
         yield return null;
         animator.SetBool("isDeath", false);
 
+        // 当たり判定無効
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
+        // アニメ終了待ち
         yield return new WaitForSeconds(deathAnimTime);
 
+        // VFX
         if (deathVFX)
         {
             deathVFX.gameObject.SetActive(true);
@@ -184,27 +87,22 @@ public class ZombieController : EnemyBase
             deathVFX.Play();
         }
 
+        // ドロップ
         DropAmmo(ammoPrefab);
+
         gameObject.SetActive(false);
     }
 
+    // =====================
+    // Respawn
+    // =====================
     protected override void OnRespawn()
     {
-        currentState = State.Idle;
-        isDead = false;
-
         animator.Rebind();
         animator.Update(0f);
 
-        animator.SetBool("isAttack", false);
-        animator.SetBool("isDamage", false);
-        animator.SetBool("isDeath", false);
-
         bodyCollider.enabled = true;
         headCollider.enabled = true;
-
-        agent.isStopped = false;
-        agent.ResetPath();
 
         if (deathVFX)
             deathVFX.gameObject.SetActive(false);
