@@ -31,7 +31,7 @@ public class NormalHard : MonoBehaviour
                 break;
             case StageLevel.Hard:
                 HardButton.SetActive(true);
-                NormalButton.SetActive(!false);
+                NormalButton.SetActive(false);
                 break;
         }
 
