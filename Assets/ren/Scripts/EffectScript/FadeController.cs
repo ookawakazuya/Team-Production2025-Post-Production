@@ -5,38 +5,74 @@ using System.Collections;
 public class FadeController : MonoBehaviour
 {
     public static FadeController Instance;
+
     private Image fadeImage;
+    private Coroutine fadeCoroutine;
 
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         fadeImage = GetComponent<Image>();
-        fadeImage.color = new Color(0, 0, 0, 0);
+
+        if (fadeImage == null)
+        {
+            Debug.LogError("FadeControllerÇ…ImageÇ™Ç†ÇËÇ‹ÇπÇÒÅI");
+            return;
+        }
+
+        // ç≈èâÇÕìßñæ
+        SetAlpha(0f);
+    }
+
+    void SetAlpha(float a)
+    {
+        Color c = fadeImage.color;
+        c.a = a;
+        fadeImage.color = c;
     }
 
     public void FadeOut(float duration, System.Action onComplete = null)
     {
-        StartCoroutine(Fade(0f, 1f, duration, onComplete));
+        StartFade(0f, 1f, duration, onComplete);
     }
 
     public void FadeIn(float duration, System.Action onComplete = null)
     {
-        StartCoroutine(Fade(1f, 0f, duration, onComplete));
+        StartFade(1f, 0f, duration, onComplete);
     }
 
-    private IEnumerator Fade(float startAlpha, float endAlpha, float duration, System.Action onComplete)
+    void StartFade(float from, float to, float time, System.Action onComplete)
     {
-        float time = 0f;
-        while (time < duration)
+        if (fadeCoroutine != null)
+            StopCoroutine(fadeCoroutine);
+
+        fadeCoroutine = StartCoroutine(Fade(from, to, time, onComplete));
+    }
+
+    IEnumerator Fade(float from, float to, float time, System.Action onComplete)
+    {
+        float t = 0f;
+
+        while (t < time)
         {
-            time += Time.deltaTime;
-            float alpha = Mathf.Lerp(startAlpha, endAlpha, time / duration);
-            fadeImage.color = new Color(0, 0, 0, alpha);
+            t += Time.deltaTime;
+
+            float a = Mathf.Lerp(from, to, t / time);
+            SetAlpha(a);
+
             yield return null;
         }
-        fadeImage.color = new Color(0, 0, 0, endAlpha);
+
+        SetAlpha(to);
+
+        fadeCoroutine = null;
         onComplete?.Invoke();
     }
 }

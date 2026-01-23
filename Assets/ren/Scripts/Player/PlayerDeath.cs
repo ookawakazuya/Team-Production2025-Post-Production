@@ -13,28 +13,31 @@ public class PlayerDeath : MonoBehaviour
     public delegate void PlayerDeathHandler();
     public static event PlayerDeathHandler OnPlayerDied;
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider other)
     {
+
+
         if (isDead) return;
 
-        // 🔥 フィールド即死ギミック（既存）
-        if (collision.gameObject.CompareTag("Magma"))
+        if (other.CompareTag("FallZone"))
         {
             Die();
-            return;
+        }
+        if (other.CompareTag("Magma")){
+            Die();
         }
 
-        // 🧟 Enemy / 剣 に触れたらダメージ
-        if (collision.gameObject.CompareTag("Enemy") ||
-            collision.gameObject.CompareTag("Sword"))
+        if (other.CompareTag("Enemy") ||
+            other.CompareTag("Sword"))
         {
             var health = GetComponent<PlayerHealth>();
             if (health != null)
             {
-                health.TakeDamage(1); // ダメージ量は調整
+                health.TakeDamage(1);
             }
         }
     }
+
 
     public void Die()
     {
@@ -56,7 +59,7 @@ public class PlayerDeath : MonoBehaviour
         FadeController.Instance.FadeOut(1f, () =>
         {
             gameObject.SetActive(false);
-            Invoke(nameof(Respawn), 2f);
+            Invoke(nameof(Respawn), 0.5f);
         });
     }
 
