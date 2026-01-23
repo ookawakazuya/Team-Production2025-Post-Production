@@ -59,10 +59,9 @@ public class TreasureChestLid : MonoBehaviour
 
         Debug.Log($"{currentStage} ƒNƒŠƒAI");
 
-        if (resultCanvas != null)
-        {
+
             resultCanvas.SetActive(true);
-        }
+        
     }
 
    public void LoadNextStage()

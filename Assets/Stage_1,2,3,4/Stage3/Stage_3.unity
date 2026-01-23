@@ -845,7 +845,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8080025090917608530, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Name
@@ -928,6 +928,7 @@ MonoBehaviour:
   isStageClear: 0
   openAngle: 250
   angleTolerance: 2
+  targetOpenAngle: -110
   resultCanvas: {fileID: 143203740}
 --- !u!1001 &94339217
 PrefabInstance:
@@ -1675,6 +1676,10 @@ PrefabInstance:
     - target: {fileID: 2026523117829712439, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_Name
       value: NextStageCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 2026523117829712439, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3433265701334529510, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_Camera
