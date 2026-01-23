@@ -27,27 +27,44 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        Debug.Log($"[PlayerHealth] TakeDamage呼ばれた damage={damage}");
+
         // 無敵中 or 既に死亡中は無視
-        if (isInvincible || playerDeath.IsDead) return;
+        if (isInvincible)
+        {
+            Debug.Log("[PlayerHealth] 無敵中なので無視");
+            return;
+        }
+
+        if (playerDeath.IsDead)
+        {
+            Debug.Log("[PlayerHealth] すでに死亡中なので無視");
+            return;
+        }
 
         currentLife -= damage;
         currentLife = Mathf.Max(0, currentLife);
 
-        Debug.Log($"プレイヤー被ダメージ 残りライフ: {currentLife}");
+        Debug.Log($"[PlayerHealth] 被ダメージ！ 残りHP: {currentLife}");
 
         if (currentLife <= 0)
         {
+            Debug.Log("[PlayerHealth] HP0 → 死亡処理へ");
             playerDeath.Die();
         }
         else
         {
+            Debug.Log("[PlayerHealth] 無敵時間開始");
             StartCoroutine(InvincibleCoroutine());
         }
     }
 
+
     IEnumerator InvincibleCoroutine()
     {
         isInvincible = true;
+
+        Debug.Log("[PlayerHealth] 無敵ON");
 
         if (barrierParticle)
         {
@@ -58,6 +75,8 @@ public class PlayerHealth : MonoBehaviour
         yield return new WaitForSeconds(invincibleTime);
 
         isInvincible = false;
+
+        Debug.Log("[PlayerHealth] 無敵OFF");
 
         if (barrierParticle)
         {
