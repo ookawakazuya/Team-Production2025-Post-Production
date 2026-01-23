@@ -15,6 +15,19 @@ public class TreasureChestLid : MonoBehaviour
 
     bool hasTriggered = false;
 
+    [Header("設定")]
+    [SerializeField] GameObject resultCanvas;
+
+    private void Start()
+    {
+        //ゲーム開始時リザルト画面を隠す。
+        if (resultCanvas != null)
+        {
+            resultCanvas.SetActive(false);
+        }
+    }
+
+
     void Update()
     {
         if (hasTriggered) return;
@@ -40,10 +53,15 @@ public class TreasureChestLid : MonoBehaviour
 
         Debug.Log($"{currentStage} クリア！");
 
-        LoadNextStage();
+        if (resultCanvas != null)
+        {
+            resultCanvas.SetActive(true);
+        }
+
+       // LoadNextStage();
     }
 
-    void LoadNextStage()
+   public void LoadNextStage()
     {
         int nextIndex = (int)currentStage + 1;
 

@@ -488,8 +488,8 @@ public class VRController : MonoBehaviour
 
     void HandleChestInteraction()
     {
-        //前フレームからの高さ差分を計算
         float currentY = rayOrigin.position.y;
+
         if (currentChestLid != null)
         {
             if (currentChestLid.RayAnchorpoint != null)
@@ -497,7 +497,7 @@ public class VRController : MonoBehaviour
                 UpdateRayToChestAnchor(currentChestLid.RayAnchorpoint.position);
             }
 
-            // トリガーが押された瞬間だけ、現在の高さを保存して差分を0にする
+            // 押し始めた瞬間は移動量を0にする
             if (triggerPressed && !prevTriggerPressed)
             {
                 lastControllerY = currentY;
@@ -506,14 +506,19 @@ public class VRController : MonoBehaviour
             if (triggerPressed)
             {
                 float deltaY = currentY - lastControllerY;
-                currentChestLid.UpdateRotation(deltaY);
+
+                //1フレームの移動量が0.5mを超えたら異常値として無視する
+                // これにより「瞬間移動」による物理の爆発を防ぎます
+                if (Mathf.Abs(deltaY) < 1.0f)
+                {
+                    currentChestLid.UpdateRotation(deltaY);
+                }
             }
             else if (prevTriggerPressed && !triggerPressed)
             {
                 currentChestLid.StopInteracting();
             }
         }
-        //現在の高さを保存
         lastControllerY = currentY;
     }
 
