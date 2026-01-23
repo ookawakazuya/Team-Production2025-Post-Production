@@ -435,7 +435,7 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 14.7
+  m_Radius: 15
   m_Center: {x: -2.1327088, y: 117.54697, z: 15.721493}
 --- !u!1 &1153278105776645432
 GameObject:
@@ -2502,10 +2502,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 37.2
-  m_Height: 110
+  m_Radius: 36
+  m_Height: 110.8
   m_Direction: 1
-  m_Center: {x: -2.7143345, y: 50.155216, z: 24.391869}
+  m_Center: {x: 0, y: 49.9, z: 13}
 --- !u!1 &8519647396022987233
 GameObject:
   m_ObjectHideFlags: 0
@@ -2651,7 +2651,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 2.8
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -2679,12 +2679,15 @@ MonoBehaviour:
   hpUIRoot: {fileID: 263561948082411944}
   hpGreen: {fileID: 8483773096084161393}
   hpRed: {fileID: 2964209338145114836}
-  hpVisibleDistance: 15
+  hpVisibleDistance: 10
   chaseDistance: 10
-  attackDistance: 3.2
-  stopDistance: 3.2
-  hitBoolName: isDamage
+  attackDistance: 3
+  stopDistance: 3
+  attackDamage: 1
   attackCooldown: 1
+  attackAnimTime: 1
+  attackHitRadius: 2
+  attackHitOffset: {x: 0, y: 0, z: 1}
   bodyCollider: {fileID: 2553196588086059789}
   headCollider: {fileID: 8461698841645246537}
   deathAnimTime: 2

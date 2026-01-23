@@ -1,89 +1,149 @@
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 using System.Collections;
-using UnityEngine.AI;
 
+/// <summary>
+/// 敵の共通基底クラス
+/// ・AI（Idle / Chase / Attack）
+/// ・HP管理 / HP UI
+/// ・攻撃処理（AnimationEvent）
+/// ・リスポーン
+/// ※ 挙動は従来から変更なし
+/// </summary>
 public abstract class EnemyBase : MonoBehaviour, IDamageable
 {
-    [Header("HP")]
-    public float maxHP = 100f;
+    // =====================
+    // State
+    // =====================
+    public enum EnemyState
+    {
+        Idle,
+        Chase,
+        Attack,
+        Death
+    }
 
+    protected EnemyState currentState = EnemyState.Idle;
+
+    // =====================
+    // HP
+    // =====================
+    [Header("HP")]
+    [SerializeField] protected float maxHP = 100f;
+    protected float currentHP;
+    protected bool isDead;
+
+    // =====================
+    // HP UI
+    // =====================
     [Header("HP UI")]
-    public GameObject hpUIRoot;
-    public Image hpGreen;
-    public Image hpRed;
+    [SerializeField] protected GameObject hpUIRoot;
+    [SerializeField] protected Image hpGreen;
+    [SerializeField] protected Image hpRed;
 
     [Header("HP UI Distance")]
     [SerializeField] protected float hpVisibleDistance = 10f;
 
+    Coroutine greenRoutine;
+    Coroutine redRoutine;
+
+    // =====================
+    // AI Distance
+    // =====================
     [Header("AI Distance")]
     [SerializeField] protected float chaseDistance = 15f;
     [SerializeField] protected float attackDistance = 5f;
-    [SerializeField] protected float stopDistance = 2f; // ★ 近づきすぎ防止
+    [SerializeField] protected float stopDistance = 2f;
 
-    [SerializeField] protected string hitBoolName = "isDamage";
+    // =====================
+    // Attack
+    // =====================
+    [Header("Attack")]
+    [SerializeField] protected int attackDamage = 1;
+    [SerializeField] protected float attackCooldown = 1.5f;
+    [SerializeField] protected float attackAnimTime = 1.0f;
 
+    [Header("Attack Hit Range（敵ごと調整）")]
+    [SerializeField] protected float attackHitRadius = 1.5f;
+    [SerializeField] protected Vector3 attackHitOffset = Vector3.forward;
+
+    protected float lastAttackTime;
+
+    // =====================
+    // Components
+    // =====================
     protected Transform player;
     protected NavMeshAgent agent;
     protected Animator animator;
 
-    protected float currentHP;
-    protected bool isDead;
-
+    // =====================
+    // Respawn
+    // =====================
     protected Vector3 startPosition;
     protected Quaternion startRotation;
 
-    Coroutine greenRoutine;
-    Coroutine redRoutine;
-
+    // =====================
+    // Unity Lifecycle
+    // =====================
     protected virtual void Awake()
     {
-        startPosition = transform.position;
-        startRotation = transform.rotation;
-
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
+
+        startPosition = transform.position;
+        startRotation = transform.rotation;
     }
 
     protected virtual void Start()
     {
         currentHP = maxHP;
-        GameManager.Instance?.RegisterEnemy(this);
 
+        GameManager.Instance?.RegisterEnemy(this);
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
     protected virtual void Update()
     {
+        if (isDead || player == null) return;
+
         UpdateHPUIVisibility();
+        UpdateAI();
     }
 
     // =====================
-    // HP UI 表示制御
+    // AI
     // =====================
-    protected void UpdateHPUIVisibility()
+    protected virtual void UpdateAI()
     {
-        if (!hpUIRoot || !player) return;
+        float distance = Vector3.Distance(transform.position, player.position);
 
-        float dist = Vector3.Distance(transform.position, player.position);
+        if (distance <= attackDistance)
+        {
+            currentState = EnemyState.Attack;
+            FaceTarget();
+            TryAttack();
+            return;
+        }
 
-        bool shouldShow =
-            !isDead &&
-            currentHP < maxHP &&
-            dist <= hpVisibleDistance;
+        if (distance <= chaseDistance)
+        {
+            currentState = EnemyState.Chase;
+            UpdateChase(distance);
+            return;
+        }
 
-        if (hpUIRoot.activeSelf != shouldShow)
-            hpUIRoot.SetActive(shouldShow);
+        EnterIdle();
     }
 
-    // =====================
-    // 共通 Chase 移動（めり込み防止）
-    // =====================
-    protected void UpdateChaseMovement(float dist)
+    protected void UpdateChase(float distance)
     {
-        if (!agent) return;
+        animator.SetBool("isChase", true);
+        animator.SetBool("isAttack", false);
 
-        if (dist <= stopDistance)
+        if (!agent || !agent.isOnNavMesh) return;
+
+        if (distance <= stopDistance)
         {
             agent.isStopped = true;
             return;
@@ -93,50 +153,112 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         agent.SetDestination(player.position);
     }
 
-    // =====================
-    // ダメージ受付
-    // =====================
-    public void ApplyDamage(int damage)
+    protected void EnterIdle()
     {
-        ApplyDamage((float)damage, null);
+        currentState = EnemyState.Idle;
+
+        animator.SetBool("isChase", false);
+        animator.SetBool("isAttack", false);
+
+        if (agent && agent.isOnNavMesh)
+            agent.isStopped = true;
     }
 
-    public void ApplyDamage(float damage)
+    protected void FaceTarget()
     {
-        ApplyDamage(damage, null);
+        Vector3 dir = player.position - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.01f) return;
+
+        Quaternion targetRot = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 10f);
     }
 
-    public void ApplyDamage(float baseDamage, Collider hitPart)
+    // =====================
+    // Attack
+    // =====================
+    protected void TryAttack()
+    {
+        if (Time.time < lastAttackTime + attackCooldown) return;
+
+        lastAttackTime = Time.time;
+
+        if (agent && agent.isOnNavMesh)
+            agent.isStopped = true;
+
+        animator.SetBool("isAttack", true);
+        Invoke(nameof(EndAttack), attackAnimTime);
+    }
+
+    protected void EndAttack()
     {
         if (isDead) return;
 
-        float finalDamage = CalculateDamage(baseDamage, hitPart);
+        animator.SetBool("isAttack", false);
 
-        currentHP = Mathf.Max(0, currentHP - finalDamage);
-        UpdateHPUI();
+        if (agent && agent.isOnNavMesh)
+            agent.isStopped = false;
+    }
 
-        if (currentHP <= 0)
-            Die();
-        else
+    /// <summary>
+    /// AnimationEvent から呼ばれる実ダメージ処理
+    /// </summary>
+    public void DealDamageToPlayer()
+    {
+        if (!player) return;
+
+        Vector3 center =
+            transform.position +
+            transform.forward * attackHitOffset.z +
+            Vector3.up * attackHitOffset.y;
+
+        Collider[] hits = Physics.OverlapSphere(center, attackHitRadius);
+
+        foreach (Collider hit in hits)
         {
-            if (animator) animator.SetBool(hitBoolName, true);
+            if (!hit.CompareTag("Player")) continue;
+
+            PlayerHealth health = hit.GetComponent<PlayerHealth>();
+            if (health != null)
+                health.TakeDamage(attackDamage);
+
+            break;
         }
+    }
+
+    // =====================
+    // HP UI
+    // =====================
+    protected void UpdateHPUIVisibility()
+    {
+        if (!hpUIRoot || !player) return;
+
+        float dist = Vector3.Distance(transform.position, player.position);
+
+        bool visible =
+            !isDead &&
+            currentHP < maxHP &&
+            dist <= hpVisibleDistance;
+
+        if (hpUIRoot.activeSelf != visible)
+            hpUIRoot.SetActive(visible);
     }
 
     protected void UpdateHPUI()
     {
-        float target = currentHP / maxHP;
+        float ratio = currentHP / maxHP;
 
         if (greenRoutine != null) StopCoroutine(greenRoutine);
-        greenRoutine = StartCoroutine(AnimateHP(hpGreen, target, 0f));
-
         if (redRoutine != null) StopCoroutine(redRoutine);
-        redRoutine = StartCoroutine(AnimateHP(hpRed, target, 0.5f));
+
+        greenRoutine = StartCoroutine(AnimateHP(hpGreen, ratio, 0f));
+        redRoutine = StartCoroutine(AnimateHP(hpRed, ratio, 0.5f));
     }
 
     IEnumerator AnimateHP(Image img, float target, float delay)
     {
-        if (delay > 0) yield return new WaitForSeconds(delay);
+        if (delay > 0f) yield return new WaitForSeconds(delay);
 
         float start = img.fillAmount;
         float t = 0f;
@@ -152,14 +274,37 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     }
 
     // =====================
-    // 敵ごとに実装
+    // Damage
+    // =====================
+    public void ApplyDamage(int damage)
+    {
+        ApplyDamage((float)damage, null);
+    }
+
+    public void ApplyDamage(float baseDamage, Collider hitPart)
+    {
+        if (isDead) return;
+
+        float finalDamage = CalculateDamage(baseDamage, hitPart);
+        currentHP = Mathf.Max(0, currentHP - finalDamage);
+
+        UpdateHPUI();
+
+        if (currentHP <= 0)
+            Die();
+        else
+            animator.SetBool("isDamage", true);
+    }
+
+    // =====================
+    // Abstract
     // =====================
     protected abstract float CalculateDamage(float baseDamage, Collider hitPart);
     protected abstract void Die();
     protected abstract void OnRespawn();
 
     // =====================
-    // リスポーン
+    // Respawn
     // =====================
     public virtual void Respawn()
     {
@@ -175,26 +320,28 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
         transform.rotation = startRotation;
 
-        gameObject.SetActive(true);
         hpUIRoot?.SetActive(false);
+        gameObject.SetActive(true);
 
         OnRespawn();
     }
 
+    // =====================
+    // Drop（共通）
+    // =====================
     protected void DropAmmo(GameObject ammoPrefab)
     {
         if (!ammoPrefab) return;
 
         Vector3 dropPos = transform.position + Vector3.up * 1.0f;
 
-        // 下にRayを飛ばして床を探す
         if (Physics.Raycast(dropPos, Vector3.down, out RaycastHit hit, 5f))
-        {
             dropPos = hit.point + Vector3.up * 0.1f;
-        }
 
         GameObject ammo = Instantiate(ammoPrefab, dropPos, Quaternion.identity);
         ammo.tag = "Ammo";
+
+        // ★ GameManager に登録
+        GameManager.Instance?.RegisterAmmo(ammo);
     }
 }
-

@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
 
-    
+
     // =========================
     // リスポーン管理
     // =========================
@@ -144,9 +144,7 @@ public class GameManager : MonoBehaviour
         // 敵を全リスポーン
         RespawnAllEnemies();
 
-        // 将来拡張用
-        // ・ギミック初期化
-        // ・タイマーリセット
+        ClearAllAmmo();
     }
 
     // =========================
@@ -184,4 +182,29 @@ public class GameManager : MonoBehaviour
         InitializeTreasureData();
         Debug.Log("宝箱取得数をリセットしました");
     }
+
+    // Ammo 管理
+    // =========================
+    private readonly List<GameObject> spawnedAmmo = new();
+
+    public void RegisterAmmo(GameObject ammo)
+    {
+        if (!ammo) return;
+
+        if (!spawnedAmmo.Contains(ammo))
+            spawnedAmmo.Add(ammo);
+    }
+
+    public void ClearAllAmmo()
+    {
+        foreach (var ammo in spawnedAmmo)
+        {
+            if (ammo)
+                Destroy(ammo);
+        }
+
+        spawnedAmmo.Clear();
+    }
 }
+
+

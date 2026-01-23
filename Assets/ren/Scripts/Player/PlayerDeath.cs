@@ -6,38 +6,41 @@ public class PlayerDeath : MonoBehaviour
     public GameObject deathEffect;
 
     private bool isDead = false;
-
     public bool IsDead => isDead;
 
     // 拡張用イベント（将来UIやSE用）
     public delegate void PlayerDeathHandler();
     public static event PlayerDeathHandler OnPlayerDied;
 
-    private void OnTriggerEnter(Collider other)
+    // キャッシュ
+    private PlayerHealth playerHealth;
+    private Collider playerCollider;
+    private MonoBehaviour playerController; // 移動・操作用
+
+    void Awake()
     {
+        playerHealth = GetComponent<PlayerHealth>();
+        playerCollider = GetComponent<Collider>();
 
-
-        if (isDead) return;
-
-        if (other.CompareTag("FallZone"))
-        {
-            Die();
-        }
-        if (other.CompareTag("Magma")){
-            Die();
-        }
-
-        if (other.CompareTag("Enemy") ||
-            other.CompareTag("Sword"))
-        {
-            var health = GetComponent<PlayerHealth>();
-            if (health != null)
-            {
-                health.TakeDamage(1);
-            }
-        }
+        // ★ 自分のプロジェクトの操作スクリプト名に合わせて
+        playerController = GetComponent<VRController>();
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (isDead) return;
+
+        if (other.CompareTag("FallZone") || other.CompareTag("Magma"))
+        {
+            Die();
+            return;
+        }
+
+        if (other.CompareTag("Enemy") || other.CompareTag("Sword"))
+        {
+            playerHealth?.TakeDamage(1);
+        }
+    }
 
     public void Die()
     {
@@ -46,16 +49,20 @@ public class PlayerDeath : MonoBehaviour
 
         Debug.Log("プレイヤー死亡");
 
-        if (deathEffect != null)
+        // 操作・当たり判定を止める
+        if (playerController) playerController.enabled = false;
+        if (playerCollider) playerCollider.enabled = false;
+
+        if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        // 🔔 拡張用イベント
+        // 拡張イベント
         OnPlayerDied?.Invoke();
 
-        // 🔥 ここが最重要：必ず Enemy を復活させる
+        // Enemy / Drop など全体リセット
         GameManager.Instance.OnPlayerDead();
 
-        // フェードアウト → 非表示 → リスポーン
+        // フェードアウト → リスポーン
         FadeController.Instance.FadeOut(1f, () =>
         {
             gameObject.SetActive(false);
@@ -70,19 +77,23 @@ public class PlayerDeath : MonoBehaviour
         transform.position = respawnPoint.position;
         transform.rotation = respawnPoint.rotation;
 
-        // ★ 物理リセット（どちらか使ってる方）
+        // 物理リセット
         if (TryGetComponent<Rigidbody>(out var rb))
         {
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
 
-        GetComponent<PlayerHealth>()?.ResetLife();
+        playerHealth?.ResetLife();
 
         gameObject.SetActive(true);
 
         FadeController.Instance.FadeIn(1f, () =>
         {
+            // フェード完了後に復活
+            if (playerCollider) playerCollider.enabled = true;
+            if (playerController) playerController.enabled = true;
+
             isDead = false;
         });
     }
