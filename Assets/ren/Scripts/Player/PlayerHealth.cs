@@ -27,34 +27,26 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        Debug.Log($"[PlayerHealth] TakeDamageŒÄ‚Î‚ê‚½ damage={damage}");
-
         // –³“G’† or Šù‚É€–S’†‚Í–³‹
         if (isInvincible)
         {
-            Debug.Log("[PlayerHealth] –³“G’†‚È‚Ì‚Å–³‹");
             return;
         }
 
         if (playerDeath.IsDead)
         {
-            Debug.Log("[PlayerHealth] ‚·‚Å‚É€–S’†‚È‚Ì‚Å–³‹");
             return;
         }
 
         currentLife -= damage;
-        currentLife = Mathf.Max(0, currentLife);
-
-        Debug.Log($"[PlayerHealth] ”íƒ_ƒ[ƒWI c‚èHP: {currentLife}");
+        currentLife = Mathf.Max(0, currentLife);;
 
         if (currentLife <= 0)
         {
-            Debug.Log("[PlayerHealth] HP0 ¨ €–Sˆ—‚Ö");
             playerDeath.Die();
         }
         else
         {
-            Debug.Log("[PlayerHealth] –³“GŠÔŠJn");
             StartCoroutine(InvincibleCoroutine());
         }
     }
@@ -63,8 +55,6 @@ public class PlayerHealth : MonoBehaviour
     IEnumerator InvincibleCoroutine()
     {
         isInvincible = true;
-
-        Debug.Log("[PlayerHealth] –³“GON");
 
         if (barrierParticle)
         {
@@ -75,8 +65,6 @@ public class PlayerHealth : MonoBehaviour
         yield return new WaitForSeconds(invincibleTime);
 
         isInvincible = false;
-
-        Debug.Log("[PlayerHealth] –³“GOFF");
 
         if (barrierParticle)
         {
