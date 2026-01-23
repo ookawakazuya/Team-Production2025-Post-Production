@@ -54,17 +54,37 @@ public class SkeletonController : EnemyBase
         switch (currentState)
         {
             case State.Idle:
+                // Idleは常にIdleループ
+                animator.SetBool("isChase", false);
+                animator.SetBool("isAttack", false);
+
                 if (dist <= chaseDistance)
+                {
                     currentState = State.Chase;
+                    animator.SetBool("isChase", true); // Chaseループ開始
+                }
                 break;
 
             case State.Chase:
+                // Chaseは見つけている間ずっとループ
+                animator.SetBool("isChase", true);
+
                 UpdateChaseMovement(dist);
+
                 if (dist <= attackDistance)
-                    TryAttack();
+                {
+                    TryAttack(); // Attackへ（1回再生）
+                }
+                else if (dist > chaseDistance)
+                {
+                    // 見失ったらIdleへ
+                    currentState = State.Idle;
+                    animator.SetBool("isChase", false);
+                }
                 break;
 
             case State.Attack:
+                // Attack中は移動しない・Faceだけ
                 FaceTarget();
                 break;
         }
@@ -90,6 +110,7 @@ public class SkeletonController : EnemyBase
         animator.SetBool("isAttack", false);
         agent.isStopped = false;
         currentState = State.Chase;
+        animator.SetBool("isChase", true);
     }
 
     void FaceTarget()
@@ -137,9 +158,17 @@ public class SkeletonController : EnemyBase
 
     IEnumerator DeathSequence()
     {
-        agent.isStopped = true;
+        // NavMeshAgentは「有効＆NavMesh上」の時だけ止める
+        if (agent != null && agent.enabled && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.ResetPath();
+        }
 
+        // boolを擬似Trigger化：1フレームだけtrueにしてすぐ戻す
         animator.SetBool("isDeath", true);
+        yield return null; // 1フレーム待って遷移を確定させる
+        animator.SetBool("isDeath", false);
 
         bodyCollider.enabled = false;
         headCollider.enabled = false;
@@ -155,7 +184,6 @@ public class SkeletonController : EnemyBase
 
         yield return new WaitForSeconds(deathVfxTime);
 
-        // 弾薬ドロップ
         DropAmmo(ammoPrefab);
 
         gameObject.SetActive(false);

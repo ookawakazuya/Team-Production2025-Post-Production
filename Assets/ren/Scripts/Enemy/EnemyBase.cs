@@ -21,6 +21,8 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     [SerializeField] protected float attackDistance = 5f;
     [SerializeField] protected float stopDistance = 2f; // Åö ãﬂÇ√Ç´Ç∑Ç¨ñhé~
 
+    [SerializeField] protected string hitBoolName = "isDamage";
+
     protected Transform player;
     protected NavMeshAgent agent;
     protected Animator animator;
@@ -115,6 +117,10 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
         if (currentHP <= 0)
             Die();
+        else
+        {
+            if (animator) animator.SetBool(hitBoolName, true);
+        }
     }
 
     protected void UpdateHPUI()
@@ -188,7 +194,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         }
 
         GameObject ammo = Instantiate(ammoPrefab, dropPos, Quaternion.identity);
-        ammo.tag = "Amo";
+        ammo.tag = "Ammo";
     }
 }
 
