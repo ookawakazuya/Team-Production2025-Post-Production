@@ -1,7 +1,7 @@
 public enum StageID
 {
-    Stage1,
-    Stage2,
-    Stage3,
-    Stage4
+    Stage_1,
+    Stage_2,
+    Stage_3,
+    Stage_4
 }

@@ -13,6 +13,10 @@ public class TreasureChestLid : MonoBehaviour
     [SerializeField] private float openAngle = 250f;   // -110°
     [SerializeField] private float angleTolerance = 2f;
 
+    [SerializeField] float targetOpenAngle = -110f;
+
+    HingeJoint joint;
+
     bool hasTriggered = false;
 
     [Header("設定")]
@@ -20,6 +24,8 @@ public class TreasureChestLid : MonoBehaviour
 
     private void Start()
     {
+        joint = GetComponent<HingeJoint>();
+
         //ゲーム開始時リザルト画面を隠す。
         if (resultCanvas != null)
         {
@@ -30,11 +36,11 @@ public class TreasureChestLid : MonoBehaviour
 
     void Update()
     {
-        if (hasTriggered) return;
+        if (hasTriggered || joint == null) return;
+        // HingeJoint.angle は物理的な回転角をダイレクトに返します（-180～180）
+        float currentAngle = joint.angle;
 
-        float xAngle = transform.localEulerAngles.x;
-
-        if (IsAngleReached(xAngle))
+        if (currentAngle <= targetOpenAngle)
         {
             OnChestOpened();
         }
@@ -57,8 +63,6 @@ public class TreasureChestLid : MonoBehaviour
         {
             resultCanvas.SetActive(true);
         }
-
-       // LoadNextStage();
     }
 
    public void LoadNextStage()

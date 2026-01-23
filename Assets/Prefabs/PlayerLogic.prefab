@@ -86,7 +86,7 @@ RectTransform:
   m_Father: {fileID: 2625828407563118466}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1914,7 +1914,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 76034a390cccc384d972d1ff870cdfd3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1938,7 +1938,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iconImage: {fileID: 3134249714377401942}
   collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &4393012551589458037
 GameObject:
   m_ObjectHideFlags: 0
@@ -1972,7 +1972,7 @@ RectTransform:
   m_Father: {fileID: 3613907564747206947}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3309,7 +3309,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 76034a390cccc384d972d1ff870cdfd3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3333,7 +3333,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iconImage: {fileID: 59202965583945470}
   collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &6206871129772510590
 GameObject:
   m_ObjectHideFlags: 0
@@ -3656,7 +3656,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 76034a390cccc384d972d1ff870cdfd3, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3680,7 +3680,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   iconImage: {fileID: 3454089210688100991}
   collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &7558343337626238087
 GameObject:
   m_ObjectHideFlags: 0
@@ -4333,7 +4333,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4283425761326543017, guid: 9f3369e30fbd31f4bb596b1a99babe83, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
@@ -4774,7 +4774,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8758423527188247893, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

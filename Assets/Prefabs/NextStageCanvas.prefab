@@ -163,8 +163,8 @@ RectTransform:
   m_GameObject: {fileID: 2026523117829712439}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.005, y: 0.005, z: 0.005}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2320190230129239881}
   m_Father: {fileID: 0}
@@ -263,7 +263,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2026523117829712439}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c86c9d8f9c420914c9e97e71e022d9a3, type: 3}
   m_Name: 
@@ -403,8 +403,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3708267829155640098}
-        m_TargetAssemblyTypeName: NextStageTrigger, Assembly-CSharp
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: TreasureChestLid, Assembly-CSharp
         m_MethodName: LoadNextStage
         m_Mode: 1
         m_Arguments:
