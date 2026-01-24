@@ -137,7 +137,6 @@ public class Shotgun : MonoBehaviour
         // --- 自動生成を監視開始 ---
         // --- ストック初期化 ---
         reserveAmmo = 5;
-        StartCoroutine(AutoAmmoReserve());
         UpdateLoadedDisplay();
         UpdateReserveText();
 
@@ -179,6 +178,9 @@ public class Shotgun : MonoBehaviour
                 UpdateExpertMode();
                 break;
         }
+
+        // スライダーの常時表示
+        ammoSlider.gameObject.SetActive(true);
 
         // --- トリガーが押されたら --- 
         if (!isShooting && triggerValue > 0.9f)
@@ -243,7 +245,6 @@ public class Shotgun : MonoBehaviour
         {
             hasHit = false;
             shouldDraw = false;
-            lineRenderer.enabled = false; // 念のため強制OFF
             return; // この関数をここで終了！
         }
 
@@ -448,9 +449,6 @@ public class Shotgun : MonoBehaviour
     {
         float timer = 0f;
 
-        // スライダーの常時表示
-        ammoSlider.gameObject.SetActive(true);
-
         while (true)
         {
             // --- 無限モードなら何もしない ---
@@ -568,5 +566,13 @@ public class Shotgun : MonoBehaviour
     {
         reserveAmmo++;
         UpdateReserveText();
+    }
+
+    /// <summary>
+    /// リスポーン時にも自動生成コルーチンを再開
+    /// </summary>
+    void OnEnable()
+    {
+        StartCoroutine(AutoAmmoReserve());
     }
 }
