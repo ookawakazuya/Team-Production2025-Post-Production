@@ -7118,6 +7118,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 8892872783861872360, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 759569046}
+    - targetCorrespondingSourceObject: {fileID: 8892872783861872360, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1581853359}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 4005227832609471158, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       insertIndex: -1
@@ -18823,19 +18826,11 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 537004676}
     m_Modifications:
     - target: {fileID: 2026523117829712439, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_Name
       value: NextStageCanvas
-      objectReference: {fileID: 0}
-    - target: {fileID: 3433265701334529510, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
-      propertyPath: m_Camera
-      value: 
-      objectReference: {fileID: 901203149}
-    - target: {fileID: 3708267829155640098, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
-      propertyPath: m_Enabled
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_Pivot.x
@@ -18871,15 +18866,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.006
+      value: 0.003
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.006
+      value: 0.003
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.006
+      value: 0.003
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalPosition.x
@@ -18891,7 +18886,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 80.951
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalRotation.w
@@ -18911,11 +18906,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -11363.441
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 974.93994
+      value: 2.34
       objectReference: {fileID: 0}
     - target: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -18946,13 +18941,18 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
+--- !u!224 &1581853359 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 4631122776124280541, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
+  m_PrefabInstance: {fileID: 1581853358}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1581853360 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3708267829155640098, guid: d21e88326642bbc48adf5ea9462daa19, type: 3}
   m_PrefabInstance: {fileID: 1581853358}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1581853361}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c86c9d8f9c420914c9e97e71e022d9a3, type: 3}
   m_Name: 
@@ -26714,6 +26714,5 @@ SceneRoots:
   - {fileID: 639962253}
   - {fileID: 1916153814}
   - {fileID: 537004675}
-  - {fileID: 1581853358}
   - {fileID: 762186631}
   - {fileID: 1186402048}
