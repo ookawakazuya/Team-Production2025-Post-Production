@@ -80,6 +80,15 @@ public class VRMenuManager : MonoBehaviour
 
     private void OnMenuPressed(InputAction.CallbackContext ctx)
     {
+        if (!isMenuOpen)
+        {
+            if(vrController != null && !vrController.CanOpenMenu())
+            {
+                //空中や移動中はメニューが開けない
+                return;
+            }
+        }
+
         ToggleMenu();
     }
 
@@ -160,7 +169,44 @@ public class VRMenuManager : MonoBehaviour
             uiRay.enabled = false;
         }
     }
+    // --- VRMenuManager 内に追加 ---
 
-    // 【削除】: IsMenuCollidingWithWall(), ForciblyRotateToSafeDirection(), ApplyRotationLock() の各メソッドを削除
-    // これらのメソッドは VRController.cs に移管されました。
+    /// <summary>
+    /// シーン遷移時などに、外部から強制的にメニューを閉じて状態をリセットする
+    /// </summary>
+    public void ForceCloseMenuForLoading()
+    {
+        // メニューが開いていない場合は何もしない
+        if (!isMenuOpen) return;
+
+        // 内部フラグを閉じた状態にする
+        isMenuOpen = false;
+
+        // キャンバスを非表示にする
+        if (menuCanvas != null)
+            menuCanvas.SetActive(false);
+
+        // VRController の操作制限とレイの状態をリセット
+        if (vrController != null)
+        {
+            // ゲーム用レイを有効にし、回転ロックを解除する
+            vrController.SetMenuState(false);
+
+            // 操作スクリプト自体も有効に戻す
+            if (vrControllerScripts != null)
+                vrControllerScripts.enabled = true;
+        }
+
+        // ★時間を通常速度に戻す
+        Time.timeScale = 1f;
+
+        // レイの可視化設定も通常モードへ
+        if (gameRayInteractor != null) gameRayInteractor.gameObject.SetActive(true);
+        if (gameLineVisual != null) gameLineVisual.gameObject.SetActive(true);
+        if (uiRayInteractor != null) uiRayInteractor.gameObject.SetActive(false);
+        if (uiLineVisual != null) uiLineVisual.gameObject.SetActive(false);
+
+        Debug.Log("[VRMenuManager] ロード前の強制メニュー解除が完了しました。");
+    }
+
 }

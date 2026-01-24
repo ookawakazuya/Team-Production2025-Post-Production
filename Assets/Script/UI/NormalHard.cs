@@ -35,6 +35,7 @@ public class NormalHard : MonoBehaviour
                 break;
         }
 
+        Debug.Log(stagelevel);
     }
 
 
