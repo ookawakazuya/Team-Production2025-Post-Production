@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PlayerDeath : MonoBehaviour
+public class PlayerLife : MonoBehaviour
 {
     [Header("死亡時に生成するエフェクト（任意）")]
     public GameObject deathEffect;
@@ -47,8 +47,6 @@ public class PlayerDeath : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        Debug.Log("プレイヤー死亡");
-
         // 操作・当たり判定を止める
         if (playerController) playerController.enabled = false;
         if (playerCollider) playerCollider.enabled = false;
@@ -90,11 +88,13 @@ public class PlayerDeath : MonoBehaviour
 
         FadeController.Instance.FadeIn(1f, () =>
         {
-            // フェード完了後に復活
             if (playerCollider) playerCollider.enabled = true;
             if (playerController) playerController.enabled = true;
 
             isDead = false;
+
+            // ★ ここでEnemy復活
+            GameManager.Instance.OnPlayerDead();
         });
     }
 }
