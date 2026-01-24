@@ -410,7 +410,7 @@ GameObject:
   - component: {fileID: 51156165}
   m_Layer: 0
   m_Name: Start
-  m_TagString: Untagged
+  m_TagString: StageStart
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -443,7 +443,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 51156164}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -29022,6 +29022,7 @@ MonoBehaviour:
   maxLife: 3
   currentLife: 0
   invincibleTime: 1
+  barrierObject: {fileID: 0}
   barrierParticle: {fileID: 1131937801}
 --- !u!1 &5081114457493151872
 GameObject:
