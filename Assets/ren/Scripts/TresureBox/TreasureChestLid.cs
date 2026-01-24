@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class TreasureChestLid : MonoBehaviour
 {
@@ -61,8 +62,17 @@ public class TreasureChestLid : MonoBehaviour
 
         Debug.Log($"{currentStage} クリア！");
 
+        int nextIndex = (int)currentStage + 1;
 
-            resultCanvas.SetActive(true);
+        //  最終ステージ
+        if (nextIndex >= System.Enum.GetValues(typeof(StageID)).Length)
+        {
+            Debug.Log("最終ステージクリア！");
+            StartCoroutine(DelayCoroutine());
+        }
+
+
+        resultCanvas.SetActive(true);
         
     }
 
@@ -70,16 +80,14 @@ public class TreasureChestLid : MonoBehaviour
     {
         int nextIndex = (int)currentStage + 1;
 
-        // ★ 最終ステージ
-        if (nextIndex >= System.Enum.GetValues(typeof(StageID)).Length)
-        {
-            Debug.Log("最終ステージクリア！");
-            // 例：エンディングシーン
-            SceneManager.LoadScene("StageSelect");
-            return;
-        }
-
         StageID nextStage = (StageID)nextIndex;
         SceneManager.LoadScene(nextStage.ToString());
+    }
+
+    private IEnumerator DelayCoroutine()
+    {
+        yield return new WaitForSeconds(3);
+        // 例：エンディングシーン
+        SceneManager.LoadScene("TitleScene");
     }
 }
