@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
@@ -6,70 +6,85 @@ public class PlayerHealth : MonoBehaviour
     public int maxLife = 3;
     public int currentLife;
 
-    [Header("��e���G����")]
-    public float invincibleTime = 1f;   // �� 1�b
+    [Header("被弾無敵時間")]
+    public float invincibleTime = 1f;
 
-    [Header("�o���A�G�t�F�N�g")]
+    [Header("バリアエフェクト")]
+    [SerializeField] private GameObject barrierObject; // ★ GameObjectで持つ
     [SerializeField] private ParticleSystem barrierParticle;
 
     private bool isInvincible = false;
 
-    PlayerDeath playerDeath;
+    PlayerLife playerDeath;
+    VignettController vignette;
 
     void Awake()
     {
+        vignette = FindObjectOfType<VignettController>();
         currentLife = maxLife;
-        playerDeath = GetComponent<PlayerDeath>();
+        playerDeath = GetComponent<PlayerLife>();
 
-        if (barrierParticle)
-            barrierParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        // ★ 最初は必ずOFF
+        if (barrierObject)
+            barrierObject.SetActive(false);
     }
 
     public void TakeDamage(int damage)
     {
-        // ���G�� or ���Ɏ��S���͖���
-        if (isInvincible)
-        {
-            return;
-        }
+        if (playerDeath.IsDead) return;
 
-        if (playerDeath.IsDead)
-        {
-            return;
-        }
+        // 先にHP計算
+        int nextLife = currentLife - damage;
 
-        currentLife -= damage;
-        currentLife = Mathf.Max(0, currentLife);;
-
-        if (currentLife <= 0)
+        // 死亡するならそのまま死亡（バリア出さない）
+        if (nextLife <= 0)
         {
+            currentLife = 0;
             playerDeath.Die();
+            return;
         }
-        else
-        {
-            StartCoroutine(InvincibleCoroutine());
-        }
+
+        // ★ ここに来た＝まだ生きてる
+
+        currentLife = nextLife;
+
+        // バリアON
+        ShowBarrier();
+
+        // Vignette
+        vignette?.PlayDamageVignette();
+
+        // 無敵開始
+        StopAllCoroutines();
+        StartCoroutine(InvincibleCoroutine());
     }
 
+
+    void ShowBarrier()
+    {
+        if (!barrierObject) return;
+
+        barrierObject.SetActive(true);
+
+        if (barrierParticle)
+        {
+            barrierParticle.Stop();
+            barrierParticle.Clear();
+            barrierParticle.Play();
+        }
+    }
 
     IEnumerator InvincibleCoroutine()
     {
         isInvincible = true;
 
-        if (barrierParticle)
-        {
-            barrierParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            barrierParticle.Play();
-        }
-
         yield return new WaitForSeconds(invincibleTime);
 
         isInvincible = false;
 
-        if (barrierParticle)
-        {
-            barrierParticle.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-        }
+        // ★ OFFに戻す
+        if (barrierObject)
+            barrierObject.SetActive(false);
     }
 
     public void ResetLife()
@@ -77,7 +92,7 @@ public class PlayerHealth : MonoBehaviour
         currentLife = maxLife;
         isInvincible = false;
 
-        if (barrierParticle)
-            barrierParticle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        if (barrierObject)
+            barrierObject.SetActive(false);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
 using UnityEngine;
+using System.Collections;
 
 public class VignettController : MonoBehaviour
 {
@@ -18,6 +19,11 @@ public class VignettController : MonoBehaviour
     [SerializeField] private float fallEndY = -30f;
     [SerializeField, Range(0f, 1f)] private float fallMaxValue = 1f;
 
+    [Header("Damage Vignette Color")]
+    [SerializeField] private Color damageColor = Color.red;
+
+    private Color defaultColor;
+
     [Header("参照")]
     [SerializeField] private VRController vrController;
 
@@ -27,10 +33,14 @@ public class VignettController : MonoBehaviour
 
     void Start()
     {
+
         if (volume != null && volume.profile.TryGet(out vignette))
         {
             vignette.intensity.value = startValue;
         }
+
+        defaultColor = vignette.color.value;
+
     }
 
     void Update()
@@ -85,5 +95,40 @@ public class VignettController : MonoBehaviour
 
         float t = Mathf.InverseLerp(fallStartY, fallEndY, y);
         return Mathf.Lerp(startValue, fallMaxValue, t);
+    }
+
+    public void PlayDamageVignette()
+    {
+        StopAllCoroutines();
+        StartCoroutine(DamageVignetteCoroutine());
+    }
+
+    IEnumerator DamageVignetteCoroutine()
+    {
+        // 色を赤に
+        vignette.color.value = damageColor;
+
+        float t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 4f;
+            vignette.intensity.value = Mathf.Lerp(startValue, endValue, t);
+            yield return null;
+        }
+
+        yield return new WaitForSeconds(0.2f);
+
+        t = 0f;
+
+        while (t < 1f)
+        {
+            t += Time.deltaTime * 2f;
+            vignette.intensity.value = Mathf.Lerp(endValue, startValue, t);
+            yield return null;
+        }
+
+        // 元の色に戻す
+        vignette.color.value = defaultColor;
     }
 }
