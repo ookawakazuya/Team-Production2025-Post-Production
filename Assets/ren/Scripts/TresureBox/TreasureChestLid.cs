@@ -40,7 +40,9 @@ public class TreasureChestLid : MonoBehaviour
         // HingeJoint.angle は物理的な回転角をダイレクトに返します（-180～180）
         float currentAngle = joint.angle;
 
-        if (currentAngle <= targetOpenAngle)
+        Debug.Log($"{gameObject.name} の現在の角度: {transform.localEulerAngles.x} / Joint角度: {GetComponent<HingeJoint>().angle}");
+
+        if (currentAngle <= (targetOpenAngle-10f))
         {
             OnChestOpened();
         }
@@ -73,7 +75,7 @@ public class TreasureChestLid : MonoBehaviour
         {
             Debug.Log("最終ステージクリア！");
             // 例：エンディングシーン
-            SceneManager.LoadScene("Ending");
+            SceneManager.LoadScene("StageSelect");
             return;
         }
 
