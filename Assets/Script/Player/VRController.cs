@@ -17,6 +17,7 @@ public class VRController : MonoBehaviour
     [SerializeField] Material aimMaterial;
     [SerializeField] Material hookMaterial;
     [SerializeField] Material NullMaterial;
+    [SerializeField] Material ChestMaterial;
     [SerializeField] CharacterController characterController;
     [SerializeField] Transform playerRoot;
 
@@ -74,6 +75,8 @@ public class VRController : MonoBehaviour
     [SerializeField] string chestTag = "Chest";
     ChestLid currentChestLid;
     float lastControllerY;
+    [SerializeField]float MaxChestRay = 0.3f;
+
 
     VRHookActions HookMap;
 
@@ -197,6 +200,8 @@ public class VRController : MonoBehaviour
         if (currentChestLid != null && triggerPressed)
         {
             HandleChestInteraction();
+            prevTriggerPressed = triggerPressed;
+            prevGripPressed = gripPressed;
             return;
         }
 
@@ -692,29 +697,51 @@ public class VRController : MonoBehaviour
     // ==========================================
     // 6. 宝箱・インタラクション
     // ==========================================
-
     void CheckForChest()
     {
-        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
-        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        //  すでにトリガーを引いて操作中の場合は、判定を更新せずにそのまま維持する
+        if (triggerPressed && currentChestLid != null)
         {
-            if (hit.collider.CompareTag(chestTag))
+            return;
+        }
+
+        // レイを飛ばしてヒット確認
+        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, maxWireLength))
+        {
+            // ヒットしたオブジェクト、またはその親に ChestLid が付いているか確認
+            // アンカーに MeshRenderer がある場合、その周辺のコライダーが反応します
+            ChestLid foundLid = hit.collider.GetComponentInParent<ChestLid>();
+
+            if (foundLid != null && foundLid.RayAnchorpoint != null)
             {
-                ChestLid foundLid = hit.collider.GetComponentInParent<ChestLid>();
-                if (foundLid != null && currentChestLid != foundLid)
+                // --- 重要な判定ロジック ---
+                // レイが当たった位置（hit.point）と、設定されたアンカー（RayAnchorpoint）の距離を計算
+                float distanceToAnchor = Vector3.Distance(hit.point, foundLid.RayAnchorpoint.position);
+
+                // アンカーの非常に近く（ここでは 0.2m = 20cm）を狙っている時だけ操作を許可
+                if (distanceToAnchor < MaxChestRay)
                 {
-                    if (currentChestLid != null) currentChestLid.StopInteracting();
-                    currentChestLid = foundLid;
-                    return;
+                    if (currentChestLid != foundLid)
+                    {
+                        if (currentChestLid != null) currentChestLid.StopInteracting();
+                        currentChestLid = foundLid;
+                        if(commonLine != null) commonLine.material = ChestMaterial;
+                    }
+                    return; // 条件を満たしたのでここで終了
                 }
-                if (foundLid != null) return;
             }
         }
-        if (currentChestLid != null && !triggerPressed)
+
+        //  操作中でなく、かつアンカーからレイが外れた場合は操作対象をクリア
+        if (!triggerPressed && currentChestLid != null)
         {
             currentChestLid.StopInteracting();
             currentChestLid = null;
         }
+        // レイの色を通常（aimMaterial）に戻す
+        if (commonLine != null) commonLine.material = aimMaterial;
     }
 
     void HandleChestInteraction()
