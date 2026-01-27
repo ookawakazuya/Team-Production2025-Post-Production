@@ -696,6 +696,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7315528574385147377, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7315528574385147377, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2d9af2e1d462526479808ccb733f6f49, type: 2}
@@ -723,13 +727,29 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 579863722853024414, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 579863722853024414, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 579863722853024414, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 579863722853024414, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
       propertyPath: m_Name
       value: hook (1)
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2236324344942296191, guid: 2c38dc448e9744042a2d122a674c9418, type: 3}
       propertyPath: m_LocalPosition.x
@@ -7244,6 +7264,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5856350862549429246, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: m_TagString
+      value: Chest
+      objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -9276,9 +9300,17 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1182128195}
     m_Modifications:
+    - target: {fileID: 2124668548341269885, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2839498053857712454, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3458930185766729673, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4524040475608690729, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: treasureIndex
@@ -9295,6 +9327,10 @@ PrefabInstance:
     - target: {fileID: 5482038940518871548, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5856350862549429246, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: m_TagString
+      value: Chest
       objectReference: {fileID: 0}
     - target: {fileID: 8080025090917608530, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Name
@@ -10474,6 +10510,38 @@ PrefabInstance:
       propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.minCurve.m_Curve.Array.data[1].value
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.maxCurve.m_Curve.Array.data[0].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.maxCurve.m_Curve.Array.data[1].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.minCurve.m_Curve.Array.data[0].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.minCurve.m_Curve.Array.data[1].inWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.maxCurve.m_Curve.Array.data[0].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.maxCurve.m_Curve.Array.data[1].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.minCurve.m_Curve.Array.data[0].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
+    - target: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: EmissionModule.m_Bursts.Array.data[0].countCurve.minCurve.m_Curve.Array.data[1].outWeight
+      value: 0.33333334
+      objectReference: {fileID: 0}
     - target: {fileID: 3646867834039848118, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -10499,9 +10567,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6728476930163279500, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: MaxChestRay
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6728476930163279500, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: menuManager
       value: 
       objectReference: {fileID: 1170432602}
+    - target: {fileID: 6728476930163279500, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: ChestMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 20502b63bdf65b34ab7251bfa6f70e22, type: 2}
     - target: {fileID: 6728476930163279500, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: flyingHookModel
       value: 
