@@ -21,6 +21,7 @@ public class ZombieController : EnemyBase
     // =====================
     [Header("Death")]
     [SerializeField] private float deathAnimTime = 2f;
+    [SerializeField] private float deathVfxTime = 0.5f;
     [SerializeField] private VisualEffect deathVFX;
 
     // =====================
@@ -67,31 +68,33 @@ public class ZombieController : EnemyBase
             agent.ResetPath();
         }
 
-        // 死亡アニメ
-        animator.SetBool("isDeath", true);
-        yield return null;
-        animator.SetBool("isDeath", false);
-
-        // 当たり判定無効
+        // 当たり判定OFF
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
-        // アニメ終了待ち
+        // ===== ① 死亡アニメ =====
+        animator.SetTrigger("Death"); // Trigger推奨
+
         yield return new WaitForSeconds(deathAnimTime);
 
-        // VFX
+        // ===== ② 死亡VFX =====
         if (deathVFX)
         {
+            deathVFX.transform.SetParent(null); // ★親から切り離す
             deathVFX.gameObject.SetActive(true);
             deathVFX.Reinit();
             deathVFX.Play();
         }
 
-        // ドロップ
+        yield return new WaitForSeconds(deathVfxTime);
+
+        // ===== ③ ドロップ =====
         DropAmmo(ammoPrefab);
 
+        // ===== ④ Enemy消滅 =====
         gameObject.SetActive(false);
     }
+
 
     // =====================
     // Respawn
