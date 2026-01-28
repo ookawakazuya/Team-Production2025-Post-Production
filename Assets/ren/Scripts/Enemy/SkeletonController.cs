@@ -78,35 +78,33 @@ public class SkeletonController : EnemyBase
             agent.ResetPath();
         }
 
-        // 死亡アニメ（ワンフレームトリガー）
-        animator.SetBool("isDeath", true);
-        yield return null;
-        animator.SetBool("isDeath", false);
-
-        // 当たり判定無効化
+        // 当たり判定OFF
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
-        // アニメ終了待ち
+        // ===== ① 死亡アニメ =====
+        animator.SetTrigger("Death"); // Trigger推奨
+
         yield return new WaitForSeconds(deathAnimTime);
 
-        // VFX 再生
+        // ===== ② 死亡VFX =====
         if (deathVFX)
         {
+            deathVFX.transform.SetParent(null); // ★親から切り離す
             deathVFX.gameObject.SetActive(true);
             deathVFX.Reinit();
             deathVFX.Play();
         }
 
-        // VFX 再生時間待ち
         yield return new WaitForSeconds(deathVfxTime);
 
-        // ドロップ
+        // ===== ③ ドロップ =====
         DropAmmo(ammoPrefab);
 
-        // 非表示（EnemyManager 管理想定）
+        // ===== ④ Enemy消滅 =====
         gameObject.SetActive(false);
     }
+
 
     // =====================
     // Respawn

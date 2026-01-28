@@ -91,6 +91,8 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentInChildren<Animator>();
 
+        agent.stoppingDistance = stopDistance; // Åöí«â¡
+
         startPosition = transform.position;
         startRotation = transform.rotation;
     }
@@ -143,12 +145,6 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
         if (!agent || !agent.isOnNavMesh) return;
 
-        if (distance <= stopDistance)
-        {
-            agent.isStopped = true;
-            return;
-        }
-
         agent.isStopped = false;
         agent.SetDestination(player.position);
     }
@@ -185,9 +181,14 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         lastAttackTime = Time.time;
 
         if (agent && agent.isOnNavMesh)
+        {
             agent.isStopped = true;
+            agent.velocity = Vector3.zero; // Åöèdóv
+        }
 
         animator.SetBool("isAttack", true);
+
+        CancelInvoke(nameof(EndAttack)); // ÅöëΩèdInvokeñhé~
         Invoke(nameof(EndAttack), attackAnimTime);
     }
 

@@ -2655,7 +2655,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 3
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -2684,13 +2684,14 @@ MonoBehaviour:
   attackDistance: 3
   stopDistance: 3
   attackDamage: 1
-  attackCooldown: 1
+  attackCooldown: 0
   attackAnimTime: 1
   attackHitRadius: 2
   attackHitOffset: {x: 0, y: 0, z: 1}
   bodyCollider: {fileID: 2553196588086059789}
   headCollider: {fileID: 8461698841645246537}
   deathAnimTime: 2
+  deathVfxTime: 0.5
   deathVFX: {fileID: 7342249086892632404}
   ammoPrefab: {fileID: 478178725984577693, guid: bffd066d97676ed43884baee6e9dd5e5, type: 3}
 --- !u!1 &8702854231512120132
