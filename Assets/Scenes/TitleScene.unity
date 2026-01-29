@@ -329,8 +329,8 @@ Transform:
   m_GameObject: {fileID: 151694113}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.5, z: -10}
-  m_LocalScale: {x: 20.6, y: 7, z: 0.5}
+  m_LocalPosition: {x: 2.25, y: 3.5, z: -10}
+  m_LocalScale: {x: 15, y: 7, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 998582474}
@@ -1147,8 +1147,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 798273083}
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: -0.07}
-  m_LocalScale: {x: 0.0045, y: 0.0045, z: 0.0045}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
+  m_LocalScale: {x: 0.009, y: 0.009, z: 0.009}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1840003665}
@@ -1157,7 +1157,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 9.67, y: 2.59}
+  m_AnchoredPosition: {x: 15.49, y: 7}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &842331174
@@ -1217,15 +1217,17 @@ Transform:
   m_GameObject: {fileID: 998582473}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: -4, y: 0, z: 0}
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 151694117}
   - {fileID: 1765538508}
   - {fileID: 1120006964}
   - {fileID: 1917556436}
   - {fileID: 53513653}
+  - {fileID: 1278465565}
+  - {fileID: 2061978089}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1120006960
@@ -1330,7 +1332,7 @@ Transform:
   m_GameObject: {fileID: 1120006960}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: -10, y: 3.5, z: 0}
+  m_LocalPosition: {x: -5, y: 3.5, z: 0}
   m_LocalScale: {x: 20.6, y: 7, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1342,7 +1344,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 998582474}
     m_Modifications:
     - target: {fileID: 416855514820678, guid: fb49c333695769845895471522d97466, type: 3}
       propertyPath: m_Name
@@ -1378,15 +1380,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1397378209876857907, guid: fb49c333695769845895471522d97466, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1397378209876857907, guid: fb49c333695769845895471522d97466, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1397378209876857907, guid: fb49c333695769845895471522d97466, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1397378209876857907, guid: fb49c333695769845895471522d97466, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1417,6 +1419,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fb49c333695769845895471522d97466, type: 3}
+--- !u!4 &1278465565 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1397378209876857907, guid: fb49c333695769845895471522d97466, type: 3}
+  m_PrefabInstance: {fileID: 1278465564}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1337094264
 GameObject:
   m_ObjectHideFlags: 0
@@ -2237,8 +2244,8 @@ Transform:
   m_GameObject: {fileID: 1765538504}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.5, z: 10}
-  m_LocalScale: {x: 20.6, y: 7, z: 0.5}
+  m_LocalPosition: {x: 2.25, y: 3.5, z: 10}
+  m_LocalScale: {x: 15, y: 7, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 998582474}
@@ -3355,8 +3362,8 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1980258229}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 9.47}
-  m_LocalScale: {x: 0.0045, y: 0.0045, z: 0.0045}
+  m_LocalPosition: {x: 0, y: 0, z: 19.49}
+  m_LocalScale: {x: 0.009, y: 0.009, z: 0.009}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 1674544825}
@@ -3366,7 +3373,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 2.59}
+  m_AnchoredPosition: {x: 0.5, y: 7}
   m_SizeDelta: {x: 1920, y: 1080}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1980258235
@@ -3547,12 +3554,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2061978085}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 2.25, y: 0, z: 0}
+  m_LocalScale: {x: 1.5, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 998582474}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2092139007
 GameObject:
@@ -5998,6 +6005,7 @@ MonoBehaviour:
   maxLife: 3
   currentLife: 0
   invincibleTime: 1
+  barrierObject: {fileID: 0}
   barrierParticle: {fileID: 1148272767579608190}
 --- !u!1 &5081114457894397131
 GameObject:
@@ -7311,6 +7319,7 @@ MonoBehaviour:
   aimMaterial: {fileID: 2100000, guid: 5ac02d893cd033f429457eb659507ad8, type: 2}
   hookMaterial: {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
   NullMaterial: {fileID: 2100000, guid: 07d52808b6c057641a8619e4f85478eb, type: 2}
+  ChestMaterial: {fileID: 0}
   characterController: {fileID: 9093636574522602547}
   playerRoot: {fileID: 7853180818456925437}
   maxWireLength: 30
@@ -7339,6 +7348,7 @@ MonoBehaviour:
   normalHookModel: {fileID: 5541905507963199970}
   flyingHookModel: {fileID: 4052431729170502989}
   chestTag: Chest
+  MaxChestRay: 0.3
   isClinging: 0
   rotationSpeed: 180
   menuManager: {fileID: 636660986}
@@ -8816,7 +8826,6 @@ SceneRoots:
   - {fileID: 1980258234}
   - {fileID: 798273088}
   - {fileID: 1794131582}
-  - {fileID: 2061978089}
   - {fileID: 1420592999}
   - {fileID: 998582474}
   - {fileID: 1764704381}
@@ -8826,6 +8835,5 @@ SceneRoots:
   - {fileID: 1777921962}
   - {fileID: 2014406568}
   - {fileID: 1449082491}
-  - {fileID: 1278465564}
   - {fileID: 305140932}
   - {fileID: 333564983}
