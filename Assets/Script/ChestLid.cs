@@ -4,22 +4,25 @@ public class ChestLid : MonoBehaviour
 {
     HingeJoint joint;
     public bool isBeingInteracted = false;
+    private bool isLockedOpen = false; // 最大まで開いたら真にするフラグ
+
 
     [Header("角度設定")]
     [SerializeField] float Min = 0f;            //閉じている時の角度
-    [SerializeField] float stayOpen = -110f;    //これより開くと開いたままにする角度
+    [SerializeField] float stayOpen = -120f;    //これより開くと開いたままにする角度
 
     [SerializeField] Transform rayAnchorPoint;  //レイが吸着するポイント
-    
+
     public Transform RayAnchorpoint => rayAnchorPoint;
 
-     void Start()
+    void Start()
     {
         joint = GetComponent<HingeJoint>();
     }
 
     private void Update()
     {
+        if (isLockedOpen) return;
         //操作中でない、かつJointが存在する場合の自動処理
         if (!isBeingInteracted && joint != null)
         {
@@ -31,28 +34,47 @@ public class ChestLid : MonoBehaviour
                 spring.targetPosition = joint.angle;
             }
 
+            if (joint.angle <= stayOpen)
+            {
+
+                LockChestOpen();
+                return;
+            }
+
             //蓋の状態による自動戻り処理
-            if (joint.angle > stayOpen) 
+            if (joint.angle > stayOpen+5f)
             {
                 //まだ完全に開ききっていないなら、閉じる方向に戻す
-                if(Mathf.Abs(spring.targetPosition - Min) > 0.1f)
+                if (Mathf.Abs(spring.targetPosition - Min) > 0.1f)
                 {
                     spring.targetPosition = Min;
                     joint.spring = spring;
                     joint.useSpring = true;
                 }
             }
-            else
-            {
-                //角度上限が超えている場合、その場でとどまるようにする。
-                if(Mathf.Abs(spring.targetPosition - joint.angle) > 1.0f)
-                {
-                    spring.targetPosition = joint.angle;
-                    joint.spring = spring;
-                }
-            }
         }
     }
+
+    private void LockChestOpen()
+    {
+        isLockedOpen = true;
+        isBeingInteracted = false;
+
+        // HingeJointの動きを物理的に止める設定
+        if (joint != null)
+        {
+            JointSpring spring = joint.spring;
+            spring.targetPosition = stayOpen;
+            joint.spring = spring;
+            joint.useSpring = true;
+
+            // さらに動かなくしたい場合は、RigidbodyをKinematicにするのも有効です
+            GetComponent<Rigidbody>().isKinematic = true;
+        }
+
+        Debug.Log("宝箱が全開で固定されました。");
+    }
+
 
     // コントローラの上下移動量（deltaY）を受け取って蓋を回転させる
     public void UpdateRotation(float deltaY)
@@ -86,12 +108,19 @@ public class ChestLid : MonoBehaviour
             spring.targetPosition = finalTarget;
             joint.spring = spring;
             joint.useSpring = true;
+
+            // 操作中に限界角度を超えた場合もロックをかける
+            if (finalTarget <= stayOpen)
+            {
+                LockChestOpen();
+            }
         }
     }
 
 
     public void StopInteracting()
     {
+        if (!isLockedOpen)
         isBeingInteracted = false;
     }
 }
