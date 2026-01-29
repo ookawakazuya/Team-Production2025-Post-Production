@@ -75,7 +75,8 @@ public class VRController : MonoBehaviour
     [SerializeField] string chestTag = "Chest";
     ChestLid currentChestLid;
     float lastControllerY;
-    [SerializeField]float MaxChestRay = 0.3f;
+    [SerializeField] float MaxChestRay = 0.3f;
+    [SerializeField] float maxinteractionDistance = 3.0f;
 
 
     VRHookActions HookMap;
@@ -716,20 +717,28 @@ public class VRController : MonoBehaviour
 
             if (foundLid != null && foundLid.RayAnchorpoint != null)
             {
-                // --- 重要な判定ロジック ---
-                // レイが当たった位置（hit.point）と、設定されたアンカー（RayAnchorpoint）の距離を計算
-                float distanceToAnchor = Vector3.Distance(hit.point, foundLid.RayAnchorpoint.position);
-
-                // アンカーの非常に近く（ここでは 0.2m = 20cm）を狙っている時だけ操作を許可
-                if (distanceToAnchor < MaxChestRay)
+                //プレイヤーと宝箱の距離
+                float distanceToChest = Vector3.Distance(transform.position, hit.transform.position);
+                if (distanceToChest > maxinteractionDistance)
                 {
-                    if (currentChestLid != foundLid)
+                    // レイが当たった位置（hit.point）と、設定されたアンカー（RayAnchorpoint）の距離を計算
+                    float distanceToAnchor = Vector3.Distance(hit.point, foundLid.RayAnchorpoint.position);
+                    // アンカーの非常に近く（ここでは 0.2m = 20cm）を狙っている時だけ操作を許可
+                    if (distanceToAnchor < MaxChestRay)
                     {
-                        if (currentChestLid != null) currentChestLid.StopInteracting();
-                        currentChestLid = foundLid;
-                        if(commonLine != null) commonLine.material = ChestMaterial;
+                        if (currentChestLid != foundLid)
+                        {
+                            if (currentChestLid != null) currentChestLid.StopInteracting();
+                            currentChestLid = foundLid;
+                            if (commonLine != null) commonLine.material = ChestMaterial;
+                        }
+                        return; // 条件を満たしたのでここで終了
                     }
-                    return; // 条件を満たしたのでここで終了
+                }
+                if (!triggerPressed && currentChestLid != null) 
+                {
+                    currentChestLid.StopInteracting();
+                    currentChestLid = null;
                 }
             }
         }
@@ -754,7 +763,7 @@ public class VRController : MonoBehaviour
             if (triggerPressed)
             {
                 float deltaY = currentY - lastControllerY;
-                if (Mathf.Abs(deltaY) < 1.0f) currentChestLid.UpdateRotation(deltaY);
+                if (Mathf.Abs(deltaY) < 0.5f) currentChestLid.UpdateRotation(deltaY);
             }
             else if (prevTriggerPressed && !triggerPressed) currentChestLid.StopInteracting();
         }
