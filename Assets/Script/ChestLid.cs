@@ -14,6 +14,12 @@ public class ChestLid : MonoBehaviour
     [SerializeField] Transform rayAnchorPoint;  //レイが吸着するポイント
     [SerializeField] public float interactionRadius = 5.0f;
 
+    [Header("エフェクト")]
+    [SerializeField] GameObject chestParticle;
+
+    bool hasPlayedOpenSE = false;
+    bool hasPlayedMaxSE = false;
+
 
     public Transform RayAnchorpoint => rayAnchorPoint;
 
@@ -55,6 +61,32 @@ public class ChestLid : MonoBehaviour
                 }
             }
         }
+
+        // パーティクル表示制御
+        if (chestParticle != null && joint != null)
+        {
+            // 少しでも開いていたら表示
+            bool isOpen = joint.angle < Min - 1f;
+
+            if (chestParticle.activeSelf != isOpen)
+            {
+                chestParticle.SetActive(isOpen);
+            }
+
+            // 開け始めた瞬間のSE
+            if (isOpen && !hasPlayedOpenSE)
+            {
+                SoundManager.Instance.PlaySE("Chest_Open");
+                hasPlayedOpenSE = true;
+            }
+
+            // 閉じたらリセット
+            if (!isOpen)
+            {
+                hasPlayedOpenSE = false;
+                hasPlayedMaxSE = false;
+            }
+        }
     }
 
     private void LockChestOpen()
@@ -73,6 +105,8 @@ public class ChestLid : MonoBehaviour
             // さらに動かなくしたい場合は、RigidbodyをKinematicにするのも有効です
             GetComponent<Rigidbody>().isKinematic = true;
         }
+
+        SoundManager.Instance.PlaySE("Chest_Middle");
 
         Debug.Log("宝箱が全開で固定されました。");
     }
