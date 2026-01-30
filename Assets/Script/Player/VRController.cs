@@ -718,27 +718,40 @@ public class VRController : MonoBehaviour
             if (foundLid != null && foundLid.RayAnchorpoint != null)
             {
                 //プレイヤーと宝箱の距離
-                float distanceToChest = Vector3.Distance(transform.position, hit.transform.position);
-                if (distanceToChest > maxinteractionDistance)
+                float distanceToChest = Vector3.Distance(transform.position, foundLid.transform.position);
+                // 宝箱側で設定した「操作可能半径」以内かチェック
+                if (distanceToChest <= foundLid.interactionRadius)
                 {
-                    // レイが当たった位置（hit.point）と、設定されたアンカー（RayAnchorpoint）の距離を計算
-                    float distanceToAnchor = Vector3.Distance(hit.point, foundLid.RayAnchorpoint.position);
-                    // アンカーの非常に近く（ここでは 0.2m = 20cm）を狙っている時だけ操作を許可
-                    if (distanceToAnchor < MaxChestRay)
+                    // 宝箱から見たプレイヤーへの方向ベクトル（水平方向のみで計算）
+                    Vector3 playerDir = (transform.position - foundLid.transform.position);
+                    playerDir.y = 0; // 高低差を無視して水平方向で比較
+                    playerDir.Normalize();
+
+                    // 宝箱の正面ベクトル
+                    Vector3 chestForward = foundLid.transform.forward;
+                    chestForward.y = 0;
+                    chestForward.Normalize();
+
+                    // 2つのベクトルの内積（Dot Product）を計算
+                    // 1.0 = 完全に同じ向き（0度）, 0.7 = 約45度, 0 = 90度
+                    float dot = Vector3.Dot(chestForward, playerDir);
+
+                    // dotが0.7以上（正面から左右約45度以内）の時だけ操作を許可
+                    if (dot > 0.7f)
                     {
-                        if (currentChestLid != foundLid)
+                        // アンカーポイントへのエイム判定
+                        float distanceToAnchor = Vector3.Distance(hit.point, foundLid.RayAnchorpoint.position);
+                        if (distanceToAnchor < MaxChestRay)
                         {
-                            if (currentChestLid != null) currentChestLid.StopInteracting();
-                            currentChestLid = foundLid;
-                            if (commonLine != null) commonLine.material = ChestMaterial;
+                            if (currentChestLid != foundLid)
+                            {
+                                if (currentChestLid != null) currentChestLid.StopInteracting();
+                                currentChestLid = foundLid;
+                                if (commonLine != null) commonLine.material = ChestMaterial;
+                            }
+                            return;
                         }
-                        return; // 条件を満たしたのでここで終了
                     }
-                }
-                if (!triggerPressed && currentChestLid != null) 
-                {
-                    currentChestLid.StopInteracting();
-                    currentChestLid = null;
                 }
             }
         }
