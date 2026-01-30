@@ -16295,7 +16295,7 @@ Transform:
   m_GameObject: {fileID: 1474995197}
   serializedVersion: 2
   m_LocalRotation: {x: 0.093231656, y: -0, z: -0, w: 0.99564445}
-  m_LocalPosition: {x: 0, y: 2.4, z: -8.8}
+  m_LocalPosition: {x: 0, y: 1.545, z: -1.701}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26561,6 +26561,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Acid (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5534182802283095923, guid: d51328bd55b2e6a40b72c4fdc6ba45fe, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8237807601670321878, guid: d51328bd55b2e6a40b72c4fdc6ba45fe, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -26695,6 +26699,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Magma
       objectReference: {fileID: 0}
+    - target: {fileID: 4937065145844874193, guid: 3f0abb42e0ccfa447a7d58d95e5b9eee, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8900285553118525645, guid: 3f0abb42e0ccfa447a7d58d95e5b9eee, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -26740,6 +26748,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3f0abb42e0ccfa447a7d58d95e5b9eee, type: 3}
+--- !u!1001 &6885189894425163353
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 110663957096969950, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8826341953809331684, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
+      propertyPath: m_Name
+      value: Crystal
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 52b1a4723b5647247837eb0c6bac9553, type: 3}
 --- !u!1001 &7924896645952714162
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26887,3 +26952,4 @@ SceneRoots:
   - {fileID: 1480234850}
   - {fileID: 6323322043917850739}
   - {fileID: 3280150220822688171}
+  - {fileID: 6885189894425163353}
