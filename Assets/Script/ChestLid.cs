@@ -12,6 +12,8 @@ public class ChestLid : MonoBehaviour
     [SerializeField] float stayOpen = -120f;    //これより開くと開いたままにする角度
 
     [SerializeField] Transform rayAnchorPoint;  //レイが吸着するポイント
+    [SerializeField] public float interactionRadius = 5.0f;
+
 
     public Transform RayAnchorpoint => rayAnchorPoint;
 
