@@ -1997,7 +1997,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 1, b: 0.017619133, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3492,6 +3492,7 @@ MonoBehaviour:
   aimMaterial: {fileID: 2100000, guid: 5ac02d893cd033f429457eb659507ad8, type: 2}
   hookMaterial: {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
   NullMaterial: {fileID: 2100000, guid: 07d52808b6c057641a8619e4f85478eb, type: 2}
+  ChestMaterial: {fileID: 0}
   characterController: {fileID: 9093636574595429556}
   playerRoot: {fileID: 7853180818382951546}
   maxWireLength: 30
@@ -3520,6 +3521,8 @@ MonoBehaviour:
   normalHookModel: {fileID: 4623407239817436214}
   flyingHookModel: {fileID: 3818006840468187290}
   chestTag: Chest
+  MaxChestRay: 0.3
+  maxinteractionDistance: 3
   isClinging: 0
   rotationSpeed: 180
   menuManager: {fileID: 0}
@@ -3589,6 +3592,7 @@ MonoBehaviour:
   maxLife: 3
   currentLife: 0
   invincibleTime: 1
+  barrierObject: {fileID: 0}
   barrierParticle: {fileID: 2025081608844278438}
 --- !u!1 &7473170569888127743
 GameObject:
@@ -4650,12 +4654,12 @@ PrefabInstance:
       objectReference: {fileID: 8607665495672516115}
     - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: rayDistance
-      value: 15
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: bulletPrefab
       value: 
-      objectReference: {fileID: 980066629352789684, guid: 23212ce5d851cf1439a861d2c32883e4, type: 3}
+      objectReference: {fileID: 214540524975575144, guid: 6d09de7af7aea73439ba8b8334d8c133, type: 3}
     - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: lineRenderer
       value: 

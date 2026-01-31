@@ -40,10 +40,6 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private Image loadedImage;
     [SerializeField] private Image[] digitImages;    // 各桁のImage
 
-    // [Header("銃モデルの設定")]
-    // [SerializeField] private GameObject gunPrefab;
-    // [SerializeField] private Vector3 gunOffset = new Vector3(0f, 0f, 0.1f); // コントローラーに対する位置補正
-
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
     private GameObject gunInstance;
@@ -91,15 +87,6 @@ public class Shotgun : MonoBehaviour
         {
             Debug.LogWarning("LeftHand デバイスが見つかりません！");
         }
-
-        // --- 銃を装備 ---
-        /* if (gunPrefab != null)
-           {
-               gunInstance = Instantiate(gunPrefab);
-               gunInstance.transform.SetParent(leftHandInteractor.transform);
-               gunInstance.transform.localPosition = gunOffset;
-               gunInstance.transform.localRotation = Quaternion.identity;
-           } */
 
         // --- 射線の可視化 ---
         if (lineRenderer != null)
@@ -193,10 +180,10 @@ public class Shotgun : MonoBehaviour
         // --- トリガーが離されたら ---
         else if (isShooting && triggerValue < 0.1f) { isShooting = false; }
 
-        // Debug.Log($"Y座標: {rayOrigin.position.y}, 閾値: {reloadThresholdY}");
+        if (infiniteAmmo) { currentAmmo = 1; }
 
         // --- Y座標が一定より低くなったらリロード ---
-        if (triggerValue < 0.1f)
+        if (!infiniteAmmo && triggerValue < 0.1f)
         {
             // --- 相対位置で判定 ---
             float relativeY = rayOrigin.position.y - playerHead.position.y;
@@ -494,16 +481,38 @@ public class Shotgun : MonoBehaviour
     {
         if (loadedImage == null || numberSprites == null) return;
 
-        // --- スプライト設定（0 or 1）---
-        int digit = Mathf.Clamp(currentAmmo, 0, 1);
+        int digit;
+
+        // --- 🔸無限モード中は常に「1」を表示 ---
+        if (infiniteAmmo)
+        {
+            digit = 1;
+        }
+        else
+        {
+            digit = Mathf.Clamp(currentAmmo, 0, 1);
+        }
+
+        // --- スプライト設定 ---
         loadedImage.sprite = numberSprites[digit];
         loadedImage.enabled = true;
 
-        // --- 色変更（0の時だけ赤）---
-        if (digit == 0)
-            loadedImage.color = new Color(1f, 0.345f, 0f, 1f); // オレンジ寄り赤
+        // --- 色変更 ---
+        if (infiniteAmmo)
+        {
+            // 無限モード → 緑固定
+            loadedImage.color = new Color(0.263f, 1f, 0f, 1f); // ライムグリーン
+        }
+        else if (digit == 0)
+        {
+            // 弾切れ → オレンジ赤
+            loadedImage.color = new Color(1f, 0.345f, 0f, 1f);
+        }
         else
+        {
+            // 通常時 → 緑
             loadedImage.color = new Color(0.263f, 1f, 0f, 1f);
+        }
     }
 
     /// <summary>
@@ -520,6 +529,8 @@ public class Shotgun : MonoBehaviour
         {
             if (img != null) { img.enabled = false; }
         }
+
+        if (infiniteAmmo) { return; }
 
         // --- 右詰めで数字セット ---
         for (int i = 0; i < numStr.Length && i < digitImages.Length; i++)
@@ -541,31 +552,21 @@ public class Shotgun : MonoBehaviour
                 }
             }
         }
-
-#if false
-        // --- テキスト内容の更新 ---
-        if (infiniteAmmo) { reserveText.text = "×∞"; }  // 無限モード表示
-        else { reserveText.text = $"×{reserveAmmo}"; }
-
-        // --- 位置調整 ---
-        Vector2 pos = reserveText.rectTransform.anchoredPosition;
-
-        if (infiniteAmmo) { pos.x = -16; }
-        else if (reserveAmmo >= 10) { pos.x = -5; }
-        else { pos.x = -16; }
-
-        reserveText.rectTransform.anchoredPosition = pos;
-#endif
     }
 
     /// <summary>
     /// Enemyを倒したら弾の追加
-    /// EnemyController.cs で呼ぶ
     /// </summary>
-    public void plusAmmo()
+    private void OnTriggerEnter(Collider other)
     {
-        reserveAmmo++;
-        UpdateReserveText();
+        if (other.CompareTag("Ammo"))
+        {
+            Debug.Log("ストック" + reserveAmmo);
+
+            reserveAmmo++;
+            UpdateReserveText();
+            Destroy(other.gameObject);
+        }
     }
 
     /// <summary>
