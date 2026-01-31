@@ -108,6 +108,11 @@ public class ZombieController : EnemyBase
         headCollider.enabled = true;
 
         if (deathVFX)
+        {
             deathVFX.gameObject.SetActive(false);
+            deathVFX.transform.SetParent(transform); // Åö ñﬂÇ∑
+            deathVFX.transform.localPosition = Vector3.zero;
+            deathVFX.transform.localRotation = Quaternion.identity;
+        }
     }
 }

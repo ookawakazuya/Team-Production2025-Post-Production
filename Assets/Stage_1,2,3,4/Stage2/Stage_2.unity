@@ -7861,6 +7861,10 @@ PrefabInstance:
       propertyPath: m_Size.z
       value: 250
       objectReference: {fileID: 0}
+    - target: {fileID: 4270716591603079347, guid: 2fee27e38b66e7d4f99baf88f736a371, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8406325959782065897, guid: 2fee27e38b66e7d4f99baf88f736a371, type: 3}
       propertyPath: m_Name
       value: FallZone (1)
@@ -16570,6 +16574,7 @@ MonoBehaviour:
   maxLife: 3
   currentLife: 0
   invincibleTime: 1
+  barrierObject: {fileID: 0}
   barrierParticle: {fileID: 1148272768152304171}
 --- !u!1 &5081114457389337246
 GameObject:
@@ -17894,6 +17899,7 @@ MonoBehaviour:
   aimMaterial: {fileID: 2100000, guid: 5ac02d893cd033f429457eb659507ad8, type: 2}
   hookMaterial: {fileID: 2100000, guid: 7b794bd118aab234fbefec464983e865, type: 2}
   NullMaterial: {fileID: 2100000, guid: 07d52808b6c057641a8619e4f85478eb, type: 2}
+  ChestMaterial: {fileID: 0}
   characterController: {fileID: 9093636575090563686}
   playerRoot: {fileID: 7853180817955617448}
   maxWireLength: 30
@@ -17922,6 +17928,8 @@ MonoBehaviour:
   normalHookModel: {fileID: 5541905507457159094}
   flyingHookModel: {fileID: 4052431729738414874}
   chestTag: Chest
+  MaxChestRay: 0.3
+  maxinteractionDistance: 3
   isClinging: 0
   rotationSpeed: 180
   menuManager: {fileID: 1327987687}
