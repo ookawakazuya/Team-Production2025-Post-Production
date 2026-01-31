@@ -1022,12 +1022,15 @@ MonoBehaviour:
   rayOriginObject: {fileID: 0}
   lineRenderer: {fileID: 0}
   aimMode: 1
-  rayDistance: 50
+  rayDistance: 100
   bulletrObject: {fileID: 0}
   bulletPrefab: {fileID: 0}
   maxReserve: 5
   autoAmmoDelay: 5
   infiniteAmmo: 0
+  ammoSlider: {fileID: 0}
+  loadedImage: {fileID: 0}
+  digitImages: []
 --- !u!120 &3934557886830264792
 LineRenderer:
   serializedVersion: 2

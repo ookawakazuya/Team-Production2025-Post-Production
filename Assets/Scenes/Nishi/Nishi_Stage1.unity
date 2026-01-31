@@ -10292,7 +10292,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1535507683636261312, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2210131388330627471, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_IsActive
@@ -10532,7 +10532,15 @@ PrefabInstance:
       objectReference: {fileID: 639994903}
     - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: rayDistance
-      value: 50
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: bulletPrefab
+      value: 
+      objectReference: {fileID: 214540524975575144, guid: 6d09de7af7aea73439ba8b8334d8c133, type: 3}
+    - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: infiniteAmmo
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5829179440377023168, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_Color.b
@@ -10548,7 +10556,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5832022342984247190, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6445399509644769358, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_Cameras.Array.size
@@ -10657,6 +10665,14 @@ PrefabInstance:
     - target: {fileID: 8939726874623455026, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8971853549473041224, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9093636574595429556, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
