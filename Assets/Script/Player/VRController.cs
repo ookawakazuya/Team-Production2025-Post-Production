@@ -218,6 +218,8 @@ public class VRController : MonoBehaviour
         UpdateStateMachine();
         HandleHookBreakCheck();
 
+        UpdateClingAimWhileHolding();
+
         if (isClinging)
         {
             fallSpeed = 0f;
@@ -351,17 +353,24 @@ public class VRController : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
             if (IsTagInvalidForHook(hit.collider.tag)) return;
-            SoundManager.Instance.PlaySE("SE_Hook_02");
-            grapplePoint = hit.point;
-            aimHitPoint = hit.point;
-            hasAimHitPoint = true;
+
+            // --- 状態の確定 ---
+            aimHitPoint = hit.point;    // ここで先端座標を保存
+            grapplePoint = hit.point;  // 念のため同期
+            hasAimHitPoint = true;     // 座標があることを明示
+
             isGrappling = true;
-            isRetracting = false;
             isHookActive = true;
-            tempGrappleFromCling = true;
+            tempGrappleFromCling = true; // このフラグが描画モードを切り替える
+            isRetracting = false;
+
+            // --- モデルの表示切り替え ---
+            SetHookModelStatus(isIdle: false); // flyingHookModel を有効化
+
+            SoundManager.Instance.PlaySE("SE_Hook_02");
             if (haptic != null) haptic.VibrateWallHit(isRightHand);
             if (hookMaterial != null) commonLine.material = hookMaterial;
-            PlayHookHitParticle(grapplePoint, hit.normal);
+            PlayHookHitParticle(aimHitPoint, hit.normal);
         }
     }
 
@@ -489,65 +498,97 @@ public class VRController : MonoBehaviour
     private void UpdateRayVisuals(float length)
     {
         if (targetInteractor != null) targetInteractor.maxRaycastDistance = length;
-        if (commonLine != null)
+        if (commonLine == null) return;
+
+        commonLine.enabled = isGameRayEnabled;
+        if (commonLine.positionCount != 2) commonLine.positionCount = 2;
+
+        Vector3 currentTipPosition = Vector3.zero;
+        bool isInteractingWithChest = currentChestLid != null && triggerPressed;
+
+        // 【修正】tempGrappleFromCling 中は isClinging よりもこちらを優先
+        bool isWiredState = (isHookActive || isRetracting || tempGrappleFromCling) && !isInteractingWithChest;
+
+        if (isWiredState)
         {
-            commonLine.enabled = isGameRayEnabled;
-            if (commonLine.positionCount != 2) commonLine.positionCount = 2;
-            Vector3 currentTipPosition = Vector3.zero;
+            // --- ワイヤー・フック表示フェーズ ---
+            commonLine.enabled = false;
 
-            if (isHookActive || isRetracting)
+            if (rayVisualObject != null)
             {
-                commonLine.enabled = false;
-                if (rayVisualObject != null)
-                {
-                    rayVisualObject.SetActive(true);
-                    currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
-                    float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
-                    rayVisualObject.transform.position = (rayOrigin.position + currentTipPosition) / 2f;
-                    rayVisualObject.transform.LookAt(currentTipPosition);
-                    rayVisualObject.transform.localScale = new Vector3(initialWireScale.x, initialWireScale.y, distance * wireModelScaleFactor);
-                }
-                else currentTipPosition = hasAimHitPoint ? aimHitPoint : grapplePoint;
+                rayVisualObject.SetActive(true);
+                // 射出時に保存した座標をそのまま使う（動かさない）
+                currentTipPosition = aimHitPoint;
 
-                if (hookObject != null)
-                {
-                    hookObject.position = currentTipPosition;
-                    hookObject.LookAt(rayOrigin.position);
-                    hookObject.Rotate(-90f, 0f, 0f);
-                    hookObject.localScale = new Vector3(HookScale, HookScale, HookScale);
-                }
+                // ワイヤー本体の配置と長さ更新
+                float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
+                rayVisualObject.transform.position = (rayOrigin.position + currentTipPosition) / 2f;
+                rayVisualObject.transform.LookAt(currentTipPosition);
+                rayVisualObject.transform.localScale = new Vector3(initialWireScale.x, initialWireScale.y, distance * wireModelScaleFactor);
+            }
+
+            // 先端にフックモデルを表示し、座標を更新する
+            if (hookObject != null)
+            {
+                // モデルを表示状態にする
+                hookObject.gameObject.SetActive(true);
+                // 先端座標（aimHitPoint）に配置
+                hookObject.position = aimHitPoint;
+                // 手元を向くように回転
+                hookObject.LookAt(rayOrigin.position);
+                hookObject.Rotate(-90f, 0f, 0f);
+                hookObject.localScale = new Vector3(HookScale, HookScale, HookScale);
+            }
+        }
+        else
+        {
+
+            // --- 通常時・張り付き待機・宝箱操作 ---
+            if (rayVisualObject != null) rayVisualObject.SetActive(false);
+
+            // 宝箱操作中または「射出していない張り付き中」はモデルを Idle (手元) に戻す
+            if (isInteractingWithChest || isClinging) SetHookModelStatus(isIdle: true);
+
+            // 通常の細いライン計算
+            Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, length))
+            {
+                currentTipPosition = hit.point;
             }
             else
             {
-                if (rayVisualObject != null) rayVisualObject.SetActive(false);
-                if (gameLineVisual != null && !gameLineVisual.enabled) gameLineVisual.enabled = true;
+                currentTipPosition = rayOrigin.position + rayOrigin.forward * length;
+            }
+
+            if (!isInteractingWithChest)
+            {
                 if (aimMaterial != null) commonLine.material = aimMaterial;
-
-                Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
-                if (Physics.Raycast(ray, out RaycastHit hit, length))
-                {
-                    currentTipPosition = hit.point;
-                    if (aimMaterial != null) commonLine.material = aimMaterial;
-                }
-                else
-                {
-                    if (NullMaterial != null) commonLine.material = NullMaterial;
-                    else if (aimMaterial != null) commonLine.material = aimMaterial;
-                    currentTipPosition = rayOrigin.position + rayOrigin.forward * length;
-                }
-                commonLine.SetPosition(0, rayOrigin.position + rayOrigin.forward * length);
+                commonLine.SetPosition(0, currentTipPosition);
                 commonLine.SetPosition(1, rayOrigin.position);
+            }
 
-                if (hookObject != null)
-                {
-                    hookObject.position = rayOrigin.position;
-                    hookObject.forward = rayOrigin.forward;
-                    hookObject.Rotate(90f, 0f, 0f);
-                    hookObject.localScale = new Vector3(HookScaleOrigin, HookScaleOrigin, HookScaleOrigin);
-                }
+            // フックモデルを手元の座標（rayOrigin）に固定
+            if (hookObject != null)
+            {
+                hookObject.position = rayOrigin.position;
+                hookObject.forward = rayOrigin.forward;
+                hookObject.Rotate(90f, 0f, 0f);
+                hookObject.localScale = new Vector3(HookScaleOrigin, HookScaleOrigin, HookScaleOrigin);
             }
         }
     }
+    // 壁に到達した時の処理（既存の移動ロジック内で呼ばれている箇所を想定）
+    void OnClingToWall()
+    {
+        isClinging = true;
+        isRetracting = false;
+        isHookActive = false;
+        tempGrappleFromCling = false;
+
+        // 壁に張り付いた瞬間、先端のフックモデルを非表示（手元へ戻す）
+        SetHookModelStatus(isIdle: true);
+    }
+
 
     void UpdateAimRayFixed(float dynamicLength)
     {
@@ -793,6 +834,35 @@ public class VRController : MonoBehaviour
             commonLine.SetPosition(1, rayOrigin.position);
         }
     }
+
+    void UpdateClingAimWhileHolding()
+    {
+        // 張り付き中 ＆ トリガー押しっぱなし
+        if (!isClinging || !triggerPressed)
+            return;
+
+        if (rayOrigin == null)
+            return;
+
+        Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
+        if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
+        {
+            if (IsTagInvalidForHook(hit.collider.tag))
+                return;
+
+            aimHitPoint = hit.point;
+            grapplePoint = hit.point;
+
+            // flyingHookModel を直接動かしたい場合（保険）
+            if (flyingHookModel != null && flyingHookModel.activeSelf)
+            {
+                flyingHookModel.transform.position = hit.point;
+                flyingHookModel.transform.LookAt(rayOrigin.position);
+                flyingHookModel.transform.Rotate(-90f, 0f, 0f);
+            }
+        }
+    }
+
 
     // ==========================================
     // 7. 補助判定・外部インターフェース
