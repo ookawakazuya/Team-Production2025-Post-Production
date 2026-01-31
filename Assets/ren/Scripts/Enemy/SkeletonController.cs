@@ -111,16 +111,18 @@ public class SkeletonController : EnemyBase
     // =====================
     protected override void OnRespawn()
     {
-        // Animator ‰Šú‰»
         animator.Rebind();
         animator.Update(0f);
 
-        // “–‚½‚è”»’è•œŠˆ
         bodyCollider.enabled = true;
         headCollider.enabled = true;
 
-        // VFX ”ñ•\¦
         if (deathVFX)
+        {
             deathVFX.gameObject.SetActive(false);
+            deathVFX.transform.SetParent(transform); // š –ß‚·
+            deathVFX.transform.localPosition = Vector3.zero;
+            deathVFX.transform.localRotation = Quaternion.identity;
+        }
     }
 }

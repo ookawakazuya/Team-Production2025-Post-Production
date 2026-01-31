@@ -88,14 +88,17 @@ public class GameManager : MonoBehaviour
         }
 
         FindPlayerAndEnemies();
+
+        //チェックポイントをリセット
+        ResetAllCheckpoints();
     }
 
     private void FindPlayerAndEnemies()
     {
         enemies.Clear();
 
-        // ★ EnemyBase を取得（Zombie / Skeleton 共通）
-        enemies.AddRange(FindObjectsOfType<EnemyBase>(true));
+        //EnemyBase を取得（Zombie / Skeleton 共通）
+        enemies.AddRange(Object.FindObjectsByType<EnemyBase>(FindObjectsInactive.Include,FindObjectsSortMode.None));
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
@@ -204,6 +207,15 @@ public class GameManager : MonoBehaviour
         }
 
         spawnedAmmo.Clear();
+    }
+
+    private void ResetAllCheckpoints()
+    {
+        var checkpoints = Object.FindObjectsByType<Checkpoint>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+        foreach (var cp in checkpoints)
+        {
+            cp.ResetCheckpoint();
+        }
     }
 }
 
