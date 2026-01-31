@@ -557,7 +557,7 @@ public class Shotgun : MonoBehaviour
     /// <summary>
     /// Enemyを倒したら弾の追加
     /// </summary>
-    private void OnTriggerEnter(Collider other)
+    public void OnParentTriggerEnter(Collider other)
     {
         if (other.CompareTag("Ammo"))
         {
@@ -565,7 +565,7 @@ public class Shotgun : MonoBehaviour
 
             reserveAmmo++;
             UpdateReserveText();
-            Destroy(other.gameObject);
+            // Destroy(other.gameObject);
         }
     }
 
