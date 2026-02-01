@@ -1,38 +1,20 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-/// <summary>
-/// Skeleton 固有の挙動
-/// ・ヘッドショット倍率
-/// ・死亡演出（アニメ＋VFX＋ドロップ）
-/// ※ AI / 移動 / 攻撃は EnemyBase 側
-/// </summary>
 public class SkeletonController : EnemyBase
 {
-    // =====================
-    // Hit Colliders
-    // =====================
     [Header("Hit Colliders")]
     [SerializeField] private Collider bodyCollider;
     [SerializeField] private Collider headCollider;
 
-    // =====================
-    // Damage
-    // =====================
     [Header("Damage")]
     [SerializeField] private float headShotMultiplier = 2f;
 
-    // =====================
-    // Death
-    // =====================
     [Header("Death")]
     [SerializeField] private float deathAnimTime = 2f;
     [SerializeField] private float deathVfxTime = 0.5f;
     [SerializeField] private VisualEffect deathVFX;
 
-    // =====================
-    // Drop
-    // =====================
     [Header("Drop")]
     [SerializeField] private GameObject ammoPrefab;
 
@@ -41,11 +23,9 @@ public class SkeletonController : EnemyBase
     // =====================
     protected override float CalculateDamage(float baseDamage, Collider hitPart)
     {
-        // 被弾アニメ（共通挙動・変更なし）
         animator.SetBool("isDamage", true);
         Invoke(nameof(ResetDamageAnim), 0.3f);
 
-        // ヘッドショットのみ倍率
         if (hitPart == headCollider)
             return baseDamage * headShotMultiplier;
 
@@ -71,26 +51,24 @@ public class SkeletonController : EnemyBase
 
     private System.Collections.IEnumerator DeathSequence()
     {
-        // NavMesh 停止
         if (agent && agent.enabled && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.ResetPath();
         }
 
-        // 当たり判定OFF
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
-        // ===== ① 死亡アニメ =====
-        animator.SetTrigger("Death"); // Trigger推奨
+        // ★ 死亡時はSEなし
+
+        animator.SetTrigger("Death");
 
         yield return new WaitForSeconds(deathAnimTime);
 
-        // ===== ② 死亡VFX =====
         if (deathVFX)
         {
-            deathVFX.transform.SetParent(null); // ★親から切り離す
+            deathVFX.transform.SetParent(null);
             deathVFX.gameObject.SetActive(true);
             deathVFX.Reinit();
             deathVFX.Play();
@@ -98,13 +76,10 @@ public class SkeletonController : EnemyBase
 
         yield return new WaitForSeconds(deathVfxTime);
 
-        // ===== ③ ドロップ =====
         DropAmmo(ammoPrefab);
 
-        // ===== ④ Enemy消滅 =====
         gameObject.SetActive(false);
     }
-
 
     // =====================
     // Respawn
@@ -120,9 +95,31 @@ public class SkeletonController : EnemyBase
         if (deathVFX)
         {
             deathVFX.gameObject.SetActive(false);
-            deathVFX.transform.SetParent(transform); // ★ 戻す
+            deathVFX.transform.SetParent(transform);
             deathVFX.transform.localPosition = Vector3.zero;
             deathVFX.transform.localRotation = Quaternion.identity;
         }
+    }
+
+    // =====================
+    // Animation Event 用
+    // =====================
+
+    // ★ 歩く音
+    public void PlayWalkSE()
+    {
+        SoundManager.Instance.PlaySE("SE_Enemy_02");
+    }
+
+    // ★ 攻撃音
+    public void PlayAttackSE()
+    {
+        SoundManager.Instance.PlaySE("SE_Enemy_04");
+    }
+
+    // ★ 被弾音
+    public void PlayHitSE()
+    {
+        SoundManager.Instance.PlaySE("SE_Enemy_06");
     }
 }

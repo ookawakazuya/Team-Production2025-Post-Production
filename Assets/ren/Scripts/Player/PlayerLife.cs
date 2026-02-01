@@ -47,6 +47,8 @@ public class PlayerLife : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
+
+        SoundManager.Instance.PlaySE("SE_Dead_01");
         // 操作・当たり判定を止める
         if (playerController) playerController.enabled = false;
         if (playerCollider) playerCollider.enabled = false;

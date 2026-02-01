@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
+using UnityEditor.SceneManagement;
 
 /// <summary>
 /// ゲーム全体を管理するクラス
@@ -93,7 +94,26 @@ public class GameManager : MonoBehaviour
 
         //チェックポイントをリセット
         ResetAllCheckpoints();
+
+        // ★ ステージSE切り替え
+        PlayStageSE(scene.name);
     }
+
+    private void PlayStageSE(string sceneName)
+    {
+        // いったん止める
+        SoundManager.Instance.StopSELoop();
+        
+        if (sceneName.Contains("Stage_3"))
+        {
+            SoundManager.Instance.PlaySELoop("SE_Stage_03");
+        }
+        else if (sceneName.Contains("Stage_4"))
+        {
+            SoundManager.Instance.PlaySELoop("SE_Stage_04");
+        }
+    }
+
 
     private void FindPlayerAndEnemies()
     {
