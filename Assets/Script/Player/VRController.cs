@@ -315,6 +315,7 @@ public class VRController : MonoBehaviour
     void ShootHook()
     {
         if (rayOrigin == null) return;
+
         Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
         if (Physics.Raycast(ray, out RaycastHit hit, maxWireLength))
         {
@@ -450,7 +451,8 @@ public class VRController : MonoBehaviour
             hookObject.localPosition = Vector3.zero;
             hookObject.localRotation = Quaternion.identity;
         }
-        fallSpeed = 2f;
+        fallSpeed = 0f;
+
         SetHookModelStatus(isIdle: true);
         if (gameLineVisual != null) gameLineVisual.enabled = true;
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
@@ -492,6 +494,27 @@ public class VRController : MonoBehaviour
         wasGrounded = isCurrentlyGrounded;
     }
 
+    void HandleGravity()
+    {
+        // フック移動中、引き寄せ中、張り付き中は重力を加算させない
+        if (isRetracting || isClinging || isGrappling)
+        {
+            fallSpeed = -1f; // 状態維持中は常に 0 で固定
+            return;
+        }
+
+        // 接地していない場合のみ重力を加算
+        if (characterController.isGrounded)
+        {
+            if (fallSpeed < 0) fallSpeed = -5f; // 接地時は少しだけ押し付ける
+        }
+        else
+        {
+            fallSpeed += gravity * Time.deltaTime; // 落下速度の加算
+        }
+    }
+
+
     // ==========================================
     // 4. ビジュアル・エフェクト・モデル制御
     // ==========================================
@@ -507,7 +530,7 @@ public class VRController : MonoBehaviour
         Vector3 currentTipPosition = Vector3.zero;
         bool isInteractingWithChest = currentChestLid != null && triggerPressed;
 
-        // 【修正】tempGrappleFromCling 中は isClinging よりもこちらを優先
+        // tempGrappleFromCling 中は isClinging よりもこちらを優先
         bool isWiredState = (isHookActive || isRetracting || tempGrappleFromCling) && !isInteractingWithChest;
 
         if (isWiredState)
