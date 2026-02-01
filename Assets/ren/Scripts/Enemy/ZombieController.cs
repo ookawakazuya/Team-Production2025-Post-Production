@@ -1,32 +1,17 @@
 using UnityEngine;
 using UnityEngine.VFX;
 
-/// <summary>
-/// Zombie ŒÅ—L‚Ì‹““®
-/// Eƒwƒbƒh”{—¦‚È‚µ
-/// E€–S‰‰oiƒAƒjƒ{VFX{ƒhƒƒbƒvj
-/// ¦ Skeleton ‚Æ‚Ì·•ª‚Ì‚İÀ‘•
-/// </summary>
 public class ZombieController : EnemyBase
 {
-    // =====================
-    // Hit Colliders
-    // =====================
     [Header("Hit Colliders")]
     [SerializeField] private Collider bodyCollider;
     [SerializeField] private Collider headCollider;
 
-    // =====================
-    // Death
-    // =====================
     [Header("Death")]
     [SerializeField] private float deathAnimTime = 2f;
     [SerializeField] private float deathVfxTime = 0.5f;
     [SerializeField] private VisualEffect deathVFX;
 
-    // =====================
-    // Drop
-    // =====================
     [Header("Drop")]
     [SerializeField] private GameObject ammoPrefab;
 
@@ -35,9 +20,10 @@ public class ZombieController : EnemyBase
     // =====================
     protected override float CalculateDamage(float baseDamage, Collider hitPart)
     {
-        // ”í’eƒAƒjƒi”{—¦‚È‚µj
         animator.SetBool("isDamage", true);
         Invoke(nameof(ResetDamageAnim), 0.3f);
+
+        // š ”í’eSE‚Í Animation Event ‚Å–Â‚ç‚·
 
         return baseDamage;
     }
@@ -61,26 +47,24 @@ public class ZombieController : EnemyBase
 
     private System.Collections.IEnumerator DeathSequence()
     {
-        // NavMesh ’â~
         if (agent && agent.enabled && agent.isOnNavMesh)
         {
             agent.isStopped = true;
             agent.ResetPath();
         }
 
-        // “–‚½‚è”»’èOFF
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
-        // ===== ‡@ €–SƒAƒjƒ =====
-        animator.SetTrigger("Death"); // Trigger„§
+        // š €–S‚ÍSE‚È‚µ
+
+        animator.SetTrigger("Death");
 
         yield return new WaitForSeconds(deathAnimTime);
 
-        // ===== ‡A €–SVFX =====
         if (deathVFX)
         {
-            deathVFX.transform.SetParent(null); // še‚©‚çØ‚è—£‚·
+            deathVFX.transform.SetParent(null);
             deathVFX.gameObject.SetActive(true);
             deathVFX.Reinit();
             deathVFX.Play();
@@ -88,13 +72,10 @@ public class ZombieController : EnemyBase
 
         yield return new WaitForSeconds(deathVfxTime);
 
-        // ===== ‡B ƒhƒƒbƒv =====
         DropAmmo(ammoPrefab);
 
-        // ===== ‡C EnemyÁ–Å =====
         gameObject.SetActive(false);
     }
-
 
     // =====================
     // Respawn
@@ -110,9 +91,31 @@ public class ZombieController : EnemyBase
         if (deathVFX)
         {
             deathVFX.gameObject.SetActive(false);
-            deathVFX.transform.SetParent(transform); // š –ß‚·
+            deathVFX.transform.SetParent(transform);
             deathVFX.transform.localPosition = Vector3.zero;
             deathVFX.transform.localRotation = Quaternion.identity;
         }
+    }
+
+    // =====================
+    // Animation Event —p
+    // =====================
+
+    // š –Â‚«º
+    public void PlayRoarSE()
+    {
+        SoundManager.Instance.PlaySE("SE_Enemy_01");
+    }
+
+    // š ”í’e‰¹
+    public void PlayHitSE()
+    {
+        SoundManager.Instance.PlaySE("SE_Enemy_05");
+    }
+
+    // š •à‚«‰¹
+    public void PlayWalkSE()
+    {
+        SoundManager.Instance.PlaySE("SE_Enemy_07");
     }
 }
