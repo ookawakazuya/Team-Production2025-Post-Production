@@ -91,6 +91,9 @@ public class ChestLid : MonoBehaviour
 
     private void LockChestOpen()
     {
+        // ロック時の物理角度を強制的に stayOpen に補正して、見た目のズレを直す
+        transform.localRotation = Quaternion.Euler(stayOpen, 0, 0); // 軸方向はモデルに合わせて調整してください
+
         isLockedOpen = true;
         isBeingInteracted = false;
 
@@ -102,8 +105,10 @@ public class ChestLid : MonoBehaviour
             joint.spring = spring;
             joint.useSpring = true;
 
-            // さらに動かなくしたい場合は、RigidbodyをKinematicにするのも有効です
-            GetComponent<Rigidbody>().isKinematic = true;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;        // 慣性を消す
+            rb.angularVelocity = Vector3.zero; // 回転の慣性を消す
         }
 
         SoundManager.Instance.PlaySE("Chest_Middle");
@@ -145,8 +150,8 @@ public class ChestLid : MonoBehaviour
             joint.spring = spring;
             joint.useSpring = true;
 
-            // 操作中に限界角度を超えた場合もロックをかける
-            if (finalTarget <= stayOpen)
+            float angleBuffer = 5.0f; // 物理角の許容誤差（度）
+            if (finalTarget <= stayOpen && joint.angle <= stayOpen + angleBuffer)
             {
                 LockChestOpen();
             }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System;
 
 /// <summary>
 /// ゲーム全体を管理するクラス
@@ -14,7 +15,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-
+    // 宝箱が取得された時に実行されるイベント
+    public static event Action OnTreasureCollected;
 
     // =========================
     // リスポーン管理
@@ -98,7 +100,7 @@ public class GameManager : MonoBehaviour
         enemies.Clear();
 
         //EnemyBase を取得（Zombie / Skeleton 共通）
-        enemies.AddRange(Object.FindObjectsByType<EnemyBase>(FindObjectsInactive.Include,FindObjectsSortMode.None));
+        enemies.AddRange(UnityEngine.Object.FindObjectsByType<EnemyBase>(FindObjectsInactive.Include,FindObjectsSortMode.None));
 
         player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
@@ -168,7 +170,10 @@ public class GameManager : MonoBehaviour
         if (!stageTreasureData[stage][index])
         {
             stageTreasureData[stage][index] = true;
+            PlayerPrefs.SetInt($"Stage_{stage}_{index}", 1);
+            PlayerPrefs.Save();
             Debug.Log($"{stage} 宝箱 {index} 取得");
+            OnTreasureCollected?.Invoke();
         }
     }
 
@@ -211,7 +216,7 @@ public class GameManager : MonoBehaviour
 
     private void ResetAllCheckpoints()
     {
-        var checkpoints = Object.FindObjectsByType<Checkpoint>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+        var checkpoints = UnityEngine.Object.FindObjectsByType<Checkpoint>(FindObjectsInactive.Include,FindObjectsSortMode.None);
         foreach (var cp in checkpoints)
         {
             cp.ResetCheckpoint();

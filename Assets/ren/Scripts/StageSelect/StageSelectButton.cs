@@ -11,9 +11,17 @@ public class StageSelectButton : MonoBehaviour
     [Header("宝箱UI")]
     public TreasureIconUI[] treasureIcons; // 3つ
 
-    private void Start()
+    private void OnEnable()
     {
+        // GameManagerのイベントに自分のRefreshメソッドを登録する
+        GameManager.OnTreasureCollected += Refresh;
         Refresh();
+    }
+
+    private void OnDisable()
+    {
+        // オブジェクトが消えるときは登録を解除する（メモリリーク防止）
+        GameManager.OnTreasureCollected -= Refresh;
     }
 
     public void Refresh()
@@ -26,6 +34,12 @@ public class StageSelectButton : MonoBehaviour
         }
 
         bool[] state = GameManager.Instance.GetTreasureState(stageID);
+
+        if (state == null || state.Length < 3)
+        {
+            Debug.LogWarning($"[{gameObject.name}] ステージ {stageID} の宝箱データが正しく取得できませんでした。");
+            return;
+        }
 
         // 配列がセットされているかチェック
         if (treasureIcons == null || treasureIcons.Length == 0)
@@ -42,7 +56,10 @@ public class StageSelectButton : MonoBehaviour
                 Debug.LogError($"{gameObject.name} の TreasureIcons の {i}番目が空っぽです。");
                 continue;
             }
-            treasureIcons[i].SetCollected(state[i]);
+            if (treasureIcons[i] != null && i < state.Length)
+            {
+                treasureIcons[i].SetCollected(state[i]);
+            }
         }
     }
 
