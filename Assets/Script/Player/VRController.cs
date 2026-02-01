@@ -450,6 +450,7 @@ public class VRController : MonoBehaviour
             hookObject.localPosition = Vector3.zero;
             hookObject.localRotation = Quaternion.identity;
         }
+        fallSpeed = 2f;
         SetHookModelStatus(isIdle: true);
         if (gameLineVisual != null) gameLineVisual.enabled = true;
         if (commonLine != null && aimMaterial != null) commonLine.material = aimMaterial;
@@ -543,26 +544,46 @@ public class VRController : MonoBehaviour
         else
         {
 
-            // --- 通常時・張り付き待機・宝箱操作 ---
             if (rayVisualObject != null) rayVisualObject.SetActive(false);
 
-            // 宝箱操作中または「射出していない張り付き中」はモデルを Idle (手元) に戻す
+            // 宝箱操作中または射出していない張り付き中はモデルを手元に戻す
             if (isInteractingWithChest || isClinging) SetHookModelStatus(isIdle: true);
 
-            // 通常の細いライン計算
+            // --- ここからマテリアル切り替えロジックの再実装 ---
             Ray ray = new Ray(rayOrigin.position, rayOrigin.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, length))
             {
+                // 何かにヒットしている場合は「狙い中」のマテリアル
                 currentTipPosition = hit.point;
+                // ヒットしたオブジェクトのタグが「無効化タグ」に含まれているかチェック
+                if (IsTagInvalidForHook(hit.collider.tag))
+                {
+                    // 無効なターゲットの場合は NullMaterial を適用
+                    if (NullMaterial != null) commonLine.material = NullMaterial;
+                    else if (aimMaterial != null) commonLine.material = aimMaterial;
+                }
+                else
+                {
+                    // 有効なターゲット（フックが刺さる場所）の場合は aimMaterial を適用
+                    if (aimMaterial != null) commonLine.material = aimMaterial;
+                }
             }
             else
             {
                 currentTipPosition = rayOrigin.position + rayOrigin.forward * length;
-            }
+
+                // 何もヒットしていない場合は「無効」のマテリアル
+                if (NullMaterial != null)
+                {
+                    Debug.Log("それ以外の処理");
+                    commonLine.material = NullMaterial;
+                }
+                else if (aimMaterial != null) commonLine.material = aimMaterial;
+
+                            }
 
             if (!isInteractingWithChest)
             {
-                if (aimMaterial != null) commonLine.material = aimMaterial;
                 commonLine.SetPosition(0, currentTipPosition);
                 commonLine.SetPosition(1, rayOrigin.position);
             }
