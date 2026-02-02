@@ -3916,6 +3916,17 @@ Camera:
   m_CorrespondingSourceObject: {fileID: 8181049011233162024, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
   m_PrefabInstance: {fileID: 1868781110}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &797842302 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6958873314178663262, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 1868781110}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &810212942
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4810,6 +4821,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3315357419089436937, guid: d542884d21ed7c446809d664494df0c4, type: 3}
   m_PrefabInstance: {fileID: 983354446}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &989833816 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5121422812284575304, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 1868781110}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &994543603
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10898,6 +10920,14 @@ PrefabInstance:
       propertyPath: barrierParticle
       value: 
       objectReference: {fileID: 639994903}
+    - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: 'digitImages.Array.data[0]'
+      value: 
+      objectReference: {fileID: 989833816}
+    - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: 'digitImages.Array.data[1]'
+      value: 
+      objectReference: {fileID: 797842302}
     - target: {fileID: 6445399509644769358, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_Cameras.Array.size
       value: 3
