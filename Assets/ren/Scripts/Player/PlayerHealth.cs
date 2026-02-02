@@ -4,6 +4,7 @@ using System.Collections;
 public class PlayerHealth : MonoBehaviour
 {
     public int maxLife = 3;
+    public int minLife = 1;
     public int currentLife;
 
     [Header("被弾無敵時間")]
@@ -21,12 +22,28 @@ public class PlayerHealth : MonoBehaviour
     void Awake()
     {
         vignette = FindObjectOfType<VignettController>();
-        currentLife = maxLife;
         playerDeath = GetComponent<PlayerLife>();
+        //難易度によって初期ライフを設定
+        SetInitialLifeByDifficulty();
 
         // ★ 最初は必ずOFF
         if (barrierObject)
             barrierObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// NormalHardクラスの静的変数を参照して、初期ライフを設定
+    /// </summary>
+    private void SetInitialLifeByDifficulty()
+    {
+        if (NormalHard.stagelevel == NormalHard.StageLevel.Normal)
+        {
+            currentLife = maxLife; // ノーマルなら最大値
+        }
+        else
+        {
+            currentLife = minLife; // ハードなら最小値
+        }
     }
 
     public void TakeDamage(int damage)

@@ -4,13 +4,13 @@ using UnityEngine.UI;
 
 public class NormalHard : MonoBehaviour
 {
-   enum StageLevel
+   public enum StageLevel
     {
         Normal,
         Hard,
     }
 
-    StageLevel stagelevel;
+    public static StageLevel stagelevel;
 
     [SerializeField] GameObject NormalButton;
     [SerializeField] GameObject HardButton;
