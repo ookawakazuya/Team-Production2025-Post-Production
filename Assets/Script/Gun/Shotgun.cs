@@ -40,6 +40,10 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private Image loadedImage;
     [SerializeField] private Image[] digitImages;    // 各桁のImage
 
+    [Header("アニメーション設定")]
+    [SerializeField] private Animator animator;
+
+
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
     private GameObject gunInstance;
@@ -198,6 +202,7 @@ public class Shotgun : MonoBehaviour
             // --- 通常モード時 ---
             else if (!infiniteAmmo && reserveAmmo > 0 && relativeY < reloadThresholdY)
             {
+                animator.SetTrigger("Reload");
                 Reload();
                 // Debug.Log("リロード開始");
             }
