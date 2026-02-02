@@ -39,21 +39,24 @@ Material:
     m_Ints: []
     m_Floats:
     - _CloudIntensity: 1
-    - _CloudScale: 60
-    - _CloudSpeed: 0.001
-    - _DisplacementStrength: 0.3
+    - _CloudScale: 80
+    - _CloudSpeed: 0.003
+    - _DisplacementStrength: 0.74
     - _EdgeMaxAlpha: 1
-    - _NormalStrength: 1
+    - _HighFrequency: 1.5
+    - _NormalStrength: 30
     - _QueueControl: 0
     - _QueueOffset: 0
-    - _Smoothness: 0
-    - _StepScale1: 0.29
-    - _StepScale2: 0.16
+    - _Smoothness: 0.7
+    - _StepScale1: 0.23
+    - _StepScale2: 0.11
+    - _WaveSpeed: 1.13
+    - _Waveamplitude: 0.3
     m_Colors:
-    - _BaseColor: {r: 0.9137255, g: 0.5963336, b: 0, a: 0}
+    - _BaseColor: {r: 1, g: 0.15377232, b: 0, a: 0}
     - _BaseColor1: {r: 1, g: 0.8024359, b: 0.0141509175, a: 0}
-    - _LavaColor1: {r: 1, g: 0, b: 0, a: 0}
-    - _LavaColor2: {r: 0.7961887, g: 1, b: 0, a: 0}
+    - _LavaColor1: {r: 1, g: 0.34154308, b: 0, a: 0}
+    - _LavaColor2: {r: 0.92941177, g: 0.17442057, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &1224999601405864623
