@@ -1,17 +1,17 @@
 using UnityEngine;
 
-public class NewMonoBehaviourScript : MonoBehaviour
+public class AmmoTriggerRelay : MonoBehaviour
 {
-    private Shotgun shotgun;
+    [SerializeField] private Shotgun shotgun;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // 子オブジェクトの Shotgun スクリプトを探して保持
-        shotgun = GetComponentInChildren<Shotgun>();
+        // Shotgun スクリプトを探して保持
+        // shotgun = GetComponentInParent<Shotgun>();
         if (shotgun == null)
         {
-            Debug.LogWarning("[AmmoTriggerRelay] Shotgun が子に見つかりません。");
+            Debug.LogWarning("[AmmoTriggerRelay] Shotgun が親に見つかりません。");
         }
     }
 

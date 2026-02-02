@@ -192,14 +192,14 @@ public class Shotgun : MonoBehaviour
             // --- 無限モード時 ---
             if (infiniteAmmo && relativeY < reloadThresholdY)
             {
-                Debug.Log("リロード開始（無限モード）");
                 Reload();
+                // Debug.Log("リロード開始（無限モード）");
             }
             // --- 通常モード時 ---
             else if (!infiniteAmmo && reserveAmmo > 0 && relativeY < reloadThresholdY)
             {
-                Debug.Log("リロード開始");
                 Reload();
+                // Debug.Log("リロード開始");
             }
         }
     }
@@ -303,7 +303,7 @@ public class Shotgun : MonoBehaviour
     {
         if (currentAmmo <= 0)
         {
-            Debug.Log("弾がありません！リロードしてください。");
+            // Debug.Log("弾がありません！リロードしてください。");
             return false;
         }
 
@@ -328,10 +328,12 @@ public class Shotgun : MonoBehaviour
         Instantiate(bulletPrefab, bulletDirection.position, bulletDirection.rotation);
 
         // デバッグ用
-        if (SoundManager.Instance == null)
-            Debug.LogError("SoundManager.Instance が null です！");
-        else
-            Debug.Log("SoundManager 再生チェック OK");
+        if (SoundManager.Instance == null) {
+            // Debug.LogError("SoundManager.Instance が null です！");
+        }
+        else {
+            // Debug.Log("SoundManager 再生チェック OK");
+        }
 
         // --- 発砲音 ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
@@ -384,7 +386,7 @@ public class Shotgun : MonoBehaviour
     {
         if (currentAmmo > 0)
         {
-            Debug.Log("すでに装填済みです。");
+            // Debug.Log("すでに装填済みです。");
             return;
         }
 
@@ -392,7 +394,7 @@ public class Shotgun : MonoBehaviour
         if (infiniteAmmo)
         {
             currentAmmo = 1;
-            Debug.Log("【DEBUG】無限ストック：リロードしました！");
+            // Debug.Log("【DEBUG】無限ストック：リロードしました！");
             SoundManager.Instance?.PlaySE("SE_Gun_02");
             return;
         }
@@ -402,12 +404,12 @@ public class Shotgun : MonoBehaviour
         {
             currentAmmo = 1;
             reserveAmmo--;
-            Debug.Log("リロード完了！残りストック：" + reserveAmmo);
+            // Debug.Log("リロード完了！残りストック：" + reserveAmmo);
             SoundManager.Instance?.PlaySE("SE_Gun_02");
         }
         else
         {
-            Debug.Log("ストックがありません！");
+            // Debug.Log("ストックがありません！");
         }
 
         if (hapticC != null) { hapticC.VibrateReload(isLeftHand); }
@@ -456,7 +458,7 @@ public class Shotgun : MonoBehaviour
                     timer = 0f;
                     reserveAmmo++;
                     UpdateReserveText();
-                    Debug.Log("ストックを補充！ 現在：" + reserveAmmo);
+                    // Debug.Log("ストックを補充！ 現在：" + reserveAmmo);
 
                     // 満タン→リセット
                     ammoSlider.value = 0f;
@@ -561,11 +563,9 @@ public class Shotgun : MonoBehaviour
     {
         if (other.CompareTag("Ammo"))
         {
-            Debug.Log("ストック" + reserveAmmo);
-
             reserveAmmo++;
             UpdateReserveText();
-            // Destroy(other.gameObject);
+            Destroy(other.gameObject);
         }
     }
 
