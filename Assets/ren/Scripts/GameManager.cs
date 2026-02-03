@@ -117,6 +117,7 @@ public class GameManager : MonoBehaviour
 
     private void FindPlayerAndEnemies()
     {
+       // var enemies = UnityEngine.Object.FindObjectsByType<EnemyBase>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         enemies.Clear();
 
         //EnemyBase を取得（Zombie / Skeleton 共通）
@@ -187,11 +188,9 @@ public class GameManager : MonoBehaviour
 
     public void CollectTreasure(StageID stage, int index)
     {
-        if (!stageTreasureData[stage][index])
+        if (stageTreasureData.ContainsKey(stage)&&index < 3)
         {
             stageTreasureData[stage][index] = true;
-            PlayerPrefs.SetInt($"Stage_{stage}_{index}", 1);
-            PlayerPrefs.Save();
             Debug.Log($"{stage} 宝箱 {index} 取得");
             OnTreasureCollected?.Invoke();
         }
@@ -199,7 +198,11 @@ public class GameManager : MonoBehaviour
 
     public bool[] GetTreasureState(StageID stage)
     {
-        return stageTreasureData[stage];
+        if (stageTreasureData.ContainsKey(stage))
+        {
+            return stageTreasureData[stage];
+        }
+        return new bool[3];
     }
 
     // =========================

@@ -310,9 +310,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 161a755d29cb3a941b0b53b8e9947a7d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7192061738934690193}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 161a755d29cb3a941b0b53b8e9947a7d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4524040475608690729}
     - targetCorrespondingSourceObject: {fileID: -1889574050563033696, guid: 161a755d29cb3a941b0b53b8e9947a7d, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5232962965058143053}
@@ -471,6 +468,8 @@ MonoBehaviour:
   rayAnchorPoint: {fileID: 3869991393487778432}
   interactionRadius: 5
   chestParticle: {fileID: 7103972764648861890}
+  stageID: 0
+  chestID: 0
 --- !u!1 &8080025090917608530 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 161a755d29cb3a941b0b53b8e9947a7d, type: 3}
@@ -503,20 +502,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
---- !u!114 &4524040475608690729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8080025090917608530}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ed4afcbebab11146978968f275f0c76, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stageID: 0
-  treasureIndex: 1
 --- !u!4 &8892872783861872360 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 161a755d29cb3a941b0b53b8e9947a7d, type: 3}

@@ -504,6 +504,39 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 735880520351147798, guid: 2aa19c973d9218b49a09a5be2ac20ff6, type: 3}
   m_PrefabInstance: {fileID: 24515741}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &30372930 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7473170569888127743, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 2103060189}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &30372933 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3454089210688100991, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 2103060189}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30372930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &30372935
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 30372930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 1
+  iconImage: {fileID: 30372933}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &31136394
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -920,6 +953,14 @@ PrefabInstance:
     - target: {fileID: 7103972764648861890, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: chestID
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: stageID
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Enabled
@@ -2790,6 +2831,14 @@ PrefabInstance:
     - target: {fileID: 7103972764648861890, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: chestID
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: stageID
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8080025090917608530, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Name
@@ -5805,6 +5854,10 @@ PrefabInstance:
     - target: {fileID: 7103972764648861890, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: stageID
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8080025090917608530, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Name
@@ -10547,6 +10600,39 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 735880520351147798, guid: 2aa19c973d9218b49a09a5be2ac20ff6, type: 3}
   m_PrefabInstance: {fileID: 849869620}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &859519859 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4144308891013105460, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 2103060189}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &859519862 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3134249714377401942, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 2103060189}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 859519859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &859519864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 859519859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 2
+  iconImage: {fileID: 859519862}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &866051769
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19519,6 +19605,39 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8970498656326236154, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
   m_PrefabInstance: {fileID: 1693561559}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1695451448 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6064509223774295960, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 2103060189}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1695451451 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 59202965583945470, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 2103060189}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695451448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1695451453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695451448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 0
+  iconImage: {fileID: 1695451451}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &1705543331
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -22960,6 +23079,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: chestID
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: stageID
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8080025090917608530, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Name
       value: TreasureChest001 (1)
@@ -24699,10 +24826,22 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2476580373583648820, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+    - {fileID: 8626281269500449779, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+    - {fileID: 7545623996061144429, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6064509223774295960, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1695451453}
+    - targetCorrespondingSourceObject: {fileID: 7473170569888127743, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 30372935}
+    - targetCorrespondingSourceObject: {fileID: 4144308891013105460, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 859519864}
   m_SourcePrefab: {fileID: 100100000, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
 --- !u!1001 &2103966989
 PrefabInstance:
@@ -27445,6 +27584,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxLife: 3
+  minLife: 1
   currentLife: 0
   invincibleTime: 1
   barrierObject: {fileID: 0}
