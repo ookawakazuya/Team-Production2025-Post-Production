@@ -18,6 +18,10 @@ public class SkeletonController : EnemyBase
     [Header("Drop")]
     [SerializeField] private GameObject ammoPrefab;
 
+    // ★ 追加：剣オブジェクト
+    [Header("Weapon")]
+    [SerializeField] private GameObject swordObject;
+
     // =====================
     // Damage Calculation
     // =====================
@@ -46,6 +50,8 @@ public class SkeletonController : EnemyBase
         if (isDead) return;
 
         isDead = true;
+        animator.SetBool("isDeath", true);
+
         StartCoroutine(DeathSequence());
     }
 
@@ -60,7 +66,9 @@ public class SkeletonController : EnemyBase
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
-        // ★ 死亡時はSEなし
+        // ★ 剣を非表示
+        if (swordObject)
+            swordObject.SetActive(false);
 
         animator.SetTrigger("Death");
 
@@ -92,6 +100,12 @@ public class SkeletonController : EnemyBase
         bodyCollider.enabled = true;
         headCollider.enabled = true;
 
+        animator.SetBool("isDeath", false);
+
+        // ★ 剣を再表示
+        if (swordObject)
+            swordObject.SetActive(true);
+
         if (deathVFX)
         {
             deathVFX.gameObject.SetActive(false);
@@ -104,20 +118,16 @@ public class SkeletonController : EnemyBase
     // =====================
     // Animation Event 用
     // =====================
-
-    // ★ 歩く音
     public void PlayWalkSE()
     {
         SoundManager.Instance.PlaySE("SE_Enemy_02");
     }
 
-    // ★ 攻撃音
     public void PlayAttackSE()
     {
         SoundManager.Instance.PlaySE("SE_Enemy_04");
     }
 
-    // ★ 被弾音
     public void PlayHitSE()
     {
         SoundManager.Instance.PlaySE("SE_Enemy_06");

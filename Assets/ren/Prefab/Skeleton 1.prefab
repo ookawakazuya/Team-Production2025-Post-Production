@@ -550,7 +550,36 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -3901230344922469344, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1925183586765130321}
+    - targetCorrespondingSourceObject: {fileID: 3696647009626645015, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1700397909906314990}
   m_SourcePrefab: {fileID: 100100000, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
+--- !u!1 &300464840034345078 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3696647009626645015, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
+  m_PrefabInstance: {fileID: 3991974810253230689}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &1700397909906314990
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 300464840034345078}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 12.754364, y: 104.59508, z: 6.167187}
+  m_Center: {x: -0.0000038146973, y: 44.316578, z: 0.0000038146973}
 --- !u!4 &3525454901906695562 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
@@ -637,6 +666,7 @@ MonoBehaviour:
   deathVfxTime: 0.5
   deathVFX: {fileID: 7479554603357781001}
   ammoPrefab: {fileID: 4663760178691551875, guid: ea2c3890fae3c01459fdd1d0b201b798, type: 3}
+  swordObject: {fileID: 300464840034345078}
 --- !u!1 &6259190547934024686 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7042305268660867471, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
@@ -661,8 +691,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 53.7, y: 98.4, z: 52.8}
-  m_Center: {x: -3.7586555, y: 49.86492, z: 9.793579}
+  m_Size: {x: 58.7, y: 99, z: 52.8}
+  m_Center: {x: -3.7586555, y: 48.9, z: 9.793579}
 --- !u!1 &9131712741341949505 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -3901230344922469344, guid: 1f0215d1931b32e46b3258f829624c5e, type: 3}
@@ -687,5 +717,5 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 18
-  m_Center: {x: -1.7659085, y: 111.91775, z: 33.11854}
+  m_Radius: 20
+  m_Center: {x: -1.7659085, y: 114.23, z: 33.11854}

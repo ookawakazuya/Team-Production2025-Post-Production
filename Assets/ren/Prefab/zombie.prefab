@@ -435,8 +435,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 15
-  m_Center: {x: -2.1327088, y: 117.54697, z: 15.721493}
+  m_Radius: 22
+  m_Center: {x: -2.1327088, y: 124.4, z: 15.721493}
 --- !u!1 &1153278105776645432
 GameObject:
   m_ObjectHideFlags: 0
@@ -2349,7 +2349,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3755122922780123129}
   - component: {fileID: 6406190895086701392}
-  - component: {fileID: 2553196588086059789}
+  - component: {fileID: 322836173473183264}
   m_Layer: 0
   m_Name: bdy
   m_TagString: Enemy
@@ -2483,8 +2483,8 @@ SkinnedMeshRenderer:
     m_Center: {x: -2.7143345, y: 50.155216, z: 24.391869}
     m_Extent: {x: 35.27858, y: 62.18527, z: 43.367638}
   m_DirtyAABB: 0
---- !u!136 &2553196588086059789
-CapsuleCollider:
+--- !u!65 &322836173473183264
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -2501,11 +2501,9 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 36
-  m_Height: 110.8
-  m_Direction: 1
-  m_Center: {x: 0, y: 49.9, z: 13}
+  serializedVersion: 3
+  m_Size: {x: 70.55716, y: 107.6, z: 86.735275}
+  m_Center: {x: -2.7143345, y: 50.7, z: 24.391869}
 --- !u!1 &8519647396022987233
 GameObject:
   m_ObjectHideFlags: 0
@@ -2688,7 +2686,7 @@ MonoBehaviour:
   attackAnimTime: 1
   attackHitRadius: 2
   attackHitOffset: {x: 0, y: 0, z: 1}
-  bodyCollider: {fileID: 2553196588086059789}
+  bodyCollider: {fileID: 322836173473183264}
   headCollider: {fileID: 8461698841645246537}
   deathAnimTime: 2
   deathVfxTime: 0.5

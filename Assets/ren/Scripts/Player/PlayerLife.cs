@@ -8,21 +8,17 @@ public class PlayerLife : MonoBehaviour
     private bool isDead = false;
     public bool IsDead => isDead;
 
-    // 拡張用イベント（将来UIやSE用）
     public delegate void PlayerDeathHandler();
     public static event PlayerDeathHandler OnPlayerDied;
 
-    // キャッシュ
     private PlayerHealth playerHealth;
     private Collider playerCollider;
-    private MonoBehaviour playerController; // 移動・操作用
+    private MonoBehaviour playerController;
 
     void Awake()
     {
         playerHealth = GetComponent<PlayerHealth>();
         playerCollider = GetComponent<Collider>();
-
-        // ★ 自分のプロジェクトの操作スクリプト名に合わせて
         playerController = GetComponent<VRController>();
     }
 
@@ -30,7 +26,11 @@ public class PlayerLife : MonoBehaviour
     {
         if (isDead) return;
 
-        if (other.CompareTag("FallZone") || other.CompareTag("Magma"))
+        // ★ 即死トラップ判定
+        if (other.CompareTag("FallZone")
+         || other.CompareTag("Magma")
+         || other.CompareTag("Acid")
+         || other.CompareTag("Needle"))
         {
             Die();
             return;
@@ -47,22 +47,16 @@ public class PlayerLife : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-
         SoundManager.Instance.PlaySE("SE_Dead_01");
-        // 操作・当たり判定を止める
+
         if (playerController) playerController.enabled = false;
         if (playerCollider) playerCollider.enabled = false;
 
         if (deathEffect)
             Instantiate(deathEffect, transform.position, Quaternion.identity);
 
-        // 拡張イベント
         OnPlayerDied?.Invoke();
 
-        // Enemy / Drop など全体リセット
-        GameManager.Instance.OnPlayerDead();
-
-        // フェードアウト → リスポーン
         FadeController.Instance.FadeOut(1f, () =>
         {
             gameObject.SetActive(false);
@@ -77,7 +71,6 @@ public class PlayerLife : MonoBehaviour
         transform.position = respawnPoint.position;
         transform.rotation = respawnPoint.rotation;
 
-        // 物理リセット
         if (TryGetComponent<Rigidbody>(out var rb))
         {
             rb.linearVelocity = Vector3.zero;
@@ -95,7 +88,6 @@ public class PlayerLife : MonoBehaviour
 
             isDead = false;
 
-            // ★ ここでEnemy復活
             GameManager.Instance.OnPlayerDead();
         });
     }
