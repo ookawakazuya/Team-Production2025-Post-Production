@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using static UnityEditor.VersionControl.Asset;
 
 public class StageSelectButton : MonoBehaviour
 {
@@ -35,29 +36,37 @@ public class StageSelectButton : MonoBehaviour
 
         bool[] state = GameManager.Instance.GetTreasureState(stageID);
 
-        if (state == null || state.Length < 3)
-        {
-            Debug.LogWarning($"[{gameObject.name}] ステージ {stageID} の宝箱データが正しく取得できませんでした。");
-            return;
-        }
+        //if (state == null || state.Length < 3)
+        //{
+        //    Debug.LogWarning($"[{gameObject.name}] ステージ {stageID} の宝箱データが正しく取得できませんでした。");
+        //    return;
+        //}
 
-        // 配列がセットされているかチェック
-        if (treasureIcons == null || treasureIcons.Length == 0)
-        {
-            Debug.LogError($"{gameObject.name} の TreasureIcons がインスペクターで設定されていません。");
-            return;
-        }
+        //// 配列がセットされているかチェック
+        //if (treasureIcons == null || treasureIcons.Length == 0)
+        //{
+        //    Debug.LogError($"{gameObject.name} の TreasureIcons がインスペクターで設定されていません。");
+        //    return;
+        //}
 
+        //for (int i = 0; i < treasureIcons.Length; i++)
+        //{
+        //    // アイコンの各要素がセットされているかチェック
+        //    if (treasureIcons[i] == null)
+        //    {
+        //        Debug.LogError($"{gameObject.name} の TreasureIcons の {i}番目が空っぽです。");
+        //        continue;
+        //    }
+        //    if (treasureIcons[i] != null && i < state.Length)
+        //    {
+        //        treasureIcons[i].SetCollected(state[i]);
+        //    }
+        //}
         for (int i = 0; i < treasureIcons.Length; i++)
         {
-            // アイコンの各要素がセットされているかチェック
-            if (treasureIcons[i] == null)
+            if (i < state.Length && treasureIcons[i] != null)
             {
-                Debug.LogError($"{gameObject.name} の TreasureIcons の {i}番目が空っぽです。");
-                continue;
-            }
-            if (treasureIcons[i] != null && i < state.Length)
-            {
+                // 各アイコンに取得状況を伝える
                 treasureIcons[i].SetCollected(state[i]);
             }
         }

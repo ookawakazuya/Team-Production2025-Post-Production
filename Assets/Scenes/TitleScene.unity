@@ -8664,6 +8664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxLife: 3
+  minLife: 1
   currentLife: 0
   invincibleTime: 1
   barrierObject: {fileID: 0}
@@ -9989,7 +9990,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 2a7982d19286fcb4cb8276b23e46899e, type: 2}
+  - {fileID: 2100000, guid: 8949fdebf89b61548af583f0a1ef05ab, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

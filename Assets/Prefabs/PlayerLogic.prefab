@@ -568,7 +568,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2739436715314678563
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3659,6 +3659,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxLife: 3
+  minLife: 1
   currentLife: 0
   invincibleTime: 1
   barrierObject: {fileID: 746963202191272382}

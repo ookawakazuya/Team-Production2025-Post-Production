@@ -17,6 +17,10 @@ public class ChestLid : MonoBehaviour
     [Header("エフェクト")]
     [SerializeField] GameObject chestParticle;
 
+    [Header("識別ID")]
+    [SerializeField] private int stageID; // 0~3を設定
+    [SerializeField] private int chestID; // 0~2を設定
+
     bool hasPlayedOpenSE = false;
     bool hasPlayedMaxSE = false;
 
@@ -112,6 +116,11 @@ public class ChestLid : MonoBehaviour
         }
 
         SoundManager.Instance.PlaySE("Chest_Middle");
+
+        // イベントを発火させてUI等に通知する
+        ChestEventManager.TriggerChestOpen(stageID, chestID);
+
+        Debug.Log($"宝箱が全開で固定されました。Stage:{stageID}, Index:{chestID}");
 
         Debug.Log("宝箱が全開で固定されました。");
     }
