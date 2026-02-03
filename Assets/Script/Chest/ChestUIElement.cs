@@ -14,14 +14,21 @@ public class ChestUIElement : MonoBehaviour
 
     private void Start()
     {
-        // 初期状態は黒に設定
-        if (iconImage != null)
-        {
-            iconImage.color = lockedColor;
-        }
-
+        //// 初期状態は黒に設定
+        //if (iconImage != null)
+        //{
+        //    bool opened = ChestSaveManager.IsChestOpened(stageID, chestID);
+        //    iconImage.color = lockedColor;
+        //}
+        RefreshVisual();
         // イベントの購読（宝箱が開いた通知を受け取れるようにする）
         ChestEventManager.OnChestOpened += HandleChestOpened;
+    }
+
+    private void OnEnable()
+    {
+        // オブジェクトが有効になるたびに最新の状態を確認（念のための処理）
+        RefreshVisual();
     }
 
     private void OnDestroy()
@@ -29,6 +36,19 @@ public class ChestUIElement : MonoBehaviour
         // メモリリーク防止のため、破棄時に購読を解除
         ChestEventManager.OnChestOpened -= HandleChestOpened;
     }
+
+    // セーブデータを参照して現在の色を決定する
+    private void RefreshVisual()
+    {
+        if (iconImage == null) return;
+
+        // SaveManagerから取得済みかどうかを確認
+        bool isOpened = ChestSaveManager.IsChestOpened(stageID, chestID);
+
+        // 取得済みなら白、未取得なら黒を設定
+        iconImage.color = isOpened ? unlockedColor : lockedColor;
+    }
+
 
     // 宝箱が開かれた時に実行されるメソッド
     private void HandleChestOpened(int openedStageID, int openedChestID)

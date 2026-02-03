@@ -30,6 +30,11 @@ public class ChestLid : MonoBehaviour
     void Start()
     {
         joint = GetComponent<HingeJoint>();
+
+        if (ChestSaveManager.IsChestOpened(stageID, chestID))
+        {
+            ApplyAlreadyOpenedState();
+        }
     }
 
     private void Update()
@@ -93,6 +98,30 @@ public class ChestLid : MonoBehaviour
         }
     }
 
+    // セーブデータがある場合に、演出抜きで即座に全開状態にするメソッド
+    private void ApplyAlreadyOpenedState()
+    {
+        isLockedOpen = true;
+        transform.localRotation = Quaternion.Euler(stayOpen, 0, 0);
+
+        if (joint != null)
+        {
+            var spring = joint.spring;
+            spring.targetPosition = stayOpen;
+            joint.spring = spring;
+            joint.useSpring = true;
+        }
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+        }
+
+        // UI側にも通知を送る
+        ChestEventManager.TriggerChestOpen(stageID, chestID);
+    }
+
     private void LockChestOpen()
     {
         // ロック時の物理角度を強制的に stayOpen に補正して、見た目のズレを直す
@@ -117,12 +146,13 @@ public class ChestLid : MonoBehaviour
 
         SoundManager.Instance.PlaySE("Chest_Middle");
 
+        // セーブデータを保存
+        ChestSaveManager.SaveChestState(stageID, chestID);
+
         // イベントを発火させてUI等に通知する
         ChestEventManager.TriggerChestOpen(stageID, chestID);
 
         Debug.Log($"宝箱が全開で固定されました。Stage:{stageID}, Index:{chestID}");
-
-        Debug.Log("宝箱が全開で固定されました。");
     }
 
 
