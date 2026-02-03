@@ -56,6 +56,8 @@ public class TreasureChestLid : MonoBehaviour
 
         Debug.Log($"{currentStage} ƒNƒŠƒAI");
 
+        PlayerPrefs.Save();
+
         if (resultCanvas != null)
         {
             resultCanvas.SetActive(true);

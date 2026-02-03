@@ -22,6 +22,28 @@ public static class ChestSaveManager
         // キーが存在し、かつ値が1であれば true を返す
         return PlayerPrefs.GetInt(GetKey(stageID, chestID), 0) == 1;
     }
+    /// <summary>
+    /// 宝箱のデータを削除する
+    /// </summary>
+    public static void ResetOnlyChestData()
+    {
+        for(int s = 0; s< 4; s++)
+        {
+            for (int c = 0; c < 3; c++)
+            {
+                string Key = GetKey(s, c);
+                if (PlayerPrefs.HasKey(Key))
+                {
+                    //指定したキーだけ削除
+                    PlayerPrefs.DeleteKey(Key);
+                }
+            }
+        }
+
+        PlayerPrefs.Save();
+        Debug.Log("宝箱の取得状況をリセット");
+    }
+
 
     // デバッグ用：全てのセーブデータを消去したい場合に使用
     public static void ClearAllData()
