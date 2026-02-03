@@ -213,9 +213,9 @@ MonoBehaviour:
   stageID: 0
   stageSceneName: Stage_1
   treasureIcons:
-  - {fileID: 1339027915}
-  - {fileID: 1820749742}
-  - {fileID: 269742040}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &127955279
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -573,12 +573,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 269742036}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stageID: 0
+  chestID: 2
   iconImage: {fileID: 269742038}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &299639867
 GameObject:
   m_ObjectHideFlags: 0
@@ -755,9 +757,9 @@ MonoBehaviour:
   stageID: 3
   stageSceneName: Stage_4
   treasureIcons:
-  - {fileID: 1871020599}
-  - {fileID: 487663173}
-  - {fileID: 469371450}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &307235518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -937,7 +939,7 @@ GameObject:
   - component: {fileID: 469371453}
   - component: {fileID: 469371452}
   - component: {fileID: 469371451}
-  - component: {fileID: 469371450}
+  - component: {fileID: 469371454}
   m_Layer: 5
   m_Name: Image (2)
   m_TagString: Untagged
@@ -945,21 +947,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &469371450
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 469371449}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 469371451}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &469371451
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1017,6 +1004,23 @@ RectTransform:
   m_AnchoredPosition: {x: 600, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &469371454
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 469371449}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 3
+  chestID: 2
+  iconImage: {fileID: 469371451}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &487663172
 GameObject:
   m_ObjectHideFlags: 0
@@ -1028,7 +1032,7 @@ GameObject:
   - component: {fileID: 487663176}
   - component: {fileID: 487663175}
   - component: {fileID: 487663174}
-  - component: {fileID: 487663173}
+  - component: {fileID: 487663177}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -1036,21 +1040,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &487663173
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 487663172}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 487663174}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &487663174
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1108,97 +1097,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &495758134
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 495758135}
-  - component: {fileID: 495758138}
-  - component: {fileID: 495758137}
-  - component: {fileID: 495758136}
-  m_Layer: 5
-  m_Name: Image (4)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!224 &495758135
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495758134}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1605281299}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 600, y: -799.9999}
-  m_SizeDelta: {x: 500, y: 500}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &495758136
+--- !u!114 &487663177
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495758134}
+  m_GameObject: {fileID: 487663172}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  iconImage: {fileID: 0}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
---- !u!114 &495758137
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495758134}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &495758138
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495758134}
-  m_CullTransparentMesh: 1
+  stageID: 3
+  chestID: 1
+  iconImage: {fileID: 487663174}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &514274997
 GameObject:
   m_ObjectHideFlags: 0
@@ -1755,7 +1670,7 @@ GameObject:
   - component: {fileID: 835701862}
   - component: {fileID: 835701861}
   - component: {fileID: 835701860}
-  - component: {fileID: 835701859}
+  - component: {fileID: 835701863}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -1763,21 +1678,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &835701859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 835701858}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 835701860}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &835701860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1835,6 +1735,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &835701863
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 835701858}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 1
+  chestID: 1
+  iconImage: {fileID: 835701860}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &855323719
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2066,9 +1983,9 @@ MonoBehaviour:
   stageID: 2
   stageSceneName: Stage_3
   treasureIcons:
-  - {fileID: 1675976972}
-  - {fileID: 1584717086}
-  - {fileID: 1328897323}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &936124876
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2293,9 +2210,9 @@ MonoBehaviour:
   stageID: 1
   stageSceneName: Stage_2
   treasureIcons:
-  - {fileID: 1235975035}
-  - {fileID: 835701859}
-  - {fileID: 1417027537}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &958101788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3544,7 +3461,7 @@ GameObject:
   - component: {fileID: 1235975038}
   - component: {fileID: 1235975037}
   - component: {fileID: 1235975036}
-  - component: {fileID: 1235975035}
+  - component: {fileID: 1235975039}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -3552,21 +3469,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1235975035
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1235975034}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 1235975036}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1235975036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3624,6 +3526,23 @@ RectTransform:
   m_AnchoredPosition: {x: -600, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1235975039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235975034}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 1
+  chestID: 0
+  iconImage: {fileID: 1235975036}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1249617917
 GameObject:
   m_ObjectHideFlags: 0
@@ -3909,7 +3828,7 @@ GameObject:
   - component: {fileID: 1328897322}
   - component: {fileID: 1328897325}
   - component: {fileID: 1328897324}
-  - component: {fileID: 1328897323}
+  - component: {fileID: 1328897326}
   m_Layer: 5
   m_Name: Image (2)
   m_TagString: Untagged
@@ -3936,21 +3855,6 @@ RectTransform:
   m_AnchoredPosition: {x: 600, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1328897323
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1328897321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 1328897324}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1328897324
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3989,6 +3893,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1328897321}
   m_CullTransparentMesh: 1
+--- !u!114 &1328897326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1328897321}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 2
+  iconImage: {fileID: 1328897324}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1339027911
 GameObject:
   m_ObjectHideFlags: 0
@@ -4074,12 +3995,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1339027911}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stageID: 0
+  chestID: 0
   iconImage: {fileID: 1339027913}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1417027536
 GameObject:
   m_ObjectHideFlags: 0
@@ -4091,7 +4014,7 @@ GameObject:
   - component: {fileID: 1417027540}
   - component: {fileID: 1417027539}
   - component: {fileID: 1417027538}
-  - component: {fileID: 1417027537}
+  - component: {fileID: 1417027541}
   m_Layer: 5
   m_Name: Image (2)
   m_TagString: Untagged
@@ -4099,21 +4022,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1417027537
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1417027536}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 1417027538}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1417027538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4171,6 +4079,23 @@ RectTransform:
   m_AnchoredPosition: {x: 600, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1417027541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1417027536}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 1
+  chestID: 2
+  iconImage: {fileID: 1417027538}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &1481569748 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2696175027004957907, guid: 5a543121d070ff44aa797c966687b2f7, type: 3}
@@ -4187,7 +4112,7 @@ GameObject:
   - component: {fileID: 1584717085}
   - component: {fileID: 1584717088}
   - component: {fileID: 1584717087}
-  - component: {fileID: 1584717086}
+  - component: {fileID: 1584717089}
   m_Layer: 5
   m_Name: Image (1)
   m_TagString: Untagged
@@ -4214,21 +4139,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1584717086
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1584717084}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 1584717087}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1584717087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4267,6 +4177,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1584717084}
   m_CullTransparentMesh: 1
+--- !u!114 &1584717089
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1584717084}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 1
+  iconImage: {fileID: 1584717087}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1605281298
 GameObject:
   m_ObjectHideFlags: 0
@@ -4299,7 +4226,6 @@ RectTransform:
   - {fileID: 1339027912}
   - {fileID: 1820749739}
   - {fileID: 269742037}
-  - {fileID: 495758135}
   m_Father: {fileID: 143577025}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -4703,7 +4629,7 @@ GameObject:
   - component: {fileID: 1675976971}
   - component: {fileID: 1675976974}
   - component: {fileID: 1675976973}
-  - component: {fileID: 1675976972}
+  - component: {fileID: 1675976975}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -4730,21 +4656,6 @@ RectTransform:
   m_AnchoredPosition: {x: -600, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1675976972
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1675976970}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 1675976973}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1675976973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4783,6 +4694,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1675976970}
   m_CullTransparentMesh: 1
+--- !u!114 &1675976975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1675976970}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 0
+  iconImage: {fileID: 1675976973}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1733268797
 GameObject:
   m_ObjectHideFlags: 0
@@ -5051,12 +4979,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1820749738}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  stageID: 0
+  chestID: 1
   iconImage: {fileID: 1820749740}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1871020598
 GameObject:
   m_ObjectHideFlags: 0
@@ -5068,7 +4998,7 @@ GameObject:
   - component: {fileID: 1871020602}
   - component: {fileID: 1871020601}
   - component: {fileID: 1871020600}
-  - component: {fileID: 1871020599}
+  - component: {fileID: 1871020603}
   m_Layer: 5
   m_Name: Image
   m_TagString: Untagged
@@ -5076,21 +5006,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1871020599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1871020598}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18c093ddfd1d4b049820170e3bce5fe8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  iconImage: {fileID: 1871020600}
-  collectedColor: {r: 1, g: 1, b: 1, a: 1}
-  notCollectedColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1871020600
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5148,6 +5063,23 @@ RectTransform:
   m_AnchoredPosition: {x: -599.99994, y: -800}
   m_SizeDelta: {x: 500, y: 500}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1871020603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1871020598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 3
+  chestID: 0
+  iconImage: {fileID: 1871020600}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &1907919882
 GameObject:
   m_ObjectHideFlags: 0
