@@ -2333,7 +2333,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7592887693302558000, guid: 4080b8d9200bf544eb198798189ef9b3, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5743,6 +5743,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Magma
       objectReference: {fileID: 0}
+    - target: {fileID: 3686734809326019587, guid: 8c116270e6ff5a942880d2ba207fa775, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4153393833769674924, guid: 8c116270e6ff5a942880d2ba207fa775, type: 3}
       propertyPath: m_LocalScale.x
       value: 6
@@ -5791,13 +5795,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9055903647670843861, guid: 8c116270e6ff5a942880d2ba207fa775, type: 3}
-      propertyPath: m_Convex
+    - target: {fileID: 6651162104858151260, guid: 8c116270e6ff5a942880d2ba207fa775, type: 3}
+      propertyPath: m_StaticShadowCaster
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9055903647670843861, guid: 8c116270e6ff5a942880d2ba207fa775, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9055903647670843861, guid: 8c116270e6ff5a942880d2ba207fa775, type: 3}
       propertyPath: m_IsTrigger
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8202,7 +8210,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8169916125618975196, guid: 74fe7b9b4ec6f16458b211c6fdc01492, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9125783567412445933, guid: 74fe7b9b4ec6f16458b211c6fdc01492, type: 3}
       propertyPath: m_Pivot.x
