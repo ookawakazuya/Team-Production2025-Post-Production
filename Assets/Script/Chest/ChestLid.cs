@@ -30,10 +30,27 @@ public class ChestLid : MonoBehaviour
     void Start()
     {
         joint = GetComponent<HingeJoint>();
-
-        if (ChestSaveManager.IsChestOpened(stageID, chestID))
+        if(chestID == 3)
         {
-            ApplyAlreadyOpenedState();
+            isLockedOpen = false;
+            isBeingInteracted = false;
+
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null) rb.isKinematic = false;
+
+            if (joint != null)
+            {
+                var spring = joint.spring;
+                spring.targetPosition = Min;
+                joint.spring = spring;
+            }
+        }
+        else
+        {
+            if (ChestSaveManager.IsChestOpened(stageID, chestID))
+            {
+                ApplyAlreadyOpenedState();
+            }
         }
     }
 
@@ -97,6 +114,23 @@ public class ChestLid : MonoBehaviour
             }
         }
     }
+
+    void ResetThisChestState()
+    {
+        isLockedOpen = false;
+        isBeingInteracted = false;
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null) rb.isKinematic = false;
+
+        if (joint != null)
+        {
+            var spring = joint.spring;
+            spring.targetPosition = Min;
+            joint.spring = spring;
+        }
+    }
+
 
     // セーブデータがある場合に、演出抜きで即座に全開状態にするメソッド
     private void ApplyAlreadyOpenedState()

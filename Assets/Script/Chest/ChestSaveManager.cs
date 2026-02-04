@@ -27,21 +27,19 @@ public static class ChestSaveManager
     /// </summary>
     public static void ResetOnlyChestData()
     {
-        for(int s = 0; s< 4; s++)
+        for (int s = 0; s < 4; s++)
         {
-            for (int c = 0; c < 3; c++)
+            for (int c = 0; c < 4; c++) // ID3も含めるため c < 4 に
             {
-                string Key = GetKey(s, c);
-                if (PlayerPrefs.HasKey(Key))
-                {
-                    //指定したキーだけ削除
-                    PlayerPrefs.DeleteKey(Key);
-                }
+                PlayerPrefs.DeleteKey($"Chest_Stage{s}_Index{c}");
             }
         }
-
         PlayerPrefs.Save();
-        Debug.Log("宝箱の取得状況をリセット");
+
+        // リセットされたことを各UIに通知
+        ChestEventManager.TriggerDataReset();
+
+        Debug.Log("宝箱の取得情報をリセットし、通知を送りました。");
     }
 
 

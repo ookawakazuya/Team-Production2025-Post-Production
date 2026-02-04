@@ -532,7 +532,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -290, y: -322}
+  m_AnchoredPosition: {x: -571, y: -342}
   m_SizeDelta: {x: 150, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &184399741
@@ -611,7 +611,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1fe3dd1b0c7e2484485190b3baa726ae, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 356dd7885169d2944a9edf0ec67a117d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3017,7 +3017,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8619356824731634372, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8970498656326236154, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3080,11 +3080,6 @@ VisualEffect:
 --- !u!135 &1080128113 stripped
 SphereCollider:
   m_CorrespondingSourceObject: {fileID: 8461698841645246537, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
-  m_PrefabInstance: {fileID: 1080128110}
-  m_PrefabAsset: {fileID: 0}
---- !u!136 &1080128114 stripped
-CapsuleCollider:
-  m_CorrespondingSourceObject: {fileID: 2553196588086059789, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
   m_PrefabInstance: {fileID: 1080128110}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &1080128115 stripped
@@ -4293,7 +4288,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Enabled
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8080025090917608530, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Name
@@ -4369,7 +4364,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1450247199}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cd8123c977cfa6143900343c39462034, type: 3}
   m_Name: 
@@ -5400,7 +5395,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4699317900522532394, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -112
+      value: -168
       objectReference: {fileID: 0}
     - target: {fileID: 4734209586651408439, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_Layer
@@ -5502,6 +5497,18 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 6835847048649543459, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -32
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835847048649543459, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6835847048649543459, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 16
+      objectReference: {fileID: 0}
     - target: {fileID: 6845043622339372400, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_Camera
       value: 
@@ -5584,7 +5591,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8253947001392079499, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 105
+      value: 230
       objectReference: {fileID: 0}
     - target: {fileID: 8261332433941753110, guid: 2f61e90f2a11f7d49aacb39f88dcbd67, type: 3}
       propertyPath: m_Layer
@@ -6619,7 +6626,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1080128111}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33dc95c11e11d5a4aa4aac848de92439, type: 3}
   m_Name: 
@@ -6637,7 +6644,7 @@ MonoBehaviour:
   attackAnimTime: 1
   attackHitRadius: 1.5
   attackHitOffset: {x: 0, y: 0, z: 1}
-  bodyCollider: {fileID: 1080128114}
+  bodyCollider: {fileID: 0}
   headCollider: {fileID: 1080128113}
   deathAnimTime: 2
   deathVfxTime: 0.5
