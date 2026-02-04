@@ -171,6 +171,7 @@ GameObject:
   - component: {fileID: 127955280}
   - component: {fileID: 127955279}
   - component: {fileID: 127955278}
+  - component: {fileID: 127955282}
   m_Layer: 5
   m_Name: Stage1
   m_TagString: Untagged
@@ -310,6 +311,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127955276}
   m_CullTransparentMesh: 1
+--- !u!114 &127955282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 127955276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 0
+  chestID: 3
+  iconImage: {fileID: 1654949433}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &143577021
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,6 +733,7 @@ GameObject:
   - component: {fileID: 307235519}
   - component: {fileID: 307235518}
   - component: {fileID: 307235517}
+  - component: {fileID: 307235521}
   m_Layer: 5
   m_Name: Stage4
   m_TagString: Untagged
@@ -854,6 +873,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 307235515}
   m_CullTransparentMesh: 1
+--- !u!114 &307235521
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 307235515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 3
+  chestID: 3
+  iconImage: {fileID: 1117913312}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!4 &373661954
 Transform:
   m_ObjectHideFlags: 0
@@ -1941,6 +1977,7 @@ GameObject:
   - component: {fileID: 936124877}
   - component: {fileID: 936124876}
   - component: {fileID: 936124875}
+  - component: {fileID: 936124879}
   m_Layer: 5
   m_Name: Stage3
   m_TagString: Untagged
@@ -2080,6 +2117,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 936124873}
   m_CullTransparentMesh: 1
+--- !u!114 &936124879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 936124873}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 2
+  chestID: 3
+  iconImage: {fileID: 1039385590}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &945667406
 GameObject:
   m_ObjectHideFlags: 0
@@ -2168,6 +2222,7 @@ GameObject:
   - component: {fileID: 958101789}
   - component: {fileID: 958101788}
   - component: {fileID: 958101787}
+  - component: {fileID: 958101791}
   m_Layer: 5
   m_Name: Stage2
   m_TagString: Untagged
@@ -2307,6 +2362,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 958101785}
   m_CullTransparentMesh: 1
+--- !u!114 &958101791
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 958101785}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e9aa774238bd9d44ad32166c862823f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  stageID: 1
+  chestID: 3
+  iconImage: {fileID: 1981005241}
+  lockedColor: {r: 0, g: 0, b: 0, a: 1}
+  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1 &976478299
 GameObject:
   m_ObjectHideFlags: 0

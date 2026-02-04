@@ -5,7 +5,7 @@ public class ChestUIElement : MonoBehaviour
 {
     [Header("設定")]
     [SerializeField] private int stageID;   // ステージ番号 (0〜3)
-    [SerializeField] private int chestID;   // 宝箱番号 (0〜2)
+    [SerializeField] private int chestID;   // 宝箱番号 (0〜3)
     [SerializeField] private Image iconImage; // 色を変える対象のUIイメージ
 
     [Header("カラー設定")]
@@ -14,15 +14,14 @@ public class ChestUIElement : MonoBehaviour
 
     private void Start()
     {
-        //// 初期状態は黒に設定
-        //if (iconImage != null)
-        //{
-        //    bool opened = ChestSaveManager.IsChestOpened(stageID, chestID);
-        //    iconImage.color = lockedColor;
-        //}
         RefreshVisual();
-        // イベントの購読（宝箱が開いた通知を受け取れるようにする）
-        ChestEventManager.OnChestOpened += HandleChestOpened;
+
+        if(chestID != 3)
+        {
+            // イベントの購読（宝箱が開いた通知を受け取れるようにする）
+            ChestEventManager.OnChestOpened += HandleChestOpened;
+        }
+        ChestEventManager.OnDataReset += RefreshVisual;
     }
 
     private void OnEnable()
@@ -33,7 +32,11 @@ public class ChestUIElement : MonoBehaviour
 
     private void OnDestroy()
     {
-        // メモリリーク防止のため、破棄時に購読を解除
+        if (chestID != 3)
+        {
+            // メモリリーク防止のため、破棄時に購読を解除
+            ChestEventManager.OnChestOpened -= HandleChestOpened;
+        }
         ChestEventManager.OnChestOpened -= HandleChestOpened;
     }
 
@@ -45,8 +48,18 @@ public class ChestUIElement : MonoBehaviour
         // SaveManagerから取得済みかどうかを確認
         bool isOpened = ChestSaveManager.IsChestOpened(stageID, chestID);
 
-        // 取得済みなら白、未取得なら黒を設定
-        iconImage.color = isOpened ? unlockedColor : lockedColor;
+
+        if(chestID == 3)
+        {
+            iconImage.gameObject.SetActive(isOpened);
+        }
+        else
+        {
+            iconImage.gameObject.SetActive(true);
+            // 取得済みなら白、未取得なら黒を設定
+            iconImage.color = isOpened ? unlockedColor : lockedColor;
+        }
+
     }
 
 
