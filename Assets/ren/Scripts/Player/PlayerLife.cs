@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class PlayerLife : MonoBehaviour
 {
-    [Header("死亡時に生成するエフェクト（任意）")]
-    public GameObject deathEffect;
+
+    [Header("暗転設定")]
+    public float fadeOutTime = 1f;   // 暗転にかかる時間
+    public float darkWaitTime = 2f;  // 真っ暗のまま待つ時間
 
     private bool isDead = false;
     public bool IsDead => isDead;
@@ -22,24 +25,11 @@ public class PlayerLife : MonoBehaviour
         playerController = GetComponent<VRController>();
     }
 
-    private void OnTriggerEnter(Collider other)
+    // ← Die() の下とかでOK
+    IEnumerator RespawnAfterDark()
     {
-        if (isDead) return;
-
-        // ★ 即死トラップ判定
-        if (other.CompareTag("FallZone")
-         || other.CompareTag("Magma")
-         || other.CompareTag("Acid")
-         || other.CompareTag("Needle"))
-        {
-            Die();
-            return;
-        }
-
-        if (other.CompareTag("Enemy") || other.CompareTag("Sword"))
-        {
-            playerHealth?.TakeDamage(1);
-        }
+        yield return new WaitForSeconds(darkWaitTime);
+        Respawn();
     }
 
     public void Die()
@@ -52,15 +42,13 @@ public class PlayerLife : MonoBehaviour
         if (playerController) playerController.enabled = false;
         if (playerCollider) playerCollider.enabled = false;
 
-        if (deathEffect)
-            Instantiate(deathEffect, transform.position, Quaternion.identity);
-
         OnPlayerDied?.Invoke();
 
-        FadeController.Instance.FadeOut(1f, () =>
+        // ★ すぐ暗転 → 2秒待ってリスポーン
+        FadeController.Instance.FadeOut(fadeOutTime, () =>
         {
             gameObject.SetActive(false);
-            Invoke(nameof(Respawn), 0.5f);
+            StartCoroutine(RespawnAfterDark());
         });
     }
 
