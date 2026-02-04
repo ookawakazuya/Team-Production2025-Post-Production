@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿/*using UnityEngine;
 
 public class ChestLid : MonoBehaviour
 {
@@ -236,5 +236,222 @@ public class ChestLid : MonoBehaviour
     {
         if (!isLockedOpen)
         isBeingInteracted = false;
+    }
+}*/
+using UnityEngine;
+using System.Collections;
+
+public class ChestLid : MonoBehaviour
+{
+    HingeJoint joint;
+    Rigidbody rb;
+
+    [Header("モード設定")]
+    [SerializeField] private bool isTutorialStage = false; // チュートリアルならチェック
+
+    [Header("状態フラグ")]
+    public bool isBeingInteracted = false;
+    private bool isLockedOpen = false;      // 既存ステージ用：最大まで開いたら真
+    private bool isWaitingToClose = false; // チュートリアル用：5秒待機中
+
+    [Header("角度設定")]
+    [SerializeField] float Min = 0f;            // 閉じている時の角度
+    [SerializeField] float stayOpen = -120f;    // これより開くと開いたままにする角度
+
+    [Header("インターフェース設定")]
+    [SerializeField] Transform rayAnchorPoint;  // レイが吸着するポイント
+    [SerializeField] public float interactionRadius = 5.0f;
+    public Transform RayAnchorpoint => rayAnchorPoint;
+
+    [Header("エフェクト")]
+    [SerializeField] GameObject chestParticle;
+
+    [Header("識別ID")]
+    [SerializeField] private int stageID;
+    [SerializeField] private int chestID;
+
+    bool hasPlayedOpenSE = false;
+    bool hasPlayedMaxSE = false;
+
+    void Awake()
+    {
+        joint = GetComponent<HingeJoint>();
+        rb = GetComponent<Rigidbody>();
+    }
+
+    void Start()
+    {
+        // 既存ステージの場合のみ保存データを読み込む
+        if (!isTutorialStage)
+        {
+            if (ChestSaveManager.IsChestOpened(stageID, chestID))
+            {
+                ApplyAlreadyOpenedState();
+            }
+        }
+    }
+
+    private void Update()
+    {
+        if (isLockedOpen || isWaitingToClose) return;
+
+        // --- 判定の分岐 ---
+        if (joint != null)
+        {
+            if (isTutorialStage)
+            {
+                // 【チュートリアル】操作が終わった（手を離した）瞬間に、開ききっていたらリセット開始
+                if (!isBeingInteracted && joint.angle <= stayOpen)
+                {
+                    StartCoroutine(TutorialAutoCloseRoutine());
+                    return;
+                }
+            }
+            else
+            {
+                // 【既存ステージ】操作中・非操作中に関わらず、開ききったら即固定
+                if (joint.angle <= stayOpen)
+                {
+                    LockChestOpen();
+                    return;
+                }
+            }
+
+            // 操作中でない時の自動戻り処理
+            if (!isBeingInteracted)
+            {
+                UpdateAutoClosing();
+            }
+        }
+
+        HandleEffectsAndSound();
+    }
+
+    // ==========================================
+    // チュートリアル用：5秒後に自動で閉じる
+    // ==========================================
+    private IEnumerator TutorialAutoCloseRoutine()
+    {
+        isWaitingToClose = true;
+
+        // その場で物理固定
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.angularVelocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
+        }
+
+        // 全開SE
+        if (!hasPlayedMaxSE)
+        {
+            SoundManager.Instance?.PlaySE("Chest_Middle");
+            hasPlayedMaxSE = true;
+        }
+
+        Debug.Log("【チュートリアル】手を離した＆全開を検知：5秒待機");
+
+        yield return new WaitForSeconds(5.0f);
+
+        // 物理復帰
+        if (rb != null) rb.isKinematic = false;
+
+        // 閉じるバネをセット
+        ResetSpringToClosed();
+
+        // 状態を完全リセット
+        isWaitingToClose = false;
+        hasPlayedOpenSE = false;
+        hasPlayedMaxSE = false;
+
+        Debug.Log("【チュートリアル】リセット完了");
+    }
+
+    // ==========================================
+    // 既存ステージ用：一度開いたら固定
+    // ==========================================
+    private void LockChestOpen()
+    {
+        isLockedOpen = true;
+        isBeingInteracted = false;
+
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        transform.localRotation = Quaternion.Euler(stayOpen, 0, 0);
+
+        if (!hasPlayedMaxSE)
+        {
+            SoundManager.Instance?.PlaySE("Chest_Middle");
+            hasPlayedMaxSE = true;
+        }
+
+        ChestSaveManager.SaveChestState(stageID, chestID);
+        ChestEventManager.OnChestOpened(stageID, chestID);
+    }
+
+    // --- 補助メソッド（変更なし） ---
+    private void ResetSpringToClosed()
+    {
+        if (joint == null) return;
+        JointSpring spring = joint.spring;
+        spring.targetPosition = Min;
+        joint.spring = spring;
+        joint.useSpring = true;
+    }
+
+    private void UpdateAutoClosing()
+    {
+        if (joint.angle < Min - 1f) ResetSpringToClosed();
+    }
+
+    private void HandleEffectsAndSound()
+    {
+        if (joint == null) return;
+        bool isOpen = joint.angle < Min - 1f;
+        if (chestParticle != null) chestParticle.SetActive(isOpen);
+        if (isOpen && !hasPlayedOpenSE)
+        {
+            SoundManager.Instance?.PlaySE("Chest_Open");
+            hasPlayedOpenSE = true;
+        }
+    }
+
+    public void UpdateRotation(float deltaY)
+    {
+        if (isLockedOpen || isWaitingToClose || !float.IsFinite(deltaY) || joint == null) return;
+
+        isBeingInteracted = true;
+        float sensitivity = 450f;
+        JointSpring spring = joint.spring;
+        if (!float.IsFinite(spring.targetPosition)) spring.targetPosition = joint.angle;
+
+        float newTarget = spring.targetPosition + (deltaY * -1f * sensitivity);
+        float minL = joint.limits.min;
+        float maxL = joint.limits.max;
+        float finalTarget = Mathf.Clamp(newTarget, Mathf.Min(minL, maxL), Mathf.Max(minL, maxL));
+
+        if (float.IsFinite(finalTarget))
+        {
+            spring.targetPosition = finalTarget;
+            joint.spring = spring;
+            joint.useSpring = true;
+        }
+    }
+
+    public void StopInteracting()
+    {
+        isBeingInteracted = false;
+    }
+
+    private void ApplyAlreadyOpenedState()
+    {
+        isLockedOpen = true;
+        if (rb != null) rb.isKinematic = true;
+        transform.localRotation = Quaternion.Euler(stayOpen, 0, 0);
+        if (chestParticle != null) chestParticle.SetActive(true);
     }
 }

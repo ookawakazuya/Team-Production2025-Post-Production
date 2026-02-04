@@ -1285,6 +1285,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 361885953}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &412025387 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 322836173473183264, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
+  m_PrefabInstance: {fileID: 1080128110}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &417363989
 GameObject:
   m_ObjectHideFlags: 0
@@ -3397,7 +3402,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8619356824731634372, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8970498656326236154, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5124,10 +5129,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: stayOpen
-      value: -120
+      value: -110
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: isTutorialStage
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
@@ -7474,7 +7483,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1080128111}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33dc95c11e11d5a4aa4aac848de92439, type: 3}
   m_Name: 
@@ -7492,7 +7501,7 @@ MonoBehaviour:
   attackAnimTime: 1
   attackHitRadius: 1.5
   attackHitOffset: {x: 0, y: 0, z: 1}
-  bodyCollider: {fileID: 0}
+  bodyCollider: {fileID: 412025387}
   headCollider: {fileID: 1080128113}
   deathAnimTime: 2
   deathVfxTime: 0.5

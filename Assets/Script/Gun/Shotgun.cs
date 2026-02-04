@@ -259,7 +259,7 @@ public class Shotgun : MonoBehaviour
         {
             hasHit = false;
             shouldDraw = true; // 常に描画
-            lineRenderer.startColor = lineRenderer.endColor = Color.red;
+            lineRenderer.material = material1;
         }
     }
 
