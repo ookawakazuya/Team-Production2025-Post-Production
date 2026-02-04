@@ -1,15 +1,11 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// チェックポイントの機能を管理するクラス。
-/// プレイヤーが触れた際に、GameManager にリスポーン地点を更新させる。
-/// </summary>
 [RequireComponent(typeof(Collider))]
 public class Checkpoint : MonoBehaviour
 {
-    [Header("このチェックポイントの名前（任意）")]
-    public string checkpointName = "Checkpoint";
+    [Header("このCrystalの名前")]
+    public string crystalName = "Crystal";
 
     [Header("崩れるアニメーター")]
     [SerializeField] private Animator animator;
@@ -20,9 +16,14 @@ public class Checkpoint : MonoBehaviour
     [Header("フレアエフェクト")]
     [SerializeField] private ParticleSystem flaresParticle;
 
-    private bool isBreak = false;
+    [Header("キラキラSE用")]
+    [SerializeField] private float sparkleDistance = 5f; // プレイヤーとの距離でSE再生
 
-    // ★ 元の色とEmissionを保存
+    private bool isBreak = false;
+    private bool isSparklePlaying = false;
+
+    private Transform player;
+
     private Color glowStartColor;
     private Color flaresStartColor;
     private float glowEmissionRate;
@@ -30,6 +31,7 @@ public class Checkpoint : MonoBehaviour
 
     private void Awake()
     {
+        // パーティクル初期値保存
         if (glowParticle)
         {
             glowStartColor = glowParticle.main.startColor.color;
@@ -41,42 +43,78 @@ public class Checkpoint : MonoBehaviour
             flaresStartColor = flaresParticle.main.startColor.color;
             flaresEmissionRate = flaresParticle.emission.rateOverTime.constant;
         }
+
+        // Collider は必ず Trigger にする
+        var col = GetComponent<Collider>();
+        col.isTrigger = true;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void Start()
     {
-        // プレイヤーが触れたら
-        if (other.CompareTag("Player") && !isBreak)
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
+    }
+
+    private void Update()
+    {
+        if (isBreak || !player) return;
+
+        // プレイヤーとの距離でキラキラSE再生 / 停止
+        float dist = Vector3.Distance(player.position, transform.position);
+        if (dist <= sparkleDistance && !isSparklePlaying)
         {
-            isBreak = true;
-
-            // GameManager にリスポーン地点を更新させる
-            GameManager.Instance.UpdateRespawnPoint(transform);
-
-            Debug.Log($"チェックポイント到達：{checkpointName}");
-
-            // アニメーション再生
-            if (animator)
-            {
-                animator.SetBool("isBreak", true);
-            }
-
-            if (glowParticle)
-                StartCoroutine(DelayFadeOut(glowParticle));
-
-            if (flaresParticle)
-                StartCoroutine(DelayFadeOut(flaresParticle));
-
+            SoundManager.Instance.PlaySELoop("Onoma-Sparkle01-1");
+            isSparklePlaying = true;
+        }
+        else if (dist > sparkleDistance && isSparklePlaying)
+        {
+            SoundManager.Instance.StopSELoop();
+            isSparklePlaying = false;
         }
     }
 
-    private IEnumerator DelayFadeOut(ParticleSystem ps)
+    // ===========================
+    // プレイヤーが触れたら崩れる
+    // ===========================
+    private void OnTriggerEnter(Collider other)
     {
-        // ★ アニメーションを見せるために1秒待つ
-        yield return new WaitForSeconds(1f);
+        if (isBreak) return;
 
-        // その後フェードアウト開始
-        yield return StartCoroutine(FadeOutParticle(ps));
+        if (other.CompareTag("Player"))
+        {
+            OnCrystalTouched();
+        }
+    }
+
+    public void OnCrystalTouched()
+    {
+        if (isBreak) return;
+
+        isBreak = true;
+
+        // 崩れるSE
+        SoundManager.Instance.PlaySE("StonesCrumble");
+
+        // キラキラ停止
+        if (isSparklePlaying)
+        {
+            SoundManager.Instance.StopSELoop();
+            isSparklePlaying = false;
+        }
+
+        // GameManager にリスポーンポイント更新
+        GameManager.Instance.UpdateRespawnPoint(transform);
+
+        // アニメーション再生
+        if (animator)
+            animator.SetBool("isBreak", true);
+
+        // パーティクルフェードアウト
+        if (glowParticle)
+            StartCoroutine(FadeOutParticle(glowParticle));
+        if (flaresParticle)
+            StartCoroutine(FadeOutParticle(flaresParticle));
+
+        Debug.Log($"Crystal崩壊：{crystalName}");
     }
 
     private IEnumerator FadeOutParticle(ParticleSystem ps)
@@ -97,16 +135,12 @@ public class Checkpoint : MonoBehaviour
             for (int i = 0; i < count; i++)
             {
                 Color c = particles[i].startColor;
-
-                // ★ 元のアルファを基準にフェード
                 float baseAlpha = c.a;
                 c.a = Mathf.Lerp(baseAlpha, 0f, t);
-
                 particles[i].startColor = c;
             }
 
             ps.SetParticles(particles, count);
-
             time += Time.deltaTime;
             yield return null;
         }
@@ -115,23 +149,23 @@ public class Checkpoint : MonoBehaviour
         ps.gameObject.SetActive(false);
     }
 
-    // ★ ステージリセット用
+    // ===========================
+    // ステージリセット用
+    // ===========================
     public void ResetCheckpoint()
     {
         isBreak = false;
+        isSparklePlaying = false;
 
         if (animator)
-        {
             animator.SetBool("isBreak", false);
-        }
 
         if (glowParticle)
         {
             var main = glowParticle.main;
             var emission = glowParticle.emission;
-
-            main.startColor = glowStartColor;           // 元の色に戻す
-            emission.rateOverTime = glowEmissionRate;  // 元のEmissionに戻す
+            main.startColor = glowStartColor;
+            emission.rateOverTime = glowEmissionRate;
             glowParticle.Clear();
             glowParticle.Play();
         }
@@ -140,9 +174,8 @@ public class Checkpoint : MonoBehaviour
         {
             var main = flaresParticle.main;
             var emission = flaresParticle.emission;
-
-            main.startColor = flaresStartColor;           // 元の色に戻す
-            emission.rateOverTime = flaresEmissionRate;  // 元のEmissionに戻す
+            main.startColor = flaresStartColor;
+            emission.rateOverTime = flaresEmissionRate;
             flaresParticle.Clear();
             flaresParticle.Play();
         }
