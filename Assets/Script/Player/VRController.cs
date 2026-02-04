@@ -8,6 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using System.Collections;
 using UnityEngine.EventSystems;
 
+
 public class VRController : MonoBehaviour
 {
     // --- フィールド定義（変更なし） ---
@@ -370,7 +371,7 @@ public class VRController : MonoBehaviour
 
             SoundManager.Instance.PlaySE("SE_Hook_02");
             if (haptic != null) haptic.VibrateWallHit(isRightHand);
-            if (hookMaterial != null) commonLine.material = hookMaterial;
+            //if (hookMaterial != null) commonLine.material = hookMaterial;
             PlayHookHitParticle(aimHitPoint, hit.normal);
         }
     }
@@ -532,9 +533,10 @@ public class VRController : MonoBehaviour
 
         // tempGrappleFromCling 中は isClinging よりもこちらを優先
         bool isWiredState = (isHookActive || isRetracting || tempGrappleFromCling) && !isInteractingWithChest;
-
         if (isWiredState)
         {
+            // 射出時に確定した aimHitPoint を終点として表示し続ける
+            currentTipPosition = aimHitPoint;
             // --- ワイヤー・フック表示フェーズ ---
             commonLine.enabled = false;
 
@@ -542,7 +544,7 @@ public class VRController : MonoBehaviour
             {
                 rayVisualObject.SetActive(true);
                 // 射出時に保存した座標をそのまま使う（動かさない）
-                currentTipPosition = aimHitPoint;
+                //currentTipPosition = aimHitPoint;
 
                 // ワイヤー本体の配置と長さ更新
                 float distance = Vector3.Distance(rayOrigin.position, currentTipPosition);
@@ -557,7 +559,7 @@ public class VRController : MonoBehaviour
                 // モデルを表示状態にする
                 hookObject.gameObject.SetActive(true);
                 // 先端座標（aimHitPoint）に配置
-                hookObject.position = aimHitPoint;
+                hookObject.position = currentTipPosition;
                 // 手元を向くように回転
                 hookObject.LookAt(rayOrigin.position);
                 hookObject.Rotate(-90f, 0f, 0f);
@@ -882,7 +884,7 @@ public class VRController : MonoBehaviour
     void UpdateClingAimWhileHolding()
     {
         // 張り付き中 ＆ トリガー押しっぱなし
-        if (!isClinging || !triggerPressed)
+        if (!isClinging || !triggerPressed|| tempGrappleFromCling)
             return;
 
         if (rayOrigin == null)
@@ -900,6 +902,7 @@ public class VRController : MonoBehaviour
             // flyingHookModel を直接動かしたい場合（保険）
             if (flyingHookModel != null && flyingHookModel.activeSelf)
             {
+                hookObject.gameObject.SetActive(true); // 非表示になっていた場合に備えて
                 flyingHookModel.transform.position = hit.point;
                 flyingHookModel.transform.LookAt(rayOrigin.position);
                 flyingHookModel.transform.Rotate(-90f, 0f, 0f);
