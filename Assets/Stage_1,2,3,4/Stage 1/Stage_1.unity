@@ -3509,16 +3509,6 @@ Transform:
   - {fileID: 90910946}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &639994900 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3646867834039848118, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
-  m_PrefabInstance: {fileID: 1868781110}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &639994903 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
-  m_PrefabInstance: {fileID: 1868781110}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &653576295
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11755,6 +11745,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 746963202191272382, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1535507683636261312, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -11986,11 +11980,11 @@ PrefabInstance:
     - target: {fileID: 5064757681206025811, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: barrierObject
       value: 
-      objectReference: {fileID: 639994900}
+      objectReference: {fileID: 0}
     - target: {fileID: 5064757681206025811, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: barrierParticle
       value: 
-      objectReference: {fileID: 639994903}
+      objectReference: {fileID: 0}
     - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: 'digitImages.Array.data[0]'
       value: 
@@ -12113,7 +12107,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8905197397109023966, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8939726874623455026, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_AnchorMax.y
@@ -12125,6 +12119,7 @@ PrefabInstance:
     - {fileID: 8626281269500449779, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
     m_RemovedGameObjects:
     - {fileID: 227919558837617012, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+    - {fileID: 746963202191272382, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7239209778096909273, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
