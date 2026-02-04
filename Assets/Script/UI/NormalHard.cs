@@ -42,9 +42,33 @@ public class NormalHard : MonoBehaviour
     public void OnUpButton()
     {
         stagelevel = StageLevel.Normal;
+
+        // ★ プレイヤーHPを3にする
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player)
+        {
+            var hp = player.GetComponent<PlayerHealth>();
+            if (hp)
+            {
+                hp.currentLife = hp.maxLife; // 3
+            }
+        }
     }
+
     public void OnDownButton()
     {
         stagelevel = StageLevel.Hard;
+
+        // ★ プレイヤーHPを1にする
+        var player = GameObject.FindGameObjectWithTag("Player");
+        if (player)
+        {
+            var hp = player.GetComponent<PlayerHealth>();
+            if (hp)
+            {
+                hp.currentLife = hp.minLife; // 1
+            }
+        }
     }
+
 }

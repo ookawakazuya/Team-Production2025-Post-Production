@@ -49,6 +49,7 @@ public class PlayerHealth : MonoBehaviour
     public void TakeDamage(int damage)
     {
         if (playerDeath.IsDead) return;
+        if (isInvincible) return;
 
         // 先にHP計算
         int nextLife = currentLife - damage;
