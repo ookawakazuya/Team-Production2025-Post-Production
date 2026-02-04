@@ -43,6 +43,10 @@ public class Shotgun : MonoBehaviour
     [Header("アニメーション設定")]
     [SerializeField] private Animator animator;
 
+    [SerializeField] Material material1;
+    [SerializeField] Material material2;
+
+
 
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
@@ -102,9 +106,9 @@ public class Shotgun : MonoBehaviour
             // --- 最初は非表示 ---
             lineRenderer.enabled = false;
 
-            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.startColor = Color.red;
-            lineRenderer.endColor = Color.red;
+            //lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            lineRenderer.material = material1;
+            lineRenderer.material = material1;
         }
 
         // --- 数字画像を自動読み込み ---
@@ -202,7 +206,7 @@ public class Shotgun : MonoBehaviour
             // --- 通常モード時 ---
             else if (!infiniteAmmo && reserveAmmo > 0 && relativeY < reloadThresholdY)
             {
-                animator.SetTrigger("Reload");
+                //animator.SetTrigger("Reload");
                 Reload();
                 // Debug.Log("リロード開始");
             }
@@ -248,8 +252,8 @@ public class Shotgun : MonoBehaviour
             hasHit = true;
             shouldDraw = true;
 
-            if (hit.collider.CompareTag("Enemy")) { lineRenderer.startColor = lineRenderer.endColor = new Color(1f, 0.5f, 0f); } // オレンジ
-            else { lineRenderer.startColor = lineRenderer.endColor = Color.red; }
+            if (hit.collider.CompareTag("Enemy")) { lineRenderer.material = material2; } // オレンジ
+            else { lineRenderer.material = material1; }
         }
         else
         {
@@ -275,7 +279,7 @@ public class Shotgun : MonoBehaviour
                 hasHit = true;
                 shouldDraw = true;
 
-                lineRenderer.startColor = lineRenderer.endColor = Color.red;
+                lineRenderer.material = material1;
 
                 // hit.collider で当たったオブジェクトの Collider にアクセスできる
                 // Debug.Log("Ray hit: " + hit.collider.name);

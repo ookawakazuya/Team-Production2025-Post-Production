@@ -4622,6 +4622,14 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
+      propertyPath: material1
+      value: 
+      objectReference: {fileID: 2100000, guid: 07d52808b6c057641a8619e4f85478eb, type: 2}
+    - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
+      propertyPath: material2
+      value: 
+      objectReference: {fileID: 2100000, guid: 5ac02d893cd033f429457eb659507ad8, type: 2}
+    - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: ammoSlider
       value: 
       objectReference: {fileID: 2909974224628667193}
@@ -4635,7 +4643,7 @@ PrefabInstance:
       objectReference: {fileID: 8607665495672516115}
     - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: rayDistance
-      value: 100
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 1825047398801090554, guid: 1392f805216c47742996d4742c80721c, type: 3}
       propertyPath: bulletPrefab
