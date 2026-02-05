@@ -32,6 +32,10 @@ public class VRMove : MonoBehaviour
 
     void Update()
     {
+
+        if (controller == null || !controller.enabled)
+            return;
+
         if (controller != null && (vrController.IsRetracting || vrController.IsClinging))
             return; // ワイヤー移動中・張り付き中は入力無効
         HandleMovement();

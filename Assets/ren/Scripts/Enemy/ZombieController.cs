@@ -62,7 +62,7 @@ public class ZombieController : EnemyBase
         bodyCollider.enabled = false;
         headCollider.enabled = false;
 
-        animator.SetTrigger("Death");
+        animator.SetBool("isDeath", true);
 
         yield return new WaitForSeconds(deathAnimTime);
 
@@ -105,14 +105,14 @@ public class ZombieController : EnemyBase
     // Animation Event —p
     // =====================
 
-    public void PlayRoarSE()
+    public void PlayAttackSE()
     {
-        SoundManager.Instance.PlaySE("SE_Enemy_01");
+        SoundManager.Instance.PlaySE("SE_Enemy_05");
     }
 
     public void PlayHitSE()
     {
-        SoundManager.Instance.PlaySE("SE_Enemy_05");
+        SoundManager.Instance.PlaySE("SE_Enemy_01");
     }
 
     public void PlayWalkSE()
