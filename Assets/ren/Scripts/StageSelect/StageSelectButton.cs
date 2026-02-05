@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static UnityEditor.VersionControl.Asset;
+//using static UnityEditor.VersionControl.Asset;
 
 public class StageSelectButton : MonoBehaviour
 {

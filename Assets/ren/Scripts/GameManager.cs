@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System;
-using UnityEditor.SceneManagement;
+//using UnityEditor.SceneManagement;
 
 /// <summary>
 /// ゲーム全体を管理するクラス
