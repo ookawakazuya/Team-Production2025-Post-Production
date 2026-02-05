@@ -16557,7 +16557,7 @@ MonoBehaviour:
   isStageClear: 0
   openAngle: 250
   angleTolerance: 2
-  targetOpenAngle: -110
+  targetOpenAngle: -105
   resultCanvas: {fileID: 1581853361}
 --- !u!1001 &1099798068
 PrefabInstance:
@@ -16627,7 +16627,8 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 1240326776627568807, guid: 1a9580ea6ddfe234c859a88c965bf162, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

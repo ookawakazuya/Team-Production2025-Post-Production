@@ -284,9 +284,27 @@ public class ChestLid : MonoBehaviour
         // 既存ステージの場合のみ保存データを読み込む
         if (!isTutorialStage)
         {
-            if (ChestSaveManager.IsChestOpened(stageID, chestID))
+            if (chestID == 3)
             {
-                ApplyAlreadyOpenedState();
+                isLockedOpen = false;
+                isBeingInteracted = false;
+
+                Rigidbody rb = GetComponent<Rigidbody>();
+                if (rb != null) rb.isKinematic = false;
+
+                if (joint != null)
+                {
+                    var spring = joint.spring;
+                    spring.targetPosition = Min;
+                    joint.spring = spring;
+                }
+            }
+            else
+            {
+                if (ChestSaveManager.IsChestOpened(stageID, chestID))
+                {
+                    ApplyAlreadyOpenedState();
+                }
             }
         }
     }
@@ -401,6 +419,29 @@ public class ChestLid : MonoBehaviour
         spring.targetPosition = Min;
         joint.spring = spring;
         joint.useSpring = true;
+    }
+
+    /// <summary>
+    /// ゴール用宝箱の物理的な状態を閉じ状態に戻す（データは保持）
+    /// </summary>
+    private void ResetPhysicsState()
+    {
+        isLockedOpen = false;
+        isBeingInteracted = false;
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false; // 物理演算を有効化
+        }
+
+        if (joint != null)
+        {
+            var spring = joint.spring;
+            spring.targetPosition = Min;
+            joint.spring = spring;
+            joint.useSpring = true;
+        }
     }
 
     private void UpdateAutoClosing()
