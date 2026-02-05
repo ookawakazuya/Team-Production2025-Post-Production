@@ -27,6 +27,8 @@ public class Shotgun : MonoBehaviour
     [SerializeField] private LineRenderer lineRenderer;
     [SerializeField] private AimMode aimMode = AimMode.Normal;
     [SerializeField] private float rayDistance = 50f;
+    [SerializeField] Material material1;
+    [SerializeField] Material material2;
 
     [Header("弾の設定")]
     [SerializeField] private Transform bulletrObject;
@@ -42,11 +44,6 @@ public class Shotgun : MonoBehaviour
 
     [Header("アニメーション設定")]
     [SerializeField] private Animator animator;
-
-    [SerializeField] Material material1;
-    [SerializeField] Material material2;
-
-
 
     private UnityEngine.XR.InputDevice leftHandDevice;
     private HapticController hapticC;
@@ -107,7 +104,7 @@ public class Shotgun : MonoBehaviour
             lineRenderer.enabled = false;
 
             //lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-            lineRenderer.material = material1;
+            // lineRenderer.material = material1;
             lineRenderer.material = material1;
         }
 
@@ -182,6 +179,7 @@ public class Shotgun : MonoBehaviour
         {
             isShooting = true;
             ShootSingle();
+            animator.SetTrigger("shoot");
             // ShootSpread();
             // Debug.Log("発射");
         }
@@ -206,7 +204,6 @@ public class Shotgun : MonoBehaviour
             // --- 通常モード時 ---
             else if (!infiniteAmmo && reserveAmmo > 0 && relativeY < reloadThresholdY)
             {
-                //animator.SetTrigger("Reload");
                 Reload();
                 // Debug.Log("リロード開始");
             }
@@ -252,7 +249,7 @@ public class Shotgun : MonoBehaviour
             hasHit = true;
             shouldDraw = true;
 
-            if (hit.collider.CompareTag("Enemy")) { lineRenderer.material = material2; } // オレンジ
+            if (hit.collider.CompareTag("Enemy")) { lineRenderer.material = material2; }
             else { lineRenderer.material = material1; }
         }
         else
@@ -302,7 +299,7 @@ public class Shotgun : MonoBehaviour
     {
         hasHit = false;
         shouldDraw = false;
-        Debug.DrawRay(rayOrigin.position, rayDirection * rayDistance, Color.red);
+        // Debug.DrawRay(rayOrigin.position, rayDirection * rayDistance, Color.red);
     }
 
     /// <summary>
@@ -346,6 +343,7 @@ public class Shotgun : MonoBehaviour
 
         // --- 発砲音 ---
         SoundManager.Instance?.PlaySE("SE_Gun_01");
+
 
         UpdateLoadedDisplay();
 
@@ -411,6 +409,7 @@ public class Shotgun : MonoBehaviour
         // --- 通常モード ---
         if (reserveAmmo > 0)
         {
+            animator.SetTrigger("Reload");
             currentAmmo = 1;
             reserveAmmo--;
             // Debug.Log("リロード完了！残りストック：" + reserveAmmo);
