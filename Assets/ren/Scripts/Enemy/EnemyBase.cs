@@ -3,6 +3,7 @@ using UnityEngine.AI;
 using UnityEngine.UI;
 using System.Collections;
 
+
 /// <summary>
 /// 敵の共通基底クラス
 /// ・AI（Idle / Chase / Attack）
@@ -23,6 +24,7 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         Attack,
         Death
     }
+    public System.Action OnDead;
 
     protected EnemyState currentState = EnemyState.Idle;
 
