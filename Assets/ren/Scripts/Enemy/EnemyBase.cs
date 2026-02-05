@@ -294,7 +294,12 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
         UpdateHPUI();
 
         if (currentHP <= 0)
+        {
             Die();
+
+            // ★ 追加：Spawner通知用（これだけ）
+            OnDead?.Invoke();
+        }
         else
             animator.SetBool("isDamage", true);
     }
