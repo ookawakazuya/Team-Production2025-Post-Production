@@ -30,7 +30,7 @@ public class StageSelectButton : MonoBehaviour
         // GameManagerが存在するかチェック
         if (GameManager.Instance == null)
         {
-            Debug.LogError("GameManagerが見つかりません！シーンに配置されていますか？");
+           // Debug.LogError("GameManagerが見つかりません！シーンに配置されていますか？");
             return;
         }
 
