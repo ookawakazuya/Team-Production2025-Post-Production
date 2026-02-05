@@ -3616,6 +3616,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8970498656326236154, guid: c13d10a0d19891e49b1bbd3f44f87241, type: 3}
   m_PrefabInstance: {fileID: 994543603}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &678632010 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2955346455716604608, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 1868781110}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &682641607
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3685,6 +3690,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 3529287264432530018, guid: 93be39b77fb1063419af467a67c06e3a, type: 3}
   m_PrefabInstance: {fileID: 682641607}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &710607744 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 7356738402330311407, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 1868781110}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &731361086
 PrefabInstance:
@@ -11859,11 +11869,11 @@ PrefabInstance:
     - target: {fileID: 5064757681206025811, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: barrierObject
       value: 
-      objectReference: {fileID: 920634684216366479, guid: 71e9176be27e2184b8772d02f76a27cc, type: 3}
+      objectReference: {fileID: 678632010}
     - target: {fileID: 5064757681206025811, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: barrierParticle
       value: 
-      objectReference: {fileID: 1974570683}
+      objectReference: {fileID: 710607744}
     - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: 'digitImages.Array.data[0]'
       value: 
@@ -11983,6 +11993,10 @@ PrefabInstance:
     - target: {fileID: 8626281269500449779, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: notCollectedColor.r
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731162215814054205, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8905197397109023966, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_AnchorMax.y
@@ -12601,11 +12615,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 71e9176be27e2184b8772d02f76a27cc, type: 3}
---- !u!198 &1974570683 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 1438322845882609245, guid: 71e9176be27e2184b8772d02f76a27cc, type: 3}
-  m_PrefabInstance: {fileID: 1974570682}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1982702364
 PrefabInstance:
   m_ObjectHideFlags: 0
