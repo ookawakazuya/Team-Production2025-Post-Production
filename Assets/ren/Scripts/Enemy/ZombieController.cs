@@ -23,9 +23,15 @@ public class ZombieController : EnemyBase
         animator.SetBool("isDamage", true);
         Invoke(nameof(ResetDamageAnim), 0.3f);
 
-        // š ”í’eSE‚Í Animation Event ‚Å–Â‚ç‚·
+        float damage = baseDamage;
 
-        return baseDamage;
+        // š ƒwƒbƒhƒVƒ‡ƒbƒg‚Í2”{
+        if (hitPart == headCollider)
+        {
+            damage *= 2f;
+        }
+
+        return damage;
     }
 
     private void ResetDamageAnim()
@@ -55,8 +61,6 @@ public class ZombieController : EnemyBase
 
         bodyCollider.enabled = false;
         headCollider.enabled = false;
-
-        // š €–S‚ÍSE‚È‚µ
 
         animator.SetTrigger("Death");
 
@@ -101,21 +105,19 @@ public class ZombieController : EnemyBase
     // Animation Event —p
     // =====================
 
-    // š –Â‚«º
     public void PlayRoarSE()
     {
         SoundManager.Instance.PlaySE("SE_Enemy_01");
     }
 
-    // š ”í’e‰¹
     public void PlayHitSE()
     {
         SoundManager.Instance.PlaySE("SE_Enemy_05");
     }
 
-    // š •à‚«‰¹
     public void PlayWalkSE()
     {
         SoundManager.Instance.PlaySE("SE_Enemy_07");
     }
 }
+
