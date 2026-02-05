@@ -25,12 +25,21 @@ public class Bullet : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        var enemy = collision.collider.GetComponentInParent<EnemyBase>();
-        if (enemy != null)
+        // EnemyBase �Ή�
+        var enemyBase = collision.collider.GetComponentInParent<EnemyBase>();
+        if (enemyBase != null)
         {
-            enemy.ApplyDamage(damage, collision.collider);
+            enemyBase.ApplyDamage(damage, collision.collider);
         }
 
+        // StageZombieSimpleNoDrop �Ή�
+        var stageZombie = collision.collider.GetComponentInParent<StageZombie>();
+        if (stageZombie != null)
+        {
+            stageZombie.ApplyDamage(damage, collision.collider);
+        }
+
+        // �e��j��
         Destroy(gameObject);
     }
 }
