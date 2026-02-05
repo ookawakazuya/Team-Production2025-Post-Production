@@ -24,12 +24,17 @@ public class PlayerLife : MonoBehaviour
         playerCollider = GetComponent<Collider>();
         playerController = GetComponent<VRController>();
     }
-
-    // ← Die() の下とかでOK
-    IEnumerator RespawnAfterDark()
+    private void OnTriggerEnter(Collider other)
     {
-        yield return new WaitForSeconds(darkWaitTime);
-        Respawn();
+        if (isDead) return;
+
+        if (other.CompareTag("FallZone") ||
+            other.CompareTag("Magma") ||
+            other.CompareTag("Acid") ||
+            other.CompareTag("Needle"))
+        {
+            Die();
+        }
     }
 
     public void Die()
@@ -47,9 +52,14 @@ public class PlayerLife : MonoBehaviour
         // ★ すぐ暗転 → 2秒待ってリスポーン
         FadeController.Instance.FadeOut(fadeOutTime, () =>
         {
-            gameObject.SetActive(false);
             StartCoroutine(RespawnAfterDark());
         });
+    }
+
+    IEnumerator RespawnAfterDark()
+    {
+        yield return new WaitForSeconds(darkWaitTime);
+        Respawn();
     }
 
     void Respawn()
