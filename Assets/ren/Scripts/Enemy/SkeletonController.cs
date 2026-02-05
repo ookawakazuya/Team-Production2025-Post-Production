@@ -98,14 +98,16 @@ public class SkeletonController : EnemyBase
         animator.Rebind();
         animator.Update(0f);
 
-        // ★ Triggerをリセット（最重要）
+        // ★ Death系を完全リセット
         animator.ResetTrigger("Death");
 
-        // ★ 念のためダメージもOFF
         animator.SetBool("isDamage", false);
         animator.SetBool("isAttack", false);
         animator.SetBool("isChase", false);
         animator.SetBool("isDeath", false);
+
+        // ★ ここが最重要：Idleに強制遷移
+        animator.Play("Idle", 0, 0f);
 
         bodyCollider.enabled = true;
         headCollider.enabled = true;
@@ -122,6 +124,7 @@ public class SkeletonController : EnemyBase
             deathVFX.transform.localRotation = Quaternion.identity;
         }
     }
+
 
     // =====================
     // Animation Event 用
