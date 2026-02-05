@@ -94,15 +94,23 @@ public class SkeletonController : EnemyBase
     // =====================
     protected override void OnRespawn()
     {
+        // Animator完全初期化
         animator.Rebind();
         animator.Update(0f);
+
+        // ★ Triggerをリセット（最重要）
+        animator.ResetTrigger("Death");
+
+        // ★ 念のためダメージもOFF
+        animator.SetBool("isDamage", false);
+        animator.SetBool("isAttack", false);
+        animator.SetBool("isChase", false);
+        animator.SetBool("isDeath", false);
 
         bodyCollider.enabled = true;
         headCollider.enabled = true;
 
-        animator.SetBool("isDeath", false);
-
-        // ★ 剣を再表示
+        // 剣を再表示
         if (swordObject)
             swordObject.SetActive(true);
 
