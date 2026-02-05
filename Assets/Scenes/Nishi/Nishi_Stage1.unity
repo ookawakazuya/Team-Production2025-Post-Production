@@ -2606,33 +2606,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4536448008652211967, guid: 47f6cc5d4f9d551468ac0b3075c70022, type: 3}
   m_PrefabInstance: {fileID: 470477400}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &505769000 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2916288067411669065, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
-  m_PrefabInstance: {fileID: 1868781110}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &505769003
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 505769000}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 853542491b165ce4aae56924f845b55a, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &507176838
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3220,16 +3193,6 @@ Transform:
   - {fileID: 90910946}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &639994900 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3646867834039848118, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
-  m_PrefabInstance: {fileID: 1868781110}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &639994903 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 3291979212667877220, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
-  m_PrefabInstance: {fileID: 1868781110}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &653576295
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8309,6 +8272,33 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3529287264432530018, guid: 93be39b77fb1063419af467a67c06e3a, type: 3}
   m_PrefabInstance: {fileID: 1518149362}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1561313407 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9054855612401293178, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+  m_PrefabInstance: {fileID: 1868781110}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &1561313409
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1561313407}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 853542491b165ce4aae56924f845b55a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &1566124521
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10571,15 +10561,15 @@ PrefabInstance:
     - target: {fileID: 5064757681206025811, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: barrierObject
       value: 
-      objectReference: {fileID: 639994900}
+      objectReference: {fileID: 0}
     - target: {fileID: 5064757681206025811, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: barrierParticle
       value: 
-      objectReference: {fileID: 639994903}
+      objectReference: {fileID: 0}
     - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: animator
       value: 
-      objectReference: {fileID: 505769003}
+      objectReference: {fileID: 1561313409}
     - target: {fileID: 5235234113806983910, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: rayDistance
       value: 100
@@ -10745,9 +10735,9 @@ PrefabInstance:
     - {fileID: 227919558837617012, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2916288067411669065, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 9054855612401293178, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 505769003}
+      addedObject: {fileID: 1561313409}
   m_SourcePrefab: {fileID: 100100000, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
 --- !u!114 &1868781111 stripped
 MonoBehaviour:
