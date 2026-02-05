@@ -1031,6 +1031,10 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
+      propertyPath: stayOpen
+      value: -110
+      objectReference: {fileID: 0}
+    - target: {fileID: 7876590667374481872, guid: 203f643847d32854cb739eb9dae87bb1, type: 3}
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
@@ -1143,7 +1147,7 @@ MonoBehaviour:
   isStageClear: 0
   openAngle: 250
   angleTolerance: 2
-  targetOpenAngle: -110
+  targetOpenAngle: -105
   resultCanvas: {fileID: 143203740}
 --- !u!1 &87400176
 GameObject:
@@ -29548,6 +29552,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerLogic
       objectReference: {fileID: 0}
+    - target: {fileID: 7356738402330311407, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: looping
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7853180818382951546, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -29587,6 +29595,10 @@ PrefabInstance:
     - target: {fileID: 7853180818382951546, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8731162215814054205, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8939726874623455026, guid: 3a7530448b4dae04095d0e93951d00da, type: 3}
       propertyPath: m_AnchorMax.y
